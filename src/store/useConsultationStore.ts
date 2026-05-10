@@ -1,0 +1,174 @@
+import { create } from 'zustand'
+import type { Patient } from './usePatientStore'
+
+export type Prescription = {
+  id: string
+  medicine: string
+  dosage: string
+  duration: string
+  instructions?: string
+}
+
+export type LabOrder = {
+  id: string
+  testName: string
+  priority: 'Routine' | 'Urgent'
+  orderedAt: string
+  sentToLab: boolean
+}
+
+export type RadiologyOrder = {
+  id: string
+  scanType: 'X-Ray' | 'MRI' | 'CT Scan' | 'Ultrasound'
+  bodyPart: string
+  priority: 'Routine' | 'Urgent'
+  orderedAt: string
+  sentToRadiology: boolean
+}
+
+export type Referral = {
+  id: string
+  specialty: string
+  notes: string
+  urgent: boolean
+  orderedAt: string
+}
+
+export type AdmissionOrder = {
+  id: string
+  admissionType: 'General Ward' | 'ICU' | 'Private Room' | 'Day Care'
+  reason: string
+  bedTypePreference: string
+  orderedAt: string
+  sent: boolean
+}
+
+interface ConsultationState {
+  currentPatient: Patient | null
+  notes: string
+  diagnosis: string
+  aiSuggestions: string[]
+  prescriptions: Prescription[]
+  labOrders: LabOrder[]
+  radiologyOrders: RadiologyOrder[]
+  referrals: Referral[]
+  admissionOrder: AdmissionOrder | null
+  isDictating: boolean
+  isPharmacySent: boolean
+  aiSummaryVisible: boolean
+  isGeneratingSummary: boolean
+
+  setCurrentPatient: (patient: Patient | null) => void
+  setNotes: (notes: string) => void
+  setDiagnosis: (diagnosis: string) => void
+  addPrescription: (prescription: Prescription) => void
+  removePrescription: (id: string) => void
+  addLabOrder: (order: Omit<LabOrder, 'id' | 'orderedAt' | 'sentToLab'>) => void
+  removeLabOrder: (id: string) => void
+  markLabOrderSent: (id: string) => void
+  addRadiologyOrder: (order: Omit<RadiologyOrder, 'id' | 'orderedAt' | 'sentToRadiology'>) => void
+  removeRadiologyOrder: (id: string) => void
+  markRadiologyOrderSent: (id: string) => void
+  addReferral: (referral: Omit<Referral, 'id' | 'orderedAt'>) => void
+  removeReferral: (id: string) => void
+  setAdmissionOrder: (order: Omit<AdmissionOrder, 'id' | 'orderedAt' | 'sent'> | null) => void
+  markAdmissionSent: () => void
+  toggleDictation: () => void
+  sendToPharmacy: () => void
+  acceptAISuggestion: (suggestion: string) => void
+  resetConsultation: () => void
+}
+
+export const useConsultationStore = create<ConsultationState>((set) => ({
+  currentPatient: null,
+  notes: '',
+  diagnosis: '',
+  aiSuggestions: ['Consider CBC + CRP blood test', 'Rule out bacterial infection', 'Check oxygen saturation trend', 'Evaluate for URTI / Bronchitis'],
+  prescriptions: [],
+  labOrders: [],
+  radiologyOrders: [],
+  referrals: [],
+  admissionOrder: null,
+  isDictating: false,
+  isPharmacySent: false,
+  aiSummaryVisible: true,
+  isGeneratingSummary: false,
+
+  setCurrentPatient: (patient) => set({
+    currentPatient: patient,
+    isPharmacySent: false,
+    prescriptions: [],
+    notes: '',
+    diagnosis: '',
+    labOrders: [],
+    radiologyOrders: [],
+    referrals: [],
+    admissionOrder: null,
+  }),
+
+  setNotes: (notes) => set({ notes }),
+  setDiagnosis: (diagnosis) => set({ diagnosis }),
+
+  addPrescription: (p) => set((s) => ({ prescriptions: [...s.prescriptions, p] })),
+  removePrescription: (id) => set((s) => ({ prescriptions: s.prescriptions.filter(p => p.id !== id) })),
+
+  addLabOrder: (order) =>
+    set((s) => ({
+      labOrders: [
+        ...s.labOrders,
+        { ...order, id: `LO-${Date.now()}`, orderedAt: new Date().toISOString(), sentToLab: false },
+      ],
+    })),
+  removeLabOrder: (id) => set((s) => ({ labOrders: s.labOrders.filter(o => o.id !== id) })),
+  markLabOrderSent: (id) =>
+    set((s) => ({ labOrders: s.labOrders.map(o => o.id === id ? { ...o, sentToLab: true } : o) })),
+
+  addRadiologyOrder: (order) =>
+    set((s) => ({
+      radiologyOrders: [
+        ...s.radiologyOrders,
+        { ...order, id: `RO-${Date.now()}`, orderedAt: new Date().toISOString(), sentToRadiology: false },
+      ],
+    })),
+  removeRadiologyOrder: (id) => set((s) => ({ radiologyOrders: s.radiologyOrders.filter(o => o.id !== id) })),
+  markRadiologyOrderSent: (id) =>
+    set((s) => ({ radiologyOrders: s.radiologyOrders.map(o => o.id === id ? { ...o, sentToRadiology: true } : o) })),
+
+  addReferral: (referral) =>
+    set((s) => ({
+      referrals: [...s.referrals, { ...referral, id: `REF-${Date.now()}`, orderedAt: new Date().toISOString() }],
+    })),
+  removeReferral: (id) => set((s) => ({ referrals: s.referrals.filter(r => r.id !== id) })),
+
+  setAdmissionOrder: (order) =>
+    set({
+      admissionOrder: order
+        ? { ...order, id: `ADM-${Date.now()}`, orderedAt: new Date().toISOString(), sent: false }
+        : null,
+    }),
+  markAdmissionSent: () =>
+    set((s) => ({ admissionOrder: s.admissionOrder ? { ...s.admissionOrder, sent: true } : null })),
+
+  toggleDictation: () => set((s) => ({ isDictating: !s.isDictating })),
+  sendToPharmacy: () => set({ isPharmacySent: true }),
+
+  acceptAISuggestion: (suggestion) =>
+    set((s) => ({
+      notes: s.notes ? `${s.notes}\n• ${suggestion}` : `• ${suggestion}`,
+      aiSuggestions: s.aiSuggestions.filter(sg => sg !== suggestion),
+    })),
+
+  resetConsultation: () =>
+    set({
+      currentPatient: null,
+      notes: '',
+      diagnosis: '',
+      prescriptions: [],
+      labOrders: [],
+      radiologyOrders: [],
+      referrals: [],
+      admissionOrder: null,
+      isPharmacySent: false,
+      isDictating: false,
+    }),
+}))

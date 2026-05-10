@@ -1,0 +1,226 @@
+"use client"
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Bed, Clock, AlertCircle, CheckCircle2, UserPlus, X, ChevronRight, Sparkles } from "lucide-react"
+import { useAdmissionStore } from "@/store/useAdmissionStore"
+import { NeonBadge } from "@/components/ui/neon-badge"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+import Link from "next/link"
+
+const TRIAGE_COLORS: Record<string, string> = {
+  Critical: "bg-red-50 border-red-200 text-red-700",
+  High: "bg-orange-50 border-orange-200 text-orange-700",
+  Medium: "bg-yellow-50 border-yellow-200 text-yellow-700",
+  Low: "bg-green-50 border-green-200 text-green-700",
+}
+
+export default function AdmissionDashboard() {
+  const { admissionRequests, beds, assignBed, cancelRequest } = useAdmissionStore()
+  const [selectedRequest, setSelectedRequest] = useState<string | null>(null)
+
+  const pending = admissionRequests.filter(r => r.status === 'Pending')
+  const assigned = admissionRequests.filter(r => r.status === 'Assigned')
+  const availableBeds = beds.filter(b => b.status === 'Available')
+  const occupiedBeds = beds.filter(b => b.status === 'Occupied')
+  const cleaningBeds = beds.filter(b => b.status === 'Cleaning')
+
+  const selectedReq = admissionRequests.find(r => r.id === selectedRequest)
+  const matchingBeds = selectedReq
+    ? availableBeds.filter(b =>
+        b.ward.toLowerCase().includes(selectedReq.admissionType.toLowerCase()) ||
+        selectedReq.admissionType === 'General Ward' && b.ward === 'General Ward'
+      )
+    : []
+
+  const handleAssign = (bedId: string) => {
+    if (!selectedRequest) return
+    assignBed(selectedRequest, bedId)
+    toast.success("Bed assigned successfully. Nursing notified.")
+    setSelectedRequest(null)
+  }
+
+  const elapsed = (dateStr: string) => {
+    const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000)
+    return mins < 60 ? `${mins}m ago` : `${Math.floor(mins / 60)}h ${mins % 60}m ago`
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-4">
+        {[
+          { label: "Pending Admissions", value: pending.length, color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-200" },
+          { label: "Available Beds", value: availableBeds.length, color: "text-green-600", bg: "bg-green-50", border: "border-green-200" },
+          { label: "Beds Being Cleaned", value: cleaningBeds.length, color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-200" },
+          { label: "Occupied Beds", value: occupiedBeds.length, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
+        ].map(({ label, value, color, bg, border }) => (
+          <div key={label} className={cn("rounded-xl border p-5", bg, border)}>
+            <p className={cn("text-3xl font-bold", color)}>{value}</p>
+            <p className="text-sm font-semibold text-slate-600 mt-1">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        {/* Pending Requests */}
+        <div className="bg-white border shadow-sm rounded-xl overflow-hidden">
+          <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-slate-900">Admission Requests</h2>
+            {pending.length > 0 && <NeonBadge variant="warning" dot pulse>{pending.length} pending</NeonBadge>}
+          </div>
+
+          <div className="divide-y divide-slate-100">
+            <AnimatePresence>
+              {pending.map((req, i) => (
+                <motion.div
+                  key={req.id}
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                  className={cn(
+                    "p-4 cursor-pointer hover:bg-slate-50 transition-colors",
+                    selectedRequest === req.id && "bg-blue-50 ring-inset ring-1 ring-blue-300"
+                  )}
+                  onClick={() => setSelectedRequest(selectedRequest === req.id ? null : req.id)}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-bold text-slate-900">{req.patientName}</p>
+                        <span className="text-xs text-slate-400">{req.patientAge}y • {req.patientGender}</span>
+                        {req.triageLevel && (
+                          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", TRIAGE_COLORS[req.triageLevel] || TRIAGE_COLORS.Low)}>
+                            {req.triageLevel}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-slate-600 font-medium mb-1">{req.diagnosis}</p>
+                      <div className="flex items-center gap-3 text-xs text-slate-500">
+                        <span className="flex items-center gap-1"><Bed className="h-3 w-3" />{req.admissionType}</span>
+                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{elapsed(req.requestedAt)}</span>
+                        <span>{req.payerType}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant={selectedRequest === req.id ? "primary" : "secondary"}>
+                        {selectedRequest === req.id ? "Selecting Bed" : "Assign Bed"}
+                        <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                      </Button>
+                      <button onClick={(e) => { e.stopPropagation(); cancelRequest(req.id); toast.info("Request cancelled") }} className="p-1.5 text-slate-400 hover:text-red-500 rounded cursor-pointer">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {pending.length === 0 && (
+              <div className="py-12 text-center">
+                <CheckCircle2 className="h-8 w-8 text-green-400 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-slate-500">No pending admission requests</p>
+              </div>
+            )}
+          </div>
+
+          {assigned.length > 0 && (
+            <div className="p-4 border-t border-slate-100 bg-green-50">
+              <p className="text-xs font-bold text-green-700 mb-2 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" />Recently Assigned ({assigned.length})</p>
+              {assigned.map(req => (
+                <div key={req.id} className="text-xs text-green-800 font-medium py-1 border-b border-green-100 last:border-0">
+                  {req.patientName} → Bed {beds.find(b => b.id === req.assignedBedId)?.bedNumber ?? '—'}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Bed Selection */}
+        <div className="bg-white border shadow-sm rounded-xl overflow-hidden">
+          <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-slate-900">
+              {selectedReq ? `Assign Bed — ${selectedReq.patientName}` : "Bed Board"}
+            </h2>
+            <Link href="/admission/beds">
+              <Button size="sm" variant="secondary">Full Board</Button>
+            </Link>
+          </div>
+
+          {selectedReq ? (
+            <div className="p-4 space-y-3">
+              {/* AI recommendation banner */}
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-purple-50 border border-purple-100">
+                <Sparkles className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-purple-900">AI Bed Recommendation</p>
+                  <p className="text-xs text-purple-700 mt-0.5">
+                    {matchingBeds.length > 0
+                      ? `Best match: Bed ${matchingBeds[0].bedNumber} (${matchingBeds[0].ward}, ${matchingBeds[0].floor} floor)`
+                      : `No exact match for ${selectedReq.admissionType}. Check all available beds.`}
+                  </p>
+                </div>
+              </div>
+
+              {matchingBeds.length === 0 && (
+                <p className="text-sm text-slate-500 text-center py-4">No matching beds available. Check other ward types.</p>
+              )}
+
+              {(matchingBeds.length > 0 ? matchingBeds : availableBeds).map(bed => (
+                <motion.button
+                  key={bed.id}
+                  initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
+                  onClick={() => handleAssign(bed.id)}
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl bg-green-50 border border-green-200 hover:border-green-400 hover:bg-green-100 transition-all cursor-pointer text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-green-600 text-white flex items-center justify-center text-sm font-bold">
+                      {bed.bedNumber}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">{bed.ward}</p>
+                      <p className="text-xs text-slate-500">{bed.floor} floor • {bed.gender}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-lg border border-green-200">Assign →</span>
+                </motion.button>
+              ))}
+            </div>
+          ) : (
+            <div className="p-4">
+              <p className="text-sm text-slate-500 mb-4 text-center">Select a request to see bed options, or click Full Board for detailed view.</p>
+              <div className="space-y-2">
+                {['Available', 'Occupied', 'Cleaning', 'Reserved', 'Maintenance'].map(status => {
+                  const count = beds.filter(b => b.status === status).length
+                  const colors: Record<string, string> = {
+                    Available: 'bg-green-100 text-green-700 border-green-200',
+                    Occupied: 'bg-blue-100 text-blue-700 border-blue-200',
+                    Cleaning: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+                    Reserved: 'bg-purple-100 text-purple-700 border-purple-200',
+                    Maintenance: 'bg-red-100 text-red-700 border-red-200',
+                  }
+                  return (
+                    <div key={status} className={cn("flex items-center justify-between p-3 rounded-xl border", colors[status])}>
+                      <span className="text-sm font-semibold">{status}</span>
+                      <span className="text-xl font-bold">{count}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Alert: Beds awaiting admission for too long */}
+      {pending.some(r => Date.now() - new Date(r.requestedAt).getTime() > 30 * 60000) && (
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-200">
+          <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-bold text-red-900">Admission delay alert</p>
+            <p className="text-xs text-red-700 mt-0.5">One or more patients have been waiting for bed assignment for more than 30 minutes.</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
