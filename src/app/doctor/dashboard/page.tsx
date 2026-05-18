@@ -1,0 +1,975 @@
+"use client"
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  Activity, CheckCircle2, Stethoscope, Mic, MicOff, Pill, Plus, X, Search,
+  AlertCircle, Sparkles, Clock, Send, FileText, FlaskConical, ScanLine,
+  UserPlus, ArrowRight, GitBranch, Bed, ChevronDown, ChevronUp, Bot,
+} from "lucide-react"
+import { usePatientStore } from "@/store/usePatientStore"
+import { useConsultationStore } from "@/store/useConsultationStore"
+import { usePharmacyStore } from "@/store/usePharmacyStore"
+import { useLabStore } from "@/store/useLabStore"
+import { useRadiologyStore } from "@/store/useRadiologyStore"
+import { useAdmissionStore } from "@/store/useAdmissionStore"
+import { NeonBadge } from "@/components/ui/neon-badge"
+import { AiPreBrief } from "@/components/features/AiPreBrief"
+import { Avatar } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import type { Patient } from "@/store/usePatientStore"
+import { toast } from "sonner"
+
+const DRUGS = ["Paracetamol 500mg","Amoxicillin 500mg","Azithromycin 500mg","Cetirizine 10mg","Pantoprazole 40mg","Dolo 650mg","Metformin 500mg","Amlodipine 5mg","Atorvastatin 20mg","Omeprazole 20mg","Ibuprofen 400mg","Montelukast 10mg","Metronidazole 400mg","Ondansetron 4mg","Diclofenac 50mg"]
+const LAB_TESTS = ["Complete Blood Count (CBC)","Blood Culture","Lipid Profile","Liver Function Test (LFT)","Renal Function Test (RFT)","HbA1c","Urine Routine/Microscopy","Thyroid Profile (TSH)","CRP / ESR","Blood Glucose (FBS/PPBS)","Coagulation Profile (PT/APTT)","Serum Electrolytes","Urine Culture"]
+const SPECIALTIES = ["Cardiology","Neurology","Orthopaedics","Gastroenterology","Pulmonology","Nephrology","Oncology","Endocrinology","Dermatology","Psychiatry","ENT","Ophthalmology","Urology"]
+const BODY_PARTS = ["Chest","Abdomen","Head","Neck","Spine (Lumbar)","Spine (Cervical)","Knee","Shoulder","Hip","Pelvis","Wrist","Ankle","Whole Abdomen"]
+
+const TRIAGE_GRADIENTS: Record<string, { gradient: string; shadow: string }> = {
+  Critical: { gradient: 'linear-gradient(135deg,#EF4444,#DC2626)', shadow: 'rgba(239,68,68,0.35)' },
+  High:     { gradient: 'linear-gradient(135deg,#F97316,#EA580C)', shadow: 'rgba(249,115,22,0.30)' },
+  Medium:   { gradient: 'linear-gradient(135deg,#F59E0B,#D97706)', shadow: 'rgba(245,158,11,0.25)' },
+  Low:      { gradient: 'linear-gradient(135deg,#10B981,#0D9488)', shadow: 'rgba(16,185,129,0.20)' },
+}
+
+const ORDER_STYLES: Record<string, { gradient: string; glow: string; light: string; text: string }> = {
+  lab:       { gradient: 'linear-gradient(135deg,#8B5CF6,#7C3AED)', glow: 'rgba(139,92,246,0.25)', light: '#FAF5FF', text: '#7C3AED' },
+  radiology: { gradient: 'linear-gradient(135deg,#6366F1,#4F46E5)', glow: 'rgba(99,102,241,0.25)', light: '#EEF2FF', text: '#4F46E5' },
+  referral:  { gradient: 'linear-gradient(135deg,#0D9488,#0891B2)', glow: 'rgba(13,148,136,0.25)', light: '#F0FDFA', text: '#0D9488' },
+  admission: { gradient: 'linear-gradient(135deg,#EF4444,#DC2626)', glow: 'rgba(239,68,68,0.25)', light: '#FEF2F2', text: '#DC2626' },
+}
+
+function QueueEntry({ patient, selected, onClick, delay }: { patient: Patient; selected: boolean; onClick: () => void; delay: number }) {
+  const triage = patient.triageLevel ?? "Low"
+  const tg = TRIAGE_GRADIENTS[triage] ?? TRIAGE_GRADIENTS.Low
+  return (
+    <motion.button
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay, ease: [0.16, 1, 0.3, 1] }}
+      onClick={onClick}
+      className="w-full text-left p-3 rounded-2xl transition-all duration-200 cursor-pointer flex items-center gap-3"
+      style={selected ? {
+        background: 'linear-gradient(135deg, rgba(37,99,235,0.08), rgba(8,145,178,0.04))',
+        boxShadow: '0 0 0 1.5px rgba(37,99,235,0.3), 0 4px 16px rgba(37,99,235,0.10)',
+      } : {
+        background: 'white',
+        boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
+      }}
+    >
+      <div
+        className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-black text-white"
+        style={{ background: tg.gradient, boxShadow: `0 3px 8px ${tg.shadow}` }}
+      >
+        #{patient.token}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold truncate" style={{ color: selected ? '#1D4ED8' : '#0F172A' }}>{patient.name}</p>
+        <p className="text-xs font-medium truncate mt-0.5" style={{ color: '#94A3B8' }}>{patient.age}y · {patient.symptoms[0] ?? "No symptoms"}</p>
+      </div>
+      <div
+        className="px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0"
+        style={{
+          background: patient.queueStatus === 'consulting' ? 'rgba(139,92,246,0.12)' : patient.queueStatus === 'vitals' ? 'rgba(245,158,11,0.12)' : '#F8FAFC',
+          color: patient.queueStatus === 'consulting' ? '#7C3AED' : patient.queueStatus === 'vitals' ? '#D97706' : '#94A3B8',
+        }}
+      >
+        {patient.queueStatus}
+      </div>
+    </motion.button>
+  )
+}
+
+function OrderPanel({ title, icon: Icon, styleKey, children, defaultOpen = false }: {
+  title: string; icon: React.ElementType; styleKey: keyof typeof ORDER_STYLES; children: React.ReactNode; defaultOpen?: boolean
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  const style = ORDER_STYLES[styleKey]
+  return (
+    <div className="overflow-hidden rounded-2xl" style={{ background: 'white', boxShadow: '0 1px 4px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-4 transition-colors cursor-pointer"
+        style={{ background: open ? `${style.light}` : 'white' }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="h-8 w-8 rounded-xl flex items-center justify-center"
+            style={{ background: style.gradient, boxShadow: `0 3px 8px ${style.glow}` }}
+          >
+            <Icon className="h-4 w-4 text-white" />
+          </div>
+          <span className="font-bold text-sm" style={{ color: open ? style.text : '#0F172A' }}>{title}</span>
+        </div>
+        {open
+          ? <ChevronUp className="h-4 w-4" style={{ color: '#94A3B8' }} />
+          : <ChevronDown className="h-4 w-4" style={{ color: '#94A3B8' }} />
+        }
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 pt-0" style={{ borderTop: '1px solid rgba(15,23,42,0.05)' }}>{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+export default function DoctorDashboard() {
+  const { patients, visits } = usePatientStore()
+  const {
+    currentPatient, setCurrentPatient, notes, setNotes, diagnosis, setDiagnosis,
+    aiSuggestions, acceptAISuggestion, prescriptions, addPrescription, removePrescription,
+    isDictating, toggleDictation, isPharmacySent, sendToPharmacy,
+    labOrders, addLabOrder, removeLabOrder, markLabOrderSent,
+    radiologyOrders, addRadiologyOrder, removeRadiologyOrder, markRadiologyOrderSent,
+    referrals, addReferral, removeReferral,
+    admissionOrder, setAdmissionOrder, markAdmissionSent,
+  } = useConsultationStore()
+  const { addPrescription: addToPharmacy } = usePharmacyStore()
+  const { addOrderFromDoctor: addLabToStore } = useLabStore()
+  const { addOrderFromDoctor: addRadToStore } = useRadiologyStore()
+  const { requestAdmission } = useAdmissionStore()
+
+  const [medSearch, setMedSearch] = useState("")
+  const [showDrugs, setShowDrugs] = useState(false)
+  const [dosage, setDosage] = useState("1-0-1")
+  const [duration, setDuration] = useState("5 days")
+  const [frequency, setFrequency] = useState("TDS")
+  const [qty, setQty] = useState("10")
+  const [noteSaved, setNoteSaved] = useState(false)
+  const [labTest, setLabTest] = useState("")
+  const [labPriority, setLabPriority] = useState<'Routine' | 'Urgent'>("Routine")
+  const [radScanType, setRadScanType] = useState<'X-Ray' | 'MRI' | 'CT Scan' | 'Ultrasound'>("X-Ray")
+  const [radBodyPart, setRadBodyPart] = useState("")
+  const [radPriority, setRadPriority] = useState<'Routine' | 'Urgent'>("Routine")
+  const [refSpecialty, setRefSpecialty] = useState("")
+  const [refNotes, setRefNotes] = useState("")
+  const [refUrgent, setRefUrgent] = useState(false)
+  const [admType, setAdmType] = useState<'General Ward' | 'ICU' | 'Private Room' | 'Day Care'>("General Ward")
+  const [admReason, setAdmReason] = useState("")
+  const [showAdmModal, setShowAdmModal] = useState(false)
+  const [admAllergies, setAdmAllergies] = useState("")
+  const [admComorbidities, setAdmComorbidities] = useState("")
+  const [admSpecialInstructions, setAdmSpecialInstructions] = useState("")
+  const [admUrgency, setAdmUrgency] = useState<'Routine' | 'Urgent' | 'Emergency'>("Urgent")
+
+  useEffect(() => {
+    if (!notes) return
+    setNoteSaved(false)
+    const t = setTimeout(() => setNoteSaved(true), 800)
+    return () => clearTimeout(t)
+  }, [notes])
+  useEffect(() => {
+    if (!noteSaved) return
+    const t = setTimeout(() => setNoteSaved(false), 2500)
+    return () => clearTimeout(t)
+  }, [noteSaved])
+
+  const queue    = patients.filter(p => ["waiting","vitals","consulting"].includes(p.queueStatus))
+  const seen     = patients.filter(p => ["pharmacy","billing","done"].includes(p.queueStatus)).length
+  const filtered = DRUGS.filter(d => d.toLowerCase().includes(medSearch.toLowerCase()) && medSearch.length > 0)
+
+  const addMed = (name: string) => {
+    if (!name.trim()) return
+    addPrescription({ id: Math.random().toString(36), medicine: name, dosage, duration, instructions: frequency })
+    setMedSearch("")
+    setShowDrugs(false)
+  }
+
+  const sendRx = () => {
+    if (!currentPatient || prescriptions.length === 0) return
+    addToPharmacy({
+      id: `RX-${Date.now()}`,
+      patientId: currentPatient.id,
+      patientName: currentPatient.name,
+      tokenNumber: currentPatient.token,
+      doctorName: currentPatient.doctor,
+      department: currentPatient.department,
+      status: "queued",
+      dispatchedAt: new Date().toISOString(),
+      estimatedReadyIn: prescriptions.length * 3,
+      triageLevel: currentPatient.triageLevel,
+      medicines: prescriptions.map(p => ({ name: p.medicine, dosage: p.dosage, frequency: p.instructions ?? "As directed", duration: p.duration, quantity: parseInt(qty) || 10 })),
+    })
+    sendToPharmacy()
+    toast.success("Prescription sent to Pharmacy")
+  }
+
+  const handleSendLabOrders = () => {
+    const unsent = labOrders.filter(o => !o.sentToLab)
+    if (!currentPatient || unsent.length === 0) return
+    unsent.forEach(order => {
+      addLabToStore({ patientName: currentPatient.name, patientId: currentPatient.id, testName: order.testName, priority: order.priority, orderedBy: currentPatient.doctor })
+      markLabOrderSent(order.id)
+    })
+    toast.success(`${unsent.length} lab order(s) sent to Laboratory`)
+  }
+
+  const handleSendRadiologyOrders = () => {
+    const unsent = radiologyOrders.filter(o => !o.sentToRadiology)
+    if (!currentPatient || unsent.length === 0) return
+    unsent.forEach(order => {
+      addRadToStore({ patientName: currentPatient.name, patientId: currentPatient.id, scanType: order.scanType, bodyPart: order.bodyPart, priority: order.priority, orderedBy: currentPatient.doctor })
+      markRadiologyOrderSent(order.id)
+    })
+    toast.success(`${unsent.length} radiology order(s) sent to Radiology`)
+  }
+
+  const handleSendAdmission = () => {
+    if (!currentPatient || !admissionOrder || admissionOrder.sent) return
+    requestAdmission({
+      patientId: currentPatient.id,
+      patientName: currentPatient.name,
+      patientAge: currentPatient.age,
+      patientGender: currentPatient.gender,
+      diagnosis,
+      admissionType: admissionOrder.admissionType,
+      bedTypePreference: admissionOrder.bedTypePreference,
+      reason: admissionOrder.reason,
+      requestedBy: currentPatient.doctor,
+      department: currentPatient.department,
+      triageLevel: currentPatient.triageLevel,
+      payerType: 'General',
+      bundle: {
+        prescriptions: prescriptions.map(p => ({ medicine: p.medicine, dosage: p.dosage, duration: p.duration, instructions: p.instructions })),
+        labOrders: labOrders.map(o => ({ testName: o.testName, priority: o.priority })),
+        radiologyOrders: radiologyOrders.map(o => ({ scanType: o.scanType, bodyPart: o.bodyPart, priority: o.priority })),
+        allergies: admAllergies,
+        comorbidities: admComorbidities,
+        specialInstructions: admSpecialInstructions,
+        urgency: admUrgency,
+      },
+    })
+    markAdmissionSent()
+    setShowAdmModal(false)
+    toast.success("Admission card + documents sent to Bed Manager")
+  }
+
+  const selectStyle = "w-full rounded-xl px-3 py-2 text-sm text-[#0F172A] focus:outline-none transition-all"
+  const selectInlineStyle = { background: '#F8FAFC', border: '1px solid rgba(15,23,42,0.06)', boxShadow: 'inset 0 1px 2px rgba(15,23,42,0.04)' }
+
+  return (
+    <div className="flex h-[calc(100vh-100px)] overflow-hidden gap-4">
+
+      {/* ── Left Sidebar Queue ──────────────────────────── */}
+      <div
+        className="w-72 flex-shrink-0 flex flex-col overflow-hidden rounded-2xl"
+        style={{ background: 'white', boxShadow: '0 1px 4px rgba(15,23,42,0.06), 0 8px 32px rgba(15,23,42,0.06)' }}
+      >
+        {/* Stats header */}
+        <div className="p-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(15,23,42,0.05)' }}>
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[
+              { label: "Total", value: patients.length, gradient: 'linear-gradient(135deg,#334155,#0F172A)' },
+              { label: "Seen",  value: seen,             gradient: 'linear-gradient(135deg,#16A34A,#0D9488)' },
+              { label: "Queue", value: queue.length,     gradient: 'linear-gradient(135deg,#F59E0B,#EA580C)' },
+            ].map(({ label, value, gradient }) => (
+              <div
+                key={label}
+                className="flex flex-col items-center py-2.5 rounded-xl"
+                style={{ background: '#F8FAFC' }}
+              >
+                <p className="text-xl font-black" style={{ background: gradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{value}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider mt-0.5" style={{ color: '#94A3B8' }}>{label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold text-[#0F172A]">Today's Queue</p>
+            <div
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold"
+              style={{ background: 'rgba(37,99,235,0.10)', color: '#2563EB' }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+              {queue.length} active
+            </div>
+          </div>
+        </div>
+
+        {/* Queue entries */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ background: '#F8FAFC' }}>
+          {queue.map((p, i) => (
+            <QueueEntry
+              key={p.id}
+              patient={p}
+              selected={currentPatient?.id === p.id}
+              onClick={() => setCurrentPatient(p)}
+              delay={i * 0.04}
+            />
+          ))}
+          {queue.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-40 gap-3">
+              <div className="h-12 w-12 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#F0FDF4,#ECFDF5)' }}>
+                <CheckCircle2 className="h-6 w-6 text-green-500" />
+              </div>
+              <p className="text-sm font-semibold" style={{ color: '#94A3B8' }}>Queue cleared</p>
+            </div>
+          )}
+        </div>
+
+        {/* Next patient footer */}
+        <div className="p-3 flex-shrink-0" style={{ borderTop: '1px solid rgba(15,23,42,0.05)' }}>
+          <div
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
+            style={{ background: '#F8FAFC' }}
+          >
+            <Clock className="h-4 w-4 flex-shrink-0" style={{ color: '#94A3B8' }} />
+            <span className="text-xs font-medium" style={{ color: '#64748B' }}>
+              Next: <span className="font-bold text-[#0F172A]">{queue[0]?.name ?? "No patients"}</span>
+              {queue[0] && <> in ~{queue[0].estimatedWait}m</>}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Main Panel ─────────────────────────────────── */}
+      {!currentPatient ? (
+        <div
+          className="flex-1 flex flex-col items-center justify-center gap-6 text-center rounded-2xl p-12"
+          style={{ background: 'white', boxShadow: '0 1px 4px rgba(15,23,42,0.06)' }}
+        >
+          <div
+            className="h-20 w-20 rounded-3xl flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg,#EFF6FF,#DBEAFE)', boxShadow: '0 8px 24px rgba(37,99,235,0.12)' }}
+          >
+            <Stethoscope className="h-10 w-10 text-blue-500" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-[#0F172A] mb-2">Select a Patient</h2>
+            <p className="text-sm leading-relaxed max-w-xs mx-auto" style={{ color: '#94A3B8' }}>
+              Choose a patient from the queue to start the consultation. AI pre-briefs load automatically.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 flex gap-4 overflow-hidden min-w-0">
+
+          {/* Consultation Notes & Orders */}
+          <div className="flex-1 overflow-y-auto space-y-4 min-w-0">
+
+            {/* Patient Header */}
+            <div
+              className="rounded-2xl p-5"
+              style={{ background: 'white', boxShadow: '0 1px 4px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
+            >
+              <div className="flex items-start gap-4 flex-wrap">
+                <Avatar name={currentPatient.name} size="lg" className="h-14 w-14 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h2 className="text-lg font-bold text-[#0F172A]">{currentPatient.name}</h2>
+                    <span
+                      className="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                      style={{ background: 'rgba(37,99,235,0.10)', color: '#2563EB' }}
+                    >
+                      #{currentPatient.token}
+                    </span>
+                    {currentPatient.triageLevel && (() => {
+                      const tg = TRIAGE_GRADIENTS[currentPatient.triageLevel] ?? TRIAGE_GRADIENTS.Low
+                      return (
+                        <span
+                          className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white"
+                          style={{ background: tg.gradient, boxShadow: `0 2px 6px ${tg.shadow}` }}
+                        >
+                          {currentPatient.triageLevel}
+                        </span>
+                      )
+                    })()}
+                  </div>
+                  <p className="text-xs font-medium" style={{ color: '#94A3B8' }}>
+                    {currentPatient.id} · {currentPatient.age}y · {currentPatient.gender} · {currentPatient.phone}
+                  </p>
+                </div>
+                {currentPatient.vitals && (
+                  <div className="flex gap-2 flex-wrap flex-shrink-0">
+                    {Object.entries(currentPatient.vitals).slice(0, 3).map(([k, v]) => (
+                      <div
+                        key={k}
+                        className="text-center px-3 py-2 rounded-xl"
+                        style={{ background: '#F8FAFC', boxShadow: '0 1px 3px rgba(15,23,42,0.05)' }}
+                      >
+                        <p className="text-[9px] font-bold uppercase tracking-wider mb-0.5" style={{ color: '#94A3B8' }}>{k}</p>
+                        <p className="text-sm font-bold text-[#0F172A]">{v}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <AiPreBrief patient={currentPatient} />
+
+            {/* Symptoms & History */}
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                {
+                  title: 'Symptoms', icon: AlertCircle, gradient: 'linear-gradient(135deg,#F97316,#EA580C)',
+                  items: currentPatient.symptoms, dotColor: '#F97316', empty: 'No symptoms recorded',
+                },
+                {
+                  title: 'History', icon: FileText, gradient: 'linear-gradient(135deg,#0D9488,#0891B2)',
+                  items: currentPatient.history, dotColor: '#0D9488', empty: 'No significant history',
+                },
+              ].map(({ title, icon: Icon, gradient, items, dotColor, empty }) => (
+                <div
+                  key={title}
+                  className="p-5 rounded-2xl"
+                  style={{ background: 'white', boxShadow: '0 1px 4px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <div
+                      className="h-7 w-7 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: gradient, boxShadow: '0 2px 6px rgba(15,23,42,0.15)' }}
+                    >
+                      <Icon className="h-3.5 w-3.5 text-white" />
+                    </div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: '#94A3B8' }}>{title}</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {items.length > 0 ? items.map((s, i) => (
+                      <div key={i} className="flex items-start gap-2.5">
+                        <div className="h-1.5 w-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: dotColor }} />
+                        <p className="text-sm font-medium text-[#334155]">{s}</p>
+                      </div>
+                    )) : (
+                      <p className="text-sm font-medium italic" style={{ color: '#94A3B8' }}>{empty}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Clinical Notes */}
+            <div
+              className="p-5 rounded-2xl"
+              style={{ background: 'white', boxShadow: '0 1px 4px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#2563EB,#0891B2)', boxShadow: '0 2px 6px rgba(37,99,235,0.25)' }}>
+                    <Activity className="h-3.5 w-3.5 text-white" />
+                  </div>
+                  <h3 className="text-sm font-bold text-[#0F172A]">Consultation Notes</h3>
+                </div>
+                <Button variant={isDictating ? "danger" : "secondary"} size="sm" onClick={toggleDictation} className="gap-2">
+                  {isDictating ? <><MicOff className="h-4 w-4 animate-pulse" />Stop</> : <><Mic className="h-4 w-4" />Dictate</>}
+                </Button>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#94A3B8' }}>Diagnosis</label>
+                  <Input placeholder="E.g. Acute Viral Pharyngitis" value={diagnosis} onChange={e => setDiagnosis(e.target.value)} className="bg-[#F8FAFC]" />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: '#94A3B8' }}>Notes & Plan</label>
+                    {noteSaved && (
+                      <span className="text-[10px] font-bold text-green-600 flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" />Saved
+                      </span>
+                    )}
+                  </div>
+                  <textarea
+                    className="w-full rounded-xl px-4 py-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none resize-none transition-all"
+                    style={{ background: '#F8FAFC', border: '1px solid rgba(15,23,42,0.06)', boxShadow: 'inset 0 1px 2px rgba(15,23,42,0.04)' }}
+                    placeholder="Enter findings, follow-up instructions, etc..."
+                    rows={4}
+                    value={notes}
+                    onChange={e => setNotes(e.target.value)}
+                    onFocus={e => { e.currentTarget.style.boxShadow = '0 0 0 2px rgba(37,99,235,0.3)'; e.currentTarget.style.borderColor = '#2563EB' }}
+                    onBlur={e => { e.currentTarget.style.boxShadow = 'inset 0 1px 2px rgba(15,23,42,0.04)'; e.currentTarget.style.borderColor = 'rgba(15,23,42,0.06)' }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── ORDER PANELS ── */}
+            <OrderPanel title="Order Lab Tests" icon={FlaskConical} styleKey="lab">
+              <div className="space-y-3 mt-3">
+                <div className="flex gap-2">
+                  <select value={labTest} onChange={e => setLabTest(e.target.value)} className={selectStyle} style={selectInlineStyle}>
+                    <option value="">Select test...</option>
+                    {LAB_TESTS.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                  <select value={labPriority} onChange={e => setLabPriority(e.target.value as 'Routine' | 'Urgent')} className={cn(selectStyle, "w-24")} style={selectInlineStyle}>
+                    <option>Routine</option>
+                    <option>Urgent</option>
+                  </select>
+                  <Button size="sm" variant="secondary" onClick={() => { if (!labTest) return; addLabOrder({ testName: labTest, priority: labPriority }); setLabTest("") }}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <AnimatePresence>
+                  {labOrders.map(order => (
+                    <motion.div key={order.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
+                      className="flex items-center justify-between p-3 rounded-xl"
+                      style={{ background: ORDER_STYLES.lab.light }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <FlaskConical className="h-4 w-4 flex-shrink-0" style={{ color: ORDER_STYLES.lab.text }} />
+                        <span className="text-sm font-medium" style={{ color: '#0F172A' }}>{order.testName}</span>
+                        <NeonBadge variant={order.priority === 'Urgent' ? 'danger' : 'muted'} className="text-[10px]">{order.priority}</NeonBadge>
+                        {order.sentToLab && <NeonBadge variant="success" className="text-[10px]">Sent</NeonBadge>}
+                      </div>
+                      {!order.sentToLab && (
+                        <button onClick={() => removeLabOrder(order.id)} className="p-1 rounded cursor-pointer" style={{ color: '#94A3B8' }}>
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                {labOrders.filter(o => !o.sentToLab).length > 0 && (
+                  <Button onClick={handleSendLabOrders} className="w-full gap-2" variant="secondary">
+                    <Send className="h-4 w-4" /> Send {labOrders.filter(o => !o.sentToLab).length} Order(s) to Lab
+                  </Button>
+                )}
+              </div>
+            </OrderPanel>
+
+            <OrderPanel title="Order Radiology Scan" icon={ScanLine} styleKey="radiology">
+              <div className="space-y-3 mt-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <select value={radScanType} onChange={e => setRadScanType(e.target.value as 'X-Ray' | 'MRI' | 'CT Scan' | 'Ultrasound')} className={selectStyle} style={selectInlineStyle}>
+                    <option>X-Ray</option><option>MRI</option><option>CT Scan</option><option>Ultrasound</option>
+                  </select>
+                  <select value={radBodyPart} onChange={e => setRadBodyPart(e.target.value)} className={selectStyle} style={selectInlineStyle}>
+                    <option value="">Body part...</option>
+                    {BODY_PARTS.map(b => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <select value={radPriority} onChange={e => setRadPriority(e.target.value as 'Routine' | 'Urgent')} className={cn(selectStyle, "w-28")} style={selectInlineStyle}>
+                    <option>Routine</option><option>Urgent</option>
+                  </select>
+                  <Button size="sm" variant="secondary" className="flex-1" onClick={() => {
+                    if (!radBodyPart) return
+                    addRadiologyOrder({ scanType: radScanType, bodyPart: radBodyPart, priority: radPriority })
+                    setRadBodyPart("")
+                  }}>
+                    <Plus className="h-4 w-4 mr-1" /> Add Scan
+                  </Button>
+                </div>
+                <AnimatePresence>
+                  {radiologyOrders.map(order => (
+                    <motion.div key={order.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
+                      className="flex items-center justify-between p-3 rounded-xl"
+                      style={{ background: ORDER_STYLES.radiology.light }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <ScanLine className="h-4 w-4 flex-shrink-0" style={{ color: ORDER_STYLES.radiology.text }} />
+                        <span className="text-sm font-medium" style={{ color: '#0F172A' }}>{order.scanType} — {order.bodyPart}</span>
+                        <NeonBadge variant={order.priority === 'Urgent' ? 'danger' : 'muted'} className="text-[10px]">{order.priority}</NeonBadge>
+                        {order.sentToRadiology && <NeonBadge variant="success" className="text-[10px]">Sent</NeonBadge>}
+                      </div>
+                      {!order.sentToRadiology && (
+                        <button onClick={() => removeRadiologyOrder(order.id)} className="p-1 rounded cursor-pointer" style={{ color: '#94A3B8' }}>
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                {radiologyOrders.filter(o => !o.sentToRadiology).length > 0 && (
+                  <Button onClick={handleSendRadiologyOrders} className="w-full gap-2" variant="secondary">
+                    <Send className="h-4 w-4" /> Send {radiologyOrders.filter(o => !o.sentToRadiology).length} Order(s) to Radiology
+                  </Button>
+                )}
+              </div>
+            </OrderPanel>
+
+            <OrderPanel title="Refer to Specialist" icon={GitBranch} styleKey="referral">
+              <div className="space-y-3 mt-3">
+                <div className="flex gap-2">
+                  <select value={refSpecialty} onChange={e => setRefSpecialty(e.target.value)} className={cn(selectStyle, "flex-1")} style={selectInlineStyle}>
+                    <option value="">Select specialty...</option>
+                    {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" checked={refUrgent} onChange={e => setRefUrgent(e.target.checked)} className="rounded" />
+                    <span className="text-xs font-semibold text-red-600">Urgent</span>
+                  </label>
+                </div>
+                <textarea
+                  value={refNotes}
+                  onChange={e => setRefNotes(e.target.value)}
+                  placeholder="Referral notes for specialist..."
+                  rows={2}
+                  className={selectStyle}
+                  style={{ ...selectInlineStyle, resize: 'none' }}
+                />
+                <Button size="sm" variant="secondary" className="gap-2" onClick={() => {
+                  if (!refSpecialty) return
+                  addReferral({ specialty: refSpecialty, notes: refNotes, urgent: refUrgent })
+                  toast.success(`Referral to ${refSpecialty} recorded`)
+                  setRefSpecialty(""); setRefNotes(""); setRefUrgent(false)
+                }}>
+                  <ArrowRight className="h-4 w-4" /> Add Referral
+                </Button>
+                <AnimatePresence>
+                  {referrals.map(ref => (
+                    <motion.div key={ref.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
+                      className="flex items-center justify-between p-3 rounded-xl"
+                      style={{ background: ORDER_STYLES.referral.light }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <GitBranch className="h-4 w-4 flex-shrink-0" style={{ color: ORDER_STYLES.referral.text }} />
+                        <span className="text-sm font-medium" style={{ color: '#0F172A' }}>{ref.specialty}</span>
+                        {ref.urgent && <NeonBadge variant="danger" className="text-[10px]">Urgent</NeonBadge>}
+                      </div>
+                      <button onClick={() => removeReferral(ref.id)} className="p-1 rounded cursor-pointer" style={{ color: '#94A3B8' }}>
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </OrderPanel>
+
+            <OrderPanel title="Admit Patient" icon={Bed} styleKey="admission">
+              <div className="space-y-3 mt-3">
+                {admissionOrder?.sent ? (
+                  <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: '#F0FDF4' }}>
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <div>
+                      <p className="text-sm font-bold text-green-900">Admission Card Sent to Bed Manager</p>
+                      <p className="text-xs text-green-700 mt-0.5">{admissionOrder.admissionType} · {admissionOrder.reason}</p>
+                      <p className="text-xs text-green-600 mt-0.5">
+                        {prescriptions.length} Rx · {labOrders.length} lab · {radiologyOrders.length} radiology orders bundled
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <Button variant="danger" className="w-full gap-2" onClick={() => setShowAdmModal(true)}>
+                    <UserPlus className="h-4 w-4" /> Create Admission Card
+                  </Button>
+                )}
+              </div>
+            </OrderPanel>
+
+            {/* Admission Card Modal */}
+            <AnimatePresence>
+              {showAdmModal && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                  onClick={() => setShowAdmModal(false)}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 16 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#EF4444,#DC2626)', boxShadow: '0 3px 8px rgba(239,68,68,0.25)' }}>
+                            <Bed className="h-4.5 w-4.5 text-white" />
+                          </div>
+                          <div>
+                            <h2 className="text-base font-bold text-[#0F172A]">Admission Card</h2>
+                            <p className="text-xs font-medium" style={{ color: '#94A3B8' }}>{currentPatient?.name} · {currentPatient?.id}</p>
+                          </div>
+                        </div>
+                        <button onClick={() => setShowAdmModal(false)} className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
+                          <X className="h-4 w-4 text-slate-500" />
+                        </button>
+                      </div>
+
+                      <div className="space-y-4">
+                        {/* Ward type + Urgency */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#94A3B8' }}>Ward Type</label>
+                            <select value={admType} onChange={e => setAdmType(e.target.value as typeof admType)} className={selectStyle} style={selectInlineStyle}>
+                              <option>General Ward</option><option>ICU</option><option>Private Room</option><option>Day Care</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#94A3B8' }}>Urgency</label>
+                            <select value={admUrgency} onChange={e => setAdmUrgency(e.target.value as typeof admUrgency)} className={selectStyle} style={selectInlineStyle}>
+                              <option>Routine</option><option>Urgent</option><option>Emergency</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Reason */}
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#94A3B8' }}>Reason for Admission</label>
+                          <Input placeholder="E.g. Post-PCI monitoring, IV therapy required..." value={admReason} onChange={e => setAdmReason(e.target.value)} className="bg-[#F8FAFC]" />
+                        </div>
+
+                        {/* Allergies */}
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#94A3B8' }}>Allergies</label>
+                          <Input placeholder="E.g. Penicillin, sulpha drugs..." value={admAllergies} onChange={e => setAdmAllergies(e.target.value)} className="bg-[#F8FAFC]" />
+                        </div>
+
+                        {/* Comorbidities */}
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#94A3B8' }}>Co-morbidities</label>
+                          <Input placeholder="E.g. Hypertension, T2 Diabetes, CKD..." value={admComorbidities} onChange={e => setAdmComorbidities(e.target.value)} className="bg-[#F8FAFC]" />
+                        </div>
+
+                        {/* Special Instructions */}
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#94A3B8' }}>Special Instructions for Ward</label>
+                          <textarea
+                            className="w-full rounded-xl px-4 py-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none resize-none"
+                            style={{ background: '#F8FAFC', border: '1px solid rgba(15,23,42,0.06)' }}
+                            placeholder="E.g. Continuous cardiac monitoring, NPO, isolation precautions..."
+                            rows={2}
+                            value={admSpecialInstructions}
+                            onChange={e => setAdmSpecialInstructions(e.target.value)}
+                          />
+                        </div>
+
+                        {/* Bundle summary */}
+                        <div className="rounded-xl p-4 space-y-2" style={{ background: '#F8FAFC', border: '1px solid rgba(15,23,42,0.06)' }}>
+                          <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#94A3B8' }}>Documents to be bundled</p>
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2 text-xs font-medium text-[#334155]">
+                              <div className="h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                              <span>{prescriptions.length} prescription(s) · {labOrders.length} lab order(s) · {radiologyOrders.length} radiology order(s)</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs font-medium text-[#334155]">
+                              <div className="h-1.5 w-1.5 rounded-full bg-purple-500 flex-shrink-0" />
+                              <span>Diagnosis: {diagnosis || '(not set)'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs font-medium" style={{ color: '#16A34A' }}>
+                              <CheckCircle2 className="h-3 w-3" />
+                              <span>All documents auto-sent to Bed Manager</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3 pt-2">
+                          <Button variant="secondary" className="flex-1" onClick={() => setShowAdmModal(false)}>Cancel</Button>
+                          <Button variant="danger" className="flex-1 gap-2" onClick={() => {
+                            if (!admReason.trim()) { toast.error("Please enter reason for admission"); return }
+                            setAdmissionOrder({ admissionType: admType, reason: admReason, bedTypePreference: admType })
+                            handleSendAdmission()
+                          }}>
+                            <Send className="h-4 w-4" /> Send to Bed Manager
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+          </div>
+
+          {/* ── Right Sidebar: AI + Rx ──────────────────── */}
+          <div className="w-72 flex-shrink-0 flex flex-col gap-4 overflow-hidden">
+
+            {/* AI Assistant */}
+            <div
+              className="rounded-2xl p-4"
+              style={{
+                background: 'linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%)',
+                border: '1px solid rgba(139,92,246,0.10)',
+                boxShadow: '0 4px 16px rgba(139,92,246,0.10)',
+              }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-7 w-7 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#7C3AED,#6366F1)', boxShadow: '0 3px 8px rgba(124,58,237,0.30)' }}>
+                  <Bot className="h-3.5 w-3.5 text-white" />
+                </div>
+                <span className="font-bold text-sm text-[#0F172A]">AI Assistant</span>
+                <span className="ai-badge ml-auto">AI</span>
+              </div>
+              <AnimatePresence>
+                {aiSuggestions.map((s, idx) => (
+                  <motion.button
+                    key={s}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: idx * 0.1 }}
+                    onClick={() => acceptAISuggestion(s)}
+                    className="w-full text-left text-xs rounded-xl p-3 mb-2 flex items-center justify-between group cursor-pointer transition-all"
+                    style={{
+                      background: 'rgba(255,255,255,0.7)',
+                      color: '#5B21B6',
+                      boxShadow: '0 1px 4px rgba(139,92,246,0.10)',
+                    }}
+                    onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(139,92,246,0.20)'}
+                    onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 1px 4px rgba(139,92,246,0.10)'}
+                  >
+                    <span className="font-semibold leading-tight pr-2">{s}</span>
+                    <Plus className="h-3.5 w-3.5 flex-shrink-0 opacity-60 group-hover:opacity-100" />
+                  </motion.button>
+                ))}
+              </AnimatePresence>
+              {aiSuggestions.length === 0 && (
+                <div className="text-center py-3">
+                  <CheckCircle2 className="h-5 w-5 mx-auto mb-1" style={{ color: '#C4B5FD' }} />
+                  <p className="text-xs font-medium" style={{ color: '#9CA3AF' }}>No new suggestions</p>
+                </div>
+              )}
+            </div>
+
+            {/* Prescriptions */}
+            <div
+              className="flex-1 flex flex-col overflow-hidden rounded-2xl"
+              style={{ background: 'white', boxShadow: '0 1px 4px rgba(15,23,42,0.06), 0 8px 32px rgba(15,23,42,0.06)' }}
+            >
+              <div className="p-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(15,23,42,0.05)' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-7 w-7 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#2563EB,#0891B2)', boxShadow: '0 3px 8px rgba(37,99,235,0.25)' }}>
+                    <Pill className="h-3.5 w-3.5 text-white" />
+                  </div>
+                  <span className="font-bold text-sm text-[#0F172A]">Prescriptions</span>
+                  {prescriptions.length > 0 && (
+                    <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: 'rgba(37,99,235,0.10)', color: '#2563EB' }}>
+                      {prescriptions.length}
+                    </span>
+                  )}
+                </div>
+
+                {diagnosis && prescriptions.length === 0 && (
+                  <div className="mb-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1" style={{ color: '#7C3AED' }}>
+                      <Sparkles className="h-3 w-3" /> AI Suggests
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {['Paracetamol 500mg','Amoxicillin 500mg','Pantoprazole 40mg'].map(drug => (
+                        <button key={drug} onClick={() => addMed(drug)} className="text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer transition-all" style={{ background: 'rgba(124,58,237,0.08)', color: '#7C3AED' }}>
+                          + {drug}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="relative mb-3">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#94A3B8' }} />
+                      <Input
+                        placeholder="Search medicine..."
+                        value={medSearch}
+                        onChange={e => { setMedSearch(e.target.value); setShowDrugs(true) }}
+                        onKeyDown={e => e.key === "Enter" && addMed(medSearch)}
+                        className="pl-9 h-9"
+                      />
+                    </div>
+                    <Button onClick={() => addMed(medSearch)} size="sm">Add</Button>
+                  </div>
+                  <AnimatePresence>
+                    {showDrugs && filtered.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute top-full mt-1 left-0 right-0 z-20 rounded-xl bg-white overflow-hidden"
+                        style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.14)' }}
+                      >
+                        {filtered.slice(0, 5).map(d => (
+                          <button
+                            key={d}
+                            onClick={() => { setMedSearch(d); setShowDrugs(false) }}
+                            className="w-full text-left text-xs px-4 py-2.5 text-[#334155] font-medium transition-colors cursor-pointer"
+                            style={{ borderBottom: '1px solid rgba(15,23,42,0.04)' }}
+                            onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = '#F8FAFC'}
+                            onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = 'white'}
+                          >
+                            {d}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Dosage",   value: dosage,    setter: setDosage,    p: "1-0-1" },
+                    { label: "Duration", value: duration,  setter: setDuration,  p: "5 days" },
+                    { label: "Freq",     value: frequency, setter: setFrequency, p: "TDS" },
+                    { label: "Qty",      value: qty,       setter: setQty,       p: "10" },
+                  ].map(({ label, value, setter, p }) => (
+                    <div key={label}>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider mb-1" style={{ color: '#94A3B8' }}>{label}</label>
+                      <Input value={value} onChange={e => setter(e.target.value)} placeholder={p} className="h-7 text-xs px-2" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ background: '#F8FAFC' }}>
+                <AnimatePresence>
+                  {prescriptions.map(p => (
+                    <motion.div
+                      key={p.id}
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="flex items-start justify-between p-3 rounded-xl"
+                      style={{ background: 'white', boxShadow: '0 1px 3px rgba(15,23,42,0.06)' }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-[#0F172A] truncate">{p.medicine}</p>
+                        <p className="text-[10px] font-medium mt-0.5" style={{ color: '#94A3B8' }}>{p.dosage} · {p.duration} · {p.instructions}</p>
+                      </div>
+                      <button onClick={() => removePrescription(p.id)} className="p-1 rounded-lg transition-colors flex-shrink-0 cursor-pointer" style={{ color: '#94A3B8' }}>
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                {prescriptions.length === 0 && (
+                  <div className="flex flex-col items-center justify-center h-24 gap-2 opacity-50">
+                    <Pill className="h-6 w-6" style={{ color: '#CBD5E1' }} />
+                    <p className="text-xs font-medium" style={{ color: '#94A3B8' }}>No medicines added</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-3 flex-shrink-0" style={{ borderTop: '1px solid rgba(15,23,42,0.05)' }}>
+                <button
+                  onClick={sendRx}
+                  disabled={prescriptions.length === 0 || isPharmacySent}
+                  className="w-full h-11 rounded-xl font-bold text-sm flex items-center justify-center gap-2 text-white transition-all cursor-pointer disabled:opacity-50"
+                  style={isPharmacySent ? {
+                    background: 'linear-gradient(135deg,#16A34A,#0D9488)',
+                    boxShadow: '0 4px 12px rgba(22,163,74,0.30)',
+                  } : {
+                    background: 'linear-gradient(135deg,#2563EB,#0891B2)',
+                    boxShadow: '0 4px 12px rgba(37,99,235,0.30)',
+                  }}
+                >
+                  {isPharmacySent
+                    ? <><CheckCircle2 className="h-4 w-4" /> Sent to Pharmacy</>
+                    : <><Send className="h-4 w-4" /> Send to Pharmacy</>
+                  }
+                </button>
+                {isPharmacySent && (
+                  <p className="text-center text-[10px] font-semibold text-green-600 mt-2">Pharmacy is preparing medicines</p>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
