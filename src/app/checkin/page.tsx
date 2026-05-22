@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { QrCode, ArrowRight, Clock, Shield, Wifi, Sparkles } from "lucide-react"
+import { QrCode, ArrowRight, Clock, Shield, Wifi, Sparkles, Video, ExternalLink } from "lucide-react"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { QRCodeSVG } from "qrcode.react"
 
@@ -14,12 +14,16 @@ const steps = [
   { step: '04', label: 'Track Live',    desc: 'Real-time wait updates' },
 ]
 
+const DEMO_FAMILY_TOKEN = 'demo-family-token-meera-001'
+
 export default function CheckinPage() {
   const router = useRouter()
   const [checkInUrl, setCheckInUrl] = useState('')
+  const [familyTrackUrl, setFamilyTrackUrl] = useState('')
 
   useEffect(() => {
     setCheckInUrl(`${window.location.origin}/checkin/intake`)
+    setFamilyTrackUrl(`${window.location.origin}/family-track/${DEMO_FAMILY_TOKEN}`)
   }, [])
 
   return (
@@ -157,6 +161,34 @@ export default function CheckinPage() {
               <ArrowRight className="h-5 w-5" />
             </motion.button>
           </div>
+
+          {/* Demo family portal shortcut */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-5"
+          >
+            <div className="flex items-start gap-3">
+              <div className="h-9 w-9 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
+                <Video className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm text-amber-900">Family Live Tracking — Demo</p>
+                <p className="text-xs text-amber-700 mt-0.5">View Meera Pillai's live status + camera request</p>
+                {familyTrackUrl && (
+                  <p className="text-[10px] text-amber-500 font-mono mt-1 truncate">{familyTrackUrl}</p>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => router.push(`/family-track/${DEMO_FAMILY_TOKEN}`)}
+              className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-colors"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Open Family Portal
+            </button>
+          </motion.div>
         </motion.div>
       </div>
 

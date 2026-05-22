@@ -1,11 +1,57 @@
 import { wrapAiResponse } from '@/lib/ai-helpers'
 import type { AiEnvelope } from '@/types/ai'
 
-export interface BillingCodeSuggestion { code: string; description: string; amount: number; justification: string; confidence: number }
-export async function suggestBillingCodes(encounter: Record<string, unknown>): Promise<AiEnvelope<BillingCodeSuggestion[]>> {
+export interface TpaDocumentItem { item: string; required: boolean; description: string }
+
+export interface BillingCodeSuggestion {
+  code: string
+  description: string
+  amount: number
+  justification: string
+  confidence: number
+  icdCode?: string
+  cptCode?: string
+}
+
+export interface BillingCodeResult {
+  codes: BillingCodeSuggestion[]
+  packageMapping?: string
+  tpaChecklist: TpaDocumentItem[]
+}
+
+const TPA_CHECKLIST: TpaDocumentItem[] = [
+  { item: 'Admission Summary', required: true, description: 'Signed admission note with presenting complaint and history' },
+  { item: 'OT Note', required: false, description: 'Operative note required for all surgical procedures' },
+  { item: 'Anaesthesia Record', required: false, description: 'Required for procedures under GA or spinal' },
+  { item: 'Discharge Summary', required: true, description: 'Final discharge summary signed by attending doctor' },
+  { item: 'Investigation Reports', required: true, description: 'All lab and radiology reports during admission' },
+  { item: 'Pharmacy Bills', required: true, description: 'Itemised pharmacy bill with doctor name and date' },
+  { item: 'Signed Consent Forms', required: true, description: 'Procedure and anaesthesia consent forms' },
+]
+
+export async function suggestBillingCodes(encounter: Record<string, unknown>): Promise<AiEnvelope<BillingCodeResult>> {
   await new Promise((r) => setTimeout(r, 400))
   void encounter
-  return wrapAiResponse<BillingCodeSuggestion[]>([{ code: 'IPD-MED-001', description: 'Inpatient Medical Management — General Ward', amount: 5500, justification: 'Day rate for general ward', confidence: 0.97 }, { code: 'LAB-CBC-001', description: 'Complete Blood Count', amount: 350, justification: 'Ordered on admission', confidence: 0.99 }, { code: 'PROC-IV-001', description: 'IV Line Insertion and Care', amount: 400, justification: 'IV access documented in nursing notes', confidence: 0.92 }], 0.88, 'Billing codes mapped from clinical documentation and procedure logs.')
+
+  const hasProcedure = Boolean(encounter?.hasProcedure)
+  const checklist = TPA_CHECKLIST.map((item) => ({
+    ...item,
+    required: item.item === 'OT Note' || item.item === 'Anaesthesia Record' ? hasProcedure : item.required,
+  }))
+
+  return wrapAiResponse<BillingCodeResult>(
+    {
+      codes: [
+        { code: 'IPD-MED-001', description: 'Inpatient Medical Management — General Ward', amount: 5500, justification: 'Day rate for general ward', confidence: 0.97, icdCode: 'Z03.89' },
+        { code: 'LAB-CBC-001', description: 'Complete Blood Count', amount: 350, justification: 'Ordered on admission', confidence: 0.99, cptCode: '85025' },
+        { code: 'PROC-IV-001', description: 'IV Line Insertion and Care', amount: 400, justification: 'IV access documented in nursing notes', confidence: 0.92, cptCode: '36000' },
+      ],
+      packageMapping: 'General Medical Management Package — Tier 2',
+      tpaChecklist: checklist,
+    },
+    0.88,
+    'Billing codes mapped from clinical documentation and procedure logs. TPA checklist generated based on procedure flags.'
+  )
 }
 
 export type IPDChargeType = 'consultation' | 'lab' | 'radiology' | 'pharmacy' | 'ward' | 'procedure' | 'consumable' | 'nursing' | 'ot'

@@ -4,7 +4,9 @@ import { useState } from "react"
 import { useWardStore, type PatientBed, type Vitals } from "@/store/useWardStore"
 import { useDischargeStore } from "@/store/useDischargeStore"
 import { useAdmissionStore } from "@/store/useAdmissionStore"
-import { Activity, AlertCircle, Bed, Stethoscope, Clock, X, CheckCircle, Pill, Droplets, LogOut, ArrowDownToLine, FileText, ShieldAlert, Info } from "lucide-react"
+import { useCameraStore } from "@/store/useCameraStore"
+import { useAuditStore } from "@/store/useAuditStore"
+import { Activity, AlertCircle, Bed, Stethoscope, Clock, X, CheckCircle, Pill, Droplets, LogOut, ArrowDownToLine, FileText, ShieldAlert, Info, Video, VideoOff } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { motion, AnimatePresence } from "framer-motion"
@@ -108,8 +110,39 @@ export default function NurseDashboard() {
   const { patients, activeNurses, availableBeds, updateVitals, dismissAlert } = useWardStore()
   const { initDischarge, dischargeQueue } = useDischargeStore()
   const { admissionRequests, beds, markAdmitted } = useAdmissionStore()
+  const cameraRequests = useCameraStore((s) => s.requests)
+  const pendingCameraRequests = cameraRequests.filter((r) => r.status === 'pending')
+  const approveRequest = useCameraStore((s) => s.approveRequest)
+  const declineRequest = useCameraStore((s) => s.declineRequest)
+  const log = useAuditStore((s) => s.log)
   const [editingPatient, setEditingPatient] = useState<PatientBed | null>(null)
   const [expandedBundleId, setExpandedBundleId] = useState<string | null>(null)
+
+  const handleApproveCamera = (requestId: string, patientName: string, wardRoom: string, patientId: string) => {
+    approveRequest(requestId, 'Nurse')
+    log({
+      userId: 'nurse_portal',
+      userName: 'Nurse',
+      action: 'family_camera_approved',
+      resource: 'patient',
+      resourceId: patientId,
+      detail: `Camera feed approved for ${patientName}'s family in ${wardRoom}`,
+    })
+    toast.success(`Camera feed approved for ${patientName}'s family`)
+  }
+
+  const handleDeclineCamera = (requestId: string, patientName: string, patientId: string) => {
+    declineRequest(requestId)
+    log({
+      userId: 'nurse_portal',
+      userName: 'Nurse',
+      action: 'family_camera_declined',
+      resource: 'patient',
+      resourceId: patientId,
+      detail: `Camera request declined for ${patientName}`,
+    })
+    toast.info(`Camera request declined for ${patientName}`)
+  }
 
   const incomingTransfers = admissionRequests.filter(r => r.status === 'Assigned')
 
@@ -261,6 +294,63 @@ export default function NurseDashboard() {
                 </motion.div>
               )
             })}
+          </div>
+        </Card>
+      )}
+
+      {/* Family Camera Requests */}
+      {pendingCameraRequests.length > 0 && (
+        <Card className="overflow-hidden shadow-sm" style={{ border: '1px solid #FDE68A' }}>
+          <div className="px-5 py-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg,#FFFBEB,#FEF3C7)' }}>
+            <div className="flex items-center gap-2">
+              <div
+                className="h-8 w-8 rounded-xl flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', boxShadow: '0 3px 8px rgba(245,158,11,0.25)' }}
+              >
+                <Video className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-amber-900">Family Camera Requests</h2>
+                <p className="text-xs text-amber-600 font-medium">Family members requesting live room camera access</p>
+              </div>
+            </div>
+            <NeonBadge variant="warning" dot pulse>{pendingCameraRequests.length} pending</NeonBadge>
+          </div>
+          <div className="divide-y divide-amber-50">
+            {pendingCameraRequests.map((req, i) => (
+              <motion.div
+                key={req.id}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="px-5 py-3 flex items-center gap-4"
+              >
+                <div className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-amber-500">
+                  <Video className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-slate-900">{req.patientName}</p>
+                  <p className="text-xs text-slate-500">
+                    {req.wardRoom} · Requested {new Date(req.requestedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => handleDeclineCamera(req.id, req.patientName, req.patientId)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-xl cursor-pointer transition-colors"
+                  >
+                    <VideoOff className="h-3.5 w-3.5" /> Decline
+                  </button>
+                  <button
+                    onClick={() => handleApproveCamera(req.id, req.patientName, req.wardRoom, req.patientId)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-1.5 rounded-xl cursor-pointer transition-all"
+                    style={{ background: 'linear-gradient(135deg,#16A34A,#0D9488)', boxShadow: '0 2px 8px rgba(22,163,74,0.25)' }}
+                  >
+                    <Video className="h-3.5 w-3.5" /> Approve
+                  </button>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </Card>
       )}

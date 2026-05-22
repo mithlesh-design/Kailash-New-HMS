@@ -14,6 +14,58 @@ export interface BedForecastData {
   recommendedActions: string[]
 }
 
+export interface StaffingRecommendation {
+  role: string
+  currentCount: number
+  recommendedCount: number
+  shift: 'morning' | 'afternoon' | 'night'
+  rationale: string
+  urgency: 'low' | 'medium' | 'high'
+}
+
+export async function suggestStaffingAdjustments(
+  forecastData: BedForecastData,
+  currentStaff: { doctors: number; nurses: number; support: number },
+): Promise<AiEnvelope<StaffingRecommendation[]>> {
+  await new Promise(r => setTimeout(r, 500))
+
+  const peakOccupancy = Math.max(...forecastData.forecasts.map(f => f.predictedOccupancy))
+  const isHighDemand = peakOccupancy > 85
+
+  const recommendations: StaffingRecommendation[] = [
+    {
+      role: 'Nurses',
+      currentCount: currentStaff.nurses,
+      recommendedCount: isHighDemand ? currentStaff.nurses + 3 : currentStaff.nurses + 1,
+      shift: 'morning',
+      rationale: `Peak occupancy forecast at ${peakOccupancy}% — nurse-to-patient ratio may fall below 1:6`,
+      urgency: isHighDemand ? 'high' : 'medium',
+    },
+    {
+      role: 'Doctors (On-call)',
+      currentCount: currentStaff.doctors,
+      recommendedCount: isHighDemand ? currentStaff.doctors + 2 : currentStaff.doctors,
+      shift: 'afternoon',
+      rationale: 'Predicted admission surge requires additional on-call cover for afternoon shift',
+      urgency: isHighDemand ? 'high' : 'low',
+    },
+    {
+      role: 'Support Staff (Ward)',
+      currentCount: currentStaff.support,
+      recommendedCount: currentStaff.support + 1,
+      shift: 'night',
+      rationale: 'Night shift support required for expected discharge-backlog clearance',
+      urgency: 'medium',
+    },
+  ]
+
+  return wrapAiResponse<StaffingRecommendation[]>(
+    recommendations,
+    0.79,
+    `Staffing recommendations based on ${forecastData.horizon}-day forecast. Peak occupancy: ${peakOccupancy}%. ${recommendations.filter(r => r.urgency === 'high').length} high-urgency adjustments needed.`,
+  )
+}
+
 export async function forecastBedDemand(horizon = 7): Promise<AiEnvelope<BedForecastData>> {
   await new Promise((r) => setTimeout(r, 600))
   const base = new Date()

@@ -30,6 +30,16 @@ export type AuditTask = {
   status: 'Pending' | 'Completed' | 'Overdue'
 }
 
+export interface NabhIndicator {
+  handHygieneCompliancePct: number
+  cauti1000cathdays: number
+  clabsi1000linedays: number
+  fallRatePer1000patientdays: number
+  medicationErrorRate: number
+  re30dayReadmissionPct: number
+  patientSatisfactionNPS: number
+}
+
 interface QualityState {
   incidents: Incident[]
   auditTasks: AuditTask[]
@@ -42,9 +52,11 @@ interface QualityState {
     patientSatisfaction: number
     auditCompletionPct: number
   }
+  nabh: NabhIndicator
   addIncident: (incident: Omit<Incident, 'id' | 'reportedAt' | 'status'>) => void
   resolveIncident: (id: string, correctiveAction: string) => void
   completeAuditTask: (id: string, completedBy: string) => void
+  updateNabhIndicator: (indicator: keyof NabhIndicator, value: number) => void
 }
 
 export const useQualityStore = create<QualityState>((set) => ({
@@ -107,6 +119,19 @@ export const useQualityStore = create<QualityState>((set) => ({
     patientSatisfaction: 87,
     auditCompletionPct: 68,
   },
+
+  nabh: {
+    handHygieneCompliancePct: 78,
+    cauti1000cathdays: 1.8,
+    clabsi1000linedays: 0.9,
+    fallRatePer1000patientdays: 2.1,
+    medicationErrorRate: 0.4,
+    re30dayReadmissionPct: 4.2,
+    patientSatisfactionNPS: 67,
+  },
+
+  updateNabhIndicator: (indicator, value) =>
+    set(s => ({ nabh: { ...s.nabh, [indicator]: value } })),
 
   addIncident: (incident) =>
     set((s) => ({

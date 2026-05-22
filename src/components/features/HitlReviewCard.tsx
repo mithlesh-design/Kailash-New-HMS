@@ -20,6 +20,7 @@ interface HitlReviewCardProps<T> {
   onReject: (reason: string) => void
   onModify?: (data: T) => void
   className?: string
+  shadowMode?: boolean
 }
 
 export function HitlReviewCard<T>({
@@ -31,6 +32,7 @@ export function HitlReviewCard<T>({
   onReject,
   onModify,
   className,
+  shadowMode = false,
 }: HitlReviewCardProps<T>) {
   const [status, setStatus] = useState<'pending' | 'accepted' | 'rejected' | 'modifying'>('pending')
   const [rejectReason, setRejectReason] = useState('')
@@ -104,11 +106,20 @@ export function HitlReviewCard<T>({
 
         <AiDisclaimer compact />
 
+        {/* Shadow mode banner */}
+        {shadowMode && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-xs font-semibold">
+            <Bot className="h-3.5 w-3.5 flex-shrink-0" />
+            Shadow Mode — AI suggestions visible for observation only. Actions are disabled.
+          </div>
+        )}
+
         {/* Actions */}
         {status === 'pending' && (
-          <div className="flex items-center gap-2 pt-1">
+          <div className={cn("flex items-center gap-2 pt-1", shadowMode && "pointer-events-none opacity-40 select-none")}>
             <button
               onClick={handleAccept}
+              title={shadowMode ? 'Actions disabled in Shadow Mode' : undefined}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors"
             >
               <CheckCircle className="h-4 w-4" /> Accept
@@ -116,6 +127,7 @@ export function HitlReviewCard<T>({
             {onModify && (
               <button
                 onClick={handleModify}
+                title={shadowMode ? 'Actions disabled in Shadow Mode' : undefined}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
               >
                 <Edit3 className="h-4 w-4" /> Modify
@@ -123,6 +135,7 @@ export function HitlReviewCard<T>({
             )}
             <button
               onClick={() => setShowRejectInput(true)}
+              title={shadowMode ? 'Actions disabled in Shadow Mode' : undefined}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-red-50 text-red-600 border border-red-200 hover:border-red-400 text-sm font-semibold rounded-lg transition-colors"
             >
               <XCircle className="h-4 w-4" /> Reject

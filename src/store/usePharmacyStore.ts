@@ -1,7 +1,36 @@
 import { create } from 'zustand'
+import { useAuditStore } from '@/store/useAuditStore'
 
 export type PrepStatus = 'queued' | 'preparing' | 'ready' | 'collected'
 export type ProcurementStatus = 'immediate' | 'deferred_ipd' | 'procurement_requested'
+export type ModificationReason = 'Has at home' | 'Partial fill' | 'Unable to afford' | 'Travelling today'
+
+export interface QuantityModification {
+  medicineName: string
+  originalQty: number
+  adjustedQty: number
+  reason: ModificationReason
+  adjustedAt: string
+  adjustedBy: string
+  requiresSupervisorOverride: boolean
+  supervisorApprovedBy?: string
+}
+
+export const UNIT_PRICES: Record<string, number> = {
+  'Paracetamol 500mg': 8,
+  'Amoxicillin 250mg': 18,
+  'ORS Sachets': 12,
+  'Atorvastatin 10mg': 22,
+  'Aspirin 75mg': 5,
+  'Metoprolol 25mg': 15,
+  'Diclofenac 50mg': 14,
+  'Pantoprazole 40mg': 20,
+  'Aspirin 75mg (IPD)': 5,
+  'Heparin 5000U (IV)': 180,
+  'Insulin Actrapid (IV)': 95,
+  'Normal Saline 0.9% (1L)': 60,
+  'KCl 20mEq (IV)': 45,
+}
 
 export interface PharmacyPrescription {
   id: string
@@ -13,13 +42,16 @@ export interface PharmacyPrescription {
   medicines: PharmacyMedicine[]
   status: PrepStatus
   dispatchedAt: string
-  estimatedReadyIn: number  // minutes
+  estimatedReadyIn: number
   notes?: string
   triageLevel?: 'Low' | 'Medium' | 'High' | 'Critical'
-  patientModifications?: string[]  // medicine names patient already has at home
-  procurementStatus?: ProcurementStatus  // OPD=immediate, IPD=deferred_ipd until ward requests
-  requestedByWardAt?: string             // set when ward nursing staff triggers procurement
+  patientModifications?: string[]
+  procurementStatus?: ProcurementStatus
+  requestedByWardAt?: string
   wardBed?: string
+  quantityModifications?: QuantityModification[]
+  adjustedBillTotal?: number
+  originalBillTotal?: number
 }
 
 export interface PharmacyMedicine {
@@ -38,6 +70,8 @@ interface PharmacyStore {
   togglePatientModification: (prescriptionId: string, medicineName: string) => void
   applyModification: (prescriptionId: string) => void
   requestProcurement: (id: string) => void
+  adjustQuantity: (prescriptionId: string, medicineName: string, newQty: number, reason: ModificationReason, adjustedBy: string) => void
+  approveSupervisorOverride: (prescriptionId: string, medicineName: string, supervisorId: string) => void
 }
 
 const DEMO_PRESCRIPTIONS: PharmacyPrescription[] = [
@@ -180,5 +214,67 @@ export const usePharmacyStore = create<PharmacyStore>((set) => ({
           ? { ...p, procurementStatus: 'procurement_requested' as ProcurementStatus, requestedByWardAt: new Date().toISOString() }
           : p
       ),
+    })),
+
+  adjustQuantity: (prescriptionId, medicineName, newQty, reason, adjustedBy) =>
+    set(state => ({
+      prescriptions: state.prescriptions.map(p => {
+        if (p.id !== prescriptionId) return p
+        const medicine = p.medicines.find(m => m.name === medicineName)
+        if (!medicine) return p
+        const originalQty = medicine.quantity
+        const safeQty = Math.max(0, Math.min(originalQty, newQty))
+        const requiresSupervisorOverride = originalQty > 0 && (originalQty - safeQty) / originalQty > 0.5
+        const existingMods = (p.quantityModifications ?? []).filter(m => m.medicineName !== medicineName)
+        const newMod: QuantityModification = {
+          medicineName,
+          originalQty,
+          adjustedQty: safeQty,
+          reason,
+          adjustedAt: new Date().toISOString(),
+          adjustedBy,
+          requiresSupervisorOverride,
+        }
+        const allMods = [...existingMods, newMod]
+        const adjustedBillTotal = p.medicines.reduce((sum, m) => {
+          const mod = allMods.find(mod => mod.medicineName === m.name)
+          const qty = mod ? mod.adjustedQty : m.quantity
+          const price = UNIT_PRICES[m.name] ?? 0
+          return sum + qty * price
+        }, 0)
+        const originalBillTotal = p.originalBillTotal ?? p.medicines.reduce((sum, m) => sum + m.quantity * (UNIT_PRICES[m.name] ?? 0), 0)
+
+        useAuditStore.getState().log({
+          userId: adjustedBy,
+          userName: adjustedBy,
+          action: 'pharmacy_qty_adjusted',
+          resource: 'pharmacy_prescription',
+          resourceId: prescriptionId,
+          detail: `${medicineName}: ${originalQty} → ${safeQty} (${reason})`,
+          before: { qty: originalQty },
+          after: { qty: safeQty, reason },
+        })
+
+        return { ...p, quantityModifications: allMods, adjustedBillTotal, originalBillTotal }
+      }),
+    })),
+
+  approveSupervisorOverride: (prescriptionId, medicineName, supervisorId) =>
+    set(state => ({
+      prescriptions: state.prescriptions.map(p => {
+        if (p.id !== prescriptionId) return p
+        const mods = (p.quantityModifications ?? []).map(m =>
+          m.medicineName === medicineName ? { ...m, supervisorApprovedBy: supervisorId, requiresSupervisorOverride: false } : m
+        )
+        useAuditStore.getState().log({
+          userId: supervisorId,
+          userName: supervisorId,
+          action: 'pharmacy_supervisor_override',
+          resource: 'pharmacy_prescription',
+          resourceId: prescriptionId,
+          detail: `Supervisor override approved for ${medicineName}`,
+        })
+        return { ...p, quantityModifications: mods }
+      }),
     })),
 }))

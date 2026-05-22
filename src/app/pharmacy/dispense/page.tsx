@@ -1,13 +1,21 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircle, Package, AlertTriangle, Clock, Bed, Sparkles } from "lucide-react"
+import { CheckCircle, Package, AlertTriangle, Clock, Bed, Sparkles, Minus, Plus, ShieldAlert } from "lucide-react"
 import { isAllergyContraindicated } from "@/rules-engine/allergy-block"
 import { checkInteractions } from "@/rules-engine/drug-interactions"
-import { usePharmacyStore } from "@/store/usePharmacyStore"
+import { usePharmacyStore, UNIT_PRICES, type ModificationReason } from "@/store/usePharmacyStore"
+import { useAuthStore } from "@/store/useAuthStore"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+
+const MODIFICATION_REASONS: ModificationReason[] = [
+  'Has at home',
+  'Partial fill',
+  'Unable to afford',
+  'Travelling today',
+]
 
 const OPD_QUEUE = [
   { id: 'RX-001', patient: 'Kiran Patil', age: 52, patientId: 'PT-20394', allergies: ['Penicillin', 'Sulfonamides'], prescribedBy: 'Dr. Priya Menon', items: [{ drug: 'Amoxicillin-Clavulanate', dose: '625mg', route: 'Oral', frequency: 'TID', days: 5 }, { drug: 'Paracetamol', dose: '500mg', route: 'Oral', frequency: 'Q6H PRN', days: 5 }] },
@@ -15,9 +23,29 @@ const OPD_QUEUE = [
 ]
 
 export default function PharmacyDispense() {
-  const { prescriptions, updateStatus, requestProcurement } = usePharmacyStore()
+  const { prescriptions, updateStatus, requestProcurement, adjustQuantity, approveSupervisorOverride } = usePharmacyStore()
+  const { currentUser } = useAuthStore()
   const [dispensed, setDispensed] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<'opd' | 'ipd'>('opd')
+  const [selectedReasons, setSelectedReasons] = useState<Record<string, ModificationReason>>({})
+
+  const handleQtyChange = (prescriptionId: string, medicineName: string, delta: number, currentQty: number, originalQty: number) => {
+    const newQty = Math.max(0, Math.min(originalQty, currentQty + delta))
+    const reason = selectedReasons[`${prescriptionId}-${medicineName}`] ?? 'Partial fill'
+    adjustQuantity(prescriptionId, medicineName, newQty, reason, currentUser?.name ?? 'Pharmacist')
+    if (newQty < currentQty) toast.info(`${medicineName} quantity adjusted to ${newQty}`)
+  }
+
+  const handleApproveOverride = (prescriptionId: string, medicineName: string) => {
+    approveSupervisorOverride(prescriptionId, medicineName, currentUser?.name ?? 'Supervisor')
+    toast.success(`Supervisor override approved for ${medicineName}`)
+  }
+
+  const getEffectiveQty = (prescriptionId: string, medicineName: string, originalQty: number) => {
+    const prescription = prescriptions.find(p => p.id === prescriptionId)
+    const mod = prescription?.quantityModifications?.find(m => m.medicineName === medicineName)
+    return mod ? mod.adjustedQty : originalQty
+  }
 
   const ipdDeferred = prescriptions.filter(p => p.procurementStatus === 'deferred_ipd')
   const ipdRequested = prescriptions.filter(p => p.procurementStatus === 'procurement_requested')
@@ -151,34 +179,97 @@ export default function PharmacyDispense() {
                 <NeonBadge variant="warning" dot pulse>Action needed</NeonBadge>
               </div>
               <div className="space-y-3">
-                {ipdRequested.map(rx => (
-                  <div key={rx.id} className="bg-white rounded-xl border border-orange-200 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <p className="font-bold text-slate-900">{rx.patientName}</p>
-                          <span className="flex items-center gap-1 text-xs text-slate-500"><Bed className="h-3 w-3" />{rx.wardBed}</span>
-                          {rx.triageLevel && <NeonBadge variant={rx.triageLevel === 'Critical' ? 'danger' : rx.triageLevel === 'High' ? 'warning' : 'muted'}>{rx.triageLevel}</NeonBadge>}
+                {ipdRequested.map(rx => {
+                  const hasPendingOverride = rx.quantityModifications?.some(m => m.requiresSupervisorOverride && !m.supervisorApprovedBy)
+                  const adjustedTotal = rx.adjustedBillTotal
+                  const originalTotal = rx.originalBillTotal ?? rx.medicines.reduce((s, m) => s + m.quantity * (UNIT_PRICES[m.name] ?? 0), 0)
+                  return (
+                    <div key={rx.id} className={cn("bg-white rounded-xl border p-4", hasPendingOverride ? 'border-red-300' : 'border-orange-200')}>
+                      {hasPendingOverride && (
+                        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs font-semibold">
+                          <ShieldAlert className="h-4 w-4 flex-shrink-0" />
+                          Supervisor approval required — quantity reduced by more than 50%
                         </div>
-                        <p className="text-xs text-slate-500 mb-2">Requested by ward · {elapsed(rx.requestedByWardAt!)}</p>
-                        <div className="space-y-1">
-                          {rx.medicines.map((m, i) => (
-                            <div key={i} className="flex items-center gap-2 text-sm text-slate-700">
-                              <Package className="h-3.5 w-3.5 text-orange-500 flex-shrink-0" />
-                              {m.name} — {m.dosage} · {m.frequency} · Qty: {m.quantity}
+                      )}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <p className="font-bold text-slate-900">{rx.patientName}</p>
+                            <span className="flex items-center gap-1 text-xs text-slate-500"><Bed className="h-3 w-3" />{rx.wardBed}</span>
+                            {rx.triageLevel && <NeonBadge variant={rx.triageLevel === 'Critical' ? 'danger' : rx.triageLevel === 'High' ? 'warning' : 'muted'}>{rx.triageLevel}</NeonBadge>}
+                          </div>
+                          <p className="text-xs text-slate-500 mb-3">Requested by ward · {elapsed(rx.requestedByWardAt!)}</p>
+                          <div className="space-y-2">
+                            {rx.medicines.map((m, i) => {
+                              const effectiveQty = getEffectiveQty(rx.id, m.name, m.quantity)
+                              const mod = rx.quantityModifications?.find(mod => mod.medicineName === m.name)
+                              const needsOverride = mod?.requiresSupervisorOverride && !mod?.supervisorApprovedBy
+                              const unitPrice = UNIT_PRICES[m.name] ?? 0
+                              const reasonKey = `${rx.id}-${m.name}`
+                              return (
+                                <div key={i} className="border border-slate-100 rounded-lg p-2 bg-slate-50">
+                                  <div className="flex items-center gap-2 text-sm text-slate-700 mb-1.5">
+                                    <Package className="h-3.5 w-3.5 text-orange-500 flex-shrink-0" />
+                                    <span className="font-medium">{m.name}</span>
+                                    <span className="text-slate-400">— {m.dosage} · {m.frequency}</span>
+                                    {unitPrice > 0 && <span className="ml-auto text-xs text-slate-500">₹{unitPrice}/unit</span>}
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5">
+                                      <button
+                                        onClick={() => handleQtyChange(rx.id, m.name, -1, effectiveQty, m.quantity)}
+                                        className="h-6 w-6 rounded-md bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition-colors"
+                                      ><Minus className="h-3 w-3" /></button>
+                                      <span className={cn("text-sm font-bold w-8 text-center", effectiveQty < m.quantity && 'text-amber-600')}>{effectiveQty}</span>
+                                      <button
+                                        onClick={() => handleQtyChange(rx.id, m.name, +1, effectiveQty, m.quantity)}
+                                        className="h-6 w-6 rounded-md bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition-colors"
+                                      ><Plus className="h-3 w-3" /></button>
+                                      <span className="text-xs text-slate-400">/ {m.quantity} prescribed</span>
+                                    </div>
+                                    {effectiveQty < m.quantity && (
+                                      <select
+                                        value={selectedReasons[reasonKey] ?? 'Partial fill'}
+                                        onChange={(e) => setSelectedReasons(prev => ({ ...prev, [reasonKey]: e.target.value as ModificationReason }))}
+                                        className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-600"
+                                      >
+                                        {MODIFICATION_REASONS.map(r => <option key={r}>{r}</option>)}
+                                      </select>
+                                    )}
+                                    {needsOverride && (
+                                      <button
+                                        onClick={() => handleApproveOverride(rx.id, m.name)}
+                                        className="ml-auto text-xs font-bold px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                                      >Supervisor Approve</button>
+                                    )}
+                                    {unitPrice > 0 && (
+                                      <span className="ml-auto text-xs font-semibold text-slate-700">₹{effectiveQty * unitPrice}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                          {adjustedTotal !== undefined && adjustedTotal !== originalTotal && (
+                            <div className="mt-3 flex items-center gap-3 text-sm">
+                              <span className="text-slate-400 line-through">₹{originalTotal.toLocaleString('en-IN')}</span>
+                              <span className="font-bold text-green-700">₹{adjustedTotal.toLocaleString('en-IN')} (adjusted)</span>
                             </div>
-                          ))}
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => { updateStatus(rx.id, 'preparing'); toast.success(`Preparing IPD procurement for ${rx.patientName}`) }}
+                            disabled={!!hasPendingOverride}
+                            className={cn("px-4 py-2 text-sm font-bold rounded-xl transition-colors cursor-pointer", hasPendingOverride ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600')}
+                          >
+                            Start Preparing
+                          </button>
                         </div>
                       </div>
-                      <button
-                        onClick={() => { updateStatus(rx.id, 'preparing'); toast.success(`Preparing IPD procurement for ${rx.patientName}`) }}
-                        className="flex-shrink-0 px-4 py-2 text-sm font-bold rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors cursor-pointer"
-                      >
-                        Start Preparing
-                      </button>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}

@@ -1,5 +1,13 @@
 export type ConfidenceTier = 'high' | 'medium' | 'low'
 
+export interface AiAction {
+  id: string
+  label: string
+  type: 'navigate' | 'store_mutation' | 'notification' | 'external'
+  payload: Record<string, unknown>
+  requiresConfirmation: boolean
+}
+
 export interface AiEnvelope<T> {
   data: T
   confidence: number
@@ -9,6 +17,8 @@ export interface AiEnvelope<T> {
   modelVersion: string
   generatedAt: string
   requiresReview: boolean
+  actions?: AiAction[]
+  sessionId?: string
 }
 
 export interface HitlDecision {

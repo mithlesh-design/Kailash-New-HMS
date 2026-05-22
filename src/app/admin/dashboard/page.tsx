@@ -7,7 +7,7 @@ import {
   Users, Clock, TrendingUp, Activity, Calendar,
   Pill, AlertTriangle, Sparkles, ArrowUpRight,
   ShieldCheck, Wifi, MoreHorizontal, BedDouble,
-  CreditCard, FlaskConical, CheckCircle,
+  CreditCard, FlaskConical, CheckCircle, Workflow, RefreshCw,
 } from "lucide-react"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { ProgressRing } from "@/components/ui/progress-ring"
@@ -19,7 +19,13 @@ import { useBillingStore } from "@/store/useBillingStore"
 import { useDischargeStore } from "@/store/useDischargeStore"
 import { useQualityStore } from "@/store/useQualityStore"
 import { useAdmissionStore } from "@/store/useAdmissionStore"
+import { useJourneyStore } from "@/store/useJourneyStore"
+import { useWhatsAppStore } from "@/store/useWhatsAppStore"
+import { detectFlowBottlenecks, type BottleneckReport } from "@/ai-services/detect-flow-bottlenecks"
+import { HitlReviewCard } from "@/components/features/HitlReviewCard"
+import { FLAGS } from "@/config/feature-flags"
 import { cn } from "@/lib/utils"
+import { MessageCircle } from "lucide-react"
 
 const WEEKLY = [
   { day: 'Mon', count: 48 }, { day: 'Tue', count: 62 }, { day: 'Wed', count: 55 },
@@ -67,8 +73,23 @@ const OPS = [
   { label: 'AI Triage Active',      value: 'Online',   icon: Sparkles,  ok: true },
 ]
 
-const COO_TABS = ['Patient Access', 'IPD Operations', 'Clinical Reliability', 'Finance & Claims', 'Quality & Compliance'] as const
+const COO_TABS = ['Patient Access', 'IPD Operations', 'Clinical Reliability', 'Finance & Claims', 'Quality & Compliance', 'Journey Flow', 'WhatsApp'] as const
 type COOTab = typeof COO_TABS[number]
+
+const STATE_LABELS: Record<string, string> = {
+  OPD_REGISTERED: 'OPD Registered', VITALS_IN_PROGRESS: 'Vitals', IN_CONSULT: 'Consulting',
+  LAB_ORDERED: 'Lab — Awaiting', LAB_RESULTED: 'Lab Ready', RADIOLOGY_ORDERED: 'Radiology — Awaiting',
+  RADIOLOGY_RESULTED: 'Radiology Ready', PHARMACY_QUEUED: 'Pharmacy Queue', BILLING_PENDING: 'Billing',
+  DISCHARGE_PENDING_BILLING: 'Discharge — Billing', ADMITTED_IPD: 'IPD Admitted', IPD_STABLE: 'IPD Stable',
+  IPD_CRITICAL: 'ICU/Critical', DISCHARGE_INITIATED: 'Discharge Initiated', COMPLETED: 'Completed',
+}
+
+const URGENCY_COLOR: Record<string, string> = {
+  critical: 'bg-red-100 border-red-300 text-red-800',
+  high: 'bg-orange-100 border-orange-300 text-orange-800',
+  medium: 'bg-amber-100 border-amber-300 text-amber-800',
+  low: 'bg-blue-50 border-blue-200 text-blue-700',
+}
 
 export default function AdminDashboard() {
   const { patients } = usePatientStore()
@@ -78,9 +99,25 @@ export default function AdminDashboard() {
   const { dischargeQueue } = useDischargeStore()
   const { incidents, auditTasks, qualityMetrics } = useQualityStore()
   const { beds, admissionRequests } = useAdmissionStore()
+  const { entries: journeyEntries, getSlaBreaches } = useJourneyStore()
+  const { threads, escalateToHuman, resolveThread } = useWhatsAppStore()
   const pendingAdmissions = admissionRequests.filter(r => r.status === 'Pending')
   const router = useRouter()
   const [cooTab, setCooTab] = useState<COOTab>('Patient Access')
+  const [bottleneckReport, setBottleneckReport] = useState<import('@/ai-services/detect-flow-bottlenecks').BottleneckReport | null>(null)
+  const [bottleneckLoading, setBottleneckLoading] = useState(false)
+  const [bottleneckEnvelope, setBottleneckEnvelope] = useState<import('@/types/ai').AiEnvelope<BottleneckReport> | null>(null)
+
+  const refreshBottlenecks = async () => {
+    setBottleneckLoading(true)
+    try {
+      const result = await detectFlowBottlenecks(journeyEntries)
+      setBottleneckEnvelope(result)
+      setBottleneckReport(result.data)
+    } finally {
+      setBottleneckLoading(false)
+    }
+  }
 
   const pendingRx = prescriptions.filter(p => p.status !== 'collected').length
   const criticalUnack = samples.filter(s => s.criticalValue && !s.criticalAcknowledgedBy).length
@@ -376,6 +413,223 @@ export default function AdminDashboard() {
               </div>
             </Card>
           </div>
+        )}
+
+        {cooTab === 'Journey Flow' && (
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-900 text-lg">Patient Flow — Live State Lanes</h3>
+                <p className="text-sm text-slate-500 mt-0.5">{journeyEntries.length} active patients across {Object.keys(journeyEntries.reduce((acc, e) => ({ ...acc, [e.currentState]: true }), {})).length} states</p>
+              </div>
+              <button
+                onClick={refreshBottlenecks}
+                disabled={bottleneckLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors"
+              >
+                <RefreshCw className={`h-4 w-4 ${bottleneckLoading ? 'animate-spin' : ''}`} />
+                {bottleneckLoading ? 'Analysing…' : 'Run AI Analysis'}
+              </button>
+            </div>
+
+            {/* State lane grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              {Object.entries(
+                journeyEntries.reduce<Record<string, typeof journeyEntries>>(
+                  (acc, e) => ({ ...acc, [e.currentState]: [...(acc[e.currentState] ?? []), e] }),
+                  {}
+                )
+              ).map(([state, stateEntries]) => {
+                const breaches = stateEntries.filter(e => e.slaBreachRisk).length
+                return (
+                  <Card key={state} className={`p-4 border-t-4 ${breaches > 0 ? 'border-t-red-400' : 'border-t-slate-200'}`}>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">
+                      {STATE_LABELS[state] ?? state}
+                    </p>
+                    <p className="text-2xl font-bold text-slate-900">{stateEntries.length}</p>
+                    {breaches > 0 && (
+                      <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200 rounded px-1.5 py-0.5">
+                        <AlertTriangle className="h-3 w-3" /> {breaches} SLA breach
+                      </span>
+                    )}
+                  </Card>
+                )
+              })}
+            </div>
+
+            {/* SLA breach list */}
+            {getSlaBreaches().length > 0 && (
+              <Card className="p-5">
+                <h4 className="font-bold text-red-700 flex items-center gap-2 mb-3">
+                  <AlertTriangle className="h-4 w-4" /> SLA Breaches ({getSlaBreaches().length})
+                </h4>
+                <div className="space-y-2">
+                  {getSlaBreaches().map(entry => {
+                    const minsStuck = Math.round((Date.now() - new Date(entry.enteredStateAt).getTime()) / 60000)
+                    return (
+                      <div key={entry.patientId} className="flex items-center justify-between bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">
+                        <div>
+                          <span className="font-semibold text-slate-800 text-sm">{entry.patientId}</span>
+                          <span className="text-slate-500 text-sm ml-2">— {STATE_LABELS[entry.currentState] ?? entry.currentState}</span>
+                        </div>
+                        <span className="text-sm font-bold text-red-700">{minsStuck} min</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Card>
+            )}
+
+            {/* AI bottleneck report */}
+            {bottleneckEnvelope && bottleneckReport && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className={`p-5 border-t-4 ${bottleneckReport.systemPressureScore > 80 ? 'border-t-red-500' : bottleneckReport.systemPressureScore > 60 ? 'border-t-amber-400' : 'border-t-green-400'}`}>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">System Pressure</p>
+                    <p className="text-3xl font-bold text-slate-900">{bottleneckReport.systemPressureScore}<span className="text-lg text-slate-400">/100</span></p>
+                    {bottleneckReport.predictedPeakIn && (
+                      <p className="text-xs text-amber-700 font-semibold mt-1.5">Peak in ~{bottleneckReport.predictedPeakIn}</p>
+                    )}
+                  </Card>
+                  <Card className="p-5 md:col-span-2">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Suggested Actions</p>
+                    <ul className="space-y-1.5">
+                      {bottleneckReport.suggestedActions.map((action, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                          {action}
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                </div>
+
+                {bottleneckReport.bottlenecks.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-bold text-slate-900">Bottleneck Details</h4>
+                    {bottleneckReport.bottlenecks.map(b => (
+                      <div key={b.state} className={`flex items-start justify-between rounded-xl border px-4 py-3 ${URGENCY_COLOR[b.urgency]}`}>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm">{STATE_LABELS[b.state] ?? b.state}</span>
+                            <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${URGENCY_COLOR[b.urgency]}`}>{b.urgency}</span>
+                          </div>
+                          <p className="text-xs mt-1 opacity-80">{b.recommendation}</p>
+                        </div>
+                        <div className="text-right ml-4 shrink-0">
+                          <p className="text-sm font-bold">{b.patientsStuck} patients</p>
+                          <p className="text-xs opacity-70">{b.avgMinutesInState} min avg</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <HitlReviewCard
+                  title="AI Flow Analysis"
+                  envelope={bottleneckEnvelope}
+                  featureId="bottleneck_analysis"
+                  renderContent={() => null}
+                  shadowMode={FLAGS.shadowMode}
+                  onAccept={() => {}}
+                  onReject={() => {}}
+                />
+              </div>
+            )}
+
+            {!bottleneckEnvelope && !bottleneckLoading && (
+              <Card className="p-10 text-center">
+                <Workflow className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-500 font-medium">Run AI Analysis to detect bottlenecks and get recommendations.</p>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {cooTab === 'WhatsApp' && FLAGS.whatsappAssistantEnabled && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5 text-green-600" /> WhatsApp AI Assistant
+                </h3>
+                <p className="text-sm text-slate-500 mt-0.5">{threads.length} conversations · {threads.filter(t => t.status === 'escalated').length} escalated</p>
+              </div>
+              <div className="flex gap-2">
+                <NeonBadge variant="success" dot>{threads.filter(t => t.status === 'active').length} Active</NeonBadge>
+                {threads.filter(t => t.status === 'escalated').length > 0 && (
+                  <NeonBadge variant="danger">{threads.filter(t => t.status === 'escalated').length} Escalated</NeonBadge>
+                )}
+              </div>
+            </div>
+
+            {threads.map(thread => (
+              <Card key={thread.id} className={`p-5 border-l-4 ${thread.status === 'escalated' ? 'border-l-red-400' : thread.status === 'resolved' ? 'border-l-green-400' : 'border-l-blue-400'}`}>
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-900 text-sm">{thread.patientName ?? thread.patientPhone}</span>
+                      {thread.identityVerified
+                        ? <NeonBadge variant="success">Verified</NeonBadge>
+                        : <NeonBadge variant="warning">Unverified</NeonBadge>
+                      }
+                      {thread.status === 'escalated' && <NeonBadge variant="danger">Escalated</NeonBadge>}
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5">{thread.patientPhone} · {new Date(thread.lastActivity).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    {thread.status === 'active' && !thread.escalatedToHuman && (
+                      <button
+                        onClick={() => escalateToHuman(thread.id)}
+                        className="text-xs px-3 py-1.5 bg-red-50 text-red-700 font-semibold rounded-lg border border-red-200 hover:bg-red-100 transition-colors"
+                      >
+                        Escalate
+                      </button>
+                    )}
+                    {thread.status !== 'resolved' && (
+                      <button
+                        onClick={() => resolveThread(thread.id)}
+                        className="text-xs px-3 py-1.5 bg-green-50 text-green-700 font-semibold rounded-lg border border-green-200 hover:bg-green-100 transition-colors"
+                      >
+                        Resolve
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {thread.messages.slice(-3).map(msg => (
+                    <div key={msg.id} className={`flex ${msg.from === 'patient' ? 'justify-start' : 'justify-end'}`}>
+                      <div className={`max-w-[75%] px-3 py-2 rounded-xl text-sm ${
+                        msg.from === 'patient'
+                          ? 'bg-slate-100 text-slate-800'
+                          : msg.from === 'human_agent'
+                          ? 'bg-purple-100 text-purple-900'
+                          : 'bg-green-100 text-green-900'
+                      }`}>
+                        {msg.from !== 'patient' && (
+                          <p className="text-[10px] font-bold uppercase opacity-60 mb-0.5">
+                            {msg.from === 'ai' ? 'AI' : 'Agent'}
+                          </p>
+                        )}
+                        <p>{msg.text}</p>
+                        {msg.intent && (
+                          <p className="text-[10px] opacity-50 mt-0.5">{msg.intent}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {cooTab === 'WhatsApp' && !FLAGS.whatsappAssistantEnabled && (
+          <Card className="p-10 text-center">
+            <MessageCircle className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-500 font-medium">WhatsApp Assistant is not enabled for this tier.</p>
+          </Card>
         )}
       </div>
 

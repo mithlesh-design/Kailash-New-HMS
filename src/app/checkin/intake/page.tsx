@@ -1,15 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-  User, CreditCard, Stethoscope, Upload, ArrowRight,
+  User, CreditCard, Stethoscope, Upload,
   ArrowLeft, CheckCircle, AlertTriangle, Activity, Camera,
-  ChevronRight, Phone, ScanLine, ShieldCheck, Sparkles,
+  ChevronRight, Phone, ScanLine, ShieldCheck, Sparkles, Share2, QrCode, Mic, MicOff,
 } from "lucide-react"
+import { QRCodeSVG } from "qrcode.react"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { usePatientStore } from "@/store/usePatientStore"
+import { extractIntakeFromVoice } from "@/ai-services/voice-intake"
 import { cn } from "@/lib/utils"
 
 const VISIT_TYPES = [
@@ -50,10 +52,20 @@ function triageScore(symptoms: string[]): { level: 'Low' | 'Medium' | 'High' | '
 
 export default function IntakePage() {
   const router = useRouter()
-  const { addPatient } = usePatientStore()
+  const { addPatient, generateFamilyToken } = usePatientStore()
 
   const [step, setStep] = useState(1)
-  const [inputMode, setInputMode] = useState<'manual' | 'aadhaar'>('manual')
+  const [dishaConsent, setDishaConsent] = useState(false)
+  const [familyPhone, setFamilyPhone] = useState('')
+  const [familyToken, setFamilyToken] = useState<string | null>(null)
+  const [inputMode, setInputMode] = useState<'manual' | 'aadhaar' | 'voice'>('manual')
+  const [voiceSupported] = useState(() => typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window))
+  const [voiceLang, setVoiceLang] = useState<'en' | 'hi'>('en')
+  const [voiceState, setVoiceState] = useState<'idle' | 'listening' | 'processing' | 'done'>('idle')
+  const [voiceTranscript, setVoiceTranscript] = useState('')
+  const [elderlyMode, setElderlyMode] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null)
   const [aadhaarScanState, setAadhaarScanState] = useState<'idle' | 'scanning' | 'done'>('idle')
   const [scannedFields, setScannedFields] = useState<Set<string>>(new Set())
   const [form, setForm] = useState({
@@ -120,12 +132,54 @@ export default function IntakePage() {
     setTimeout(() => { setScannedFields(new Set()); setAadhaarScanState('idle') }, 2600)
   }
 
+  const startVoice = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any
+    const SRConstructor = w.SpeechRecognition ?? w.webkitSpeechRecognition
+    if (!SRConstructor) return
+    const recognition = new SRConstructor()
+    recognition.lang = voiceLang === 'hi' ? 'hi-IN' : 'en-IN'
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognitionRef.current = recognition
+    recognition.onstart = () => setVoiceState('listening')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = async (event: any) => {
+      const transcript = event.results[0][0].transcript
+      setVoiceTranscript(transcript)
+      setVoiceState('processing')
+      const result = await extractIntakeFromVoice(transcript, voiceLang)
+      const data = result.data
+      setForm(f => ({
+        ...f,
+        name: data.extractedName ?? f.name,
+        age: data.extractedAge ? String(data.extractedAge) : f.age,
+        gender: data.extractedGender ?? f.gender,
+        symptoms: data.extractedSymptoms.length > 0 ? [...new Set([...f.symptoms, ...data.extractedSymptoms])] : f.symptoms,
+        department: data.extractedDepartmentPreference ?? f.department,
+      }))
+      setVoiceState('done')
+    }
+    recognition.onerror = () => setVoiceState('idle')
+    recognition.onend = () => { if (voiceState === 'listening') setVoiceState('idle') }
+    recognition.start()
+  }
+
+  const stopVoice = () => {
+    recognitionRef.current?.stop()
+    setVoiceState('idle')
+  }
+
+  useEffect(() => { return () => recognitionRef.current?.stop() }, [])
+
   const handleSubmit = async () => {
     setSubmitting(true)
     await new Promise(r => setTimeout(r, 1600))
     const token = Math.max(...patients.map(p => p.token), 1000) + 1
     setTokenNumber(token)
+    const newPatientId = `PT-${Date.now()}`
     addPatient({
+      id: newPatientId,
       name: form.name,
       age: parseInt(form.age),
       gender: form.gender as 'Male' | 'Female' | 'Other',
@@ -140,6 +194,10 @@ export default function IntakePage() {
       triageLevel: triage.level,
       hasReports: form.hasReports,
     })
+    if (dishaConsent && familyPhone.trim()) {
+      const fToken = generateFamilyToken(newPatientId, [familyPhone.trim()], true)
+      setFamilyToken(fToken)
+    }
     setSubmitting(false)
     setStep(4)
   }
@@ -218,23 +276,32 @@ export default function IntakePage() {
 
                 {/* Input Mode Tab Switcher */}
                 <div className="bg-slate-200/60 p-1 rounded-xl flex gap-1">
-                  {(['manual', 'aadhaar'] as const).map(mode => (
+                  <button
+                    onClick={() => setInputMode('manual')}
+                    className={cn("flex-1 h-9 rounded-lg text-[13px] font-semibold transition-all flex items-center justify-center gap-1 active:scale-[0.97]",
+                      inputMode === 'manual' ? "bg-white text-slate-900 shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "text-slate-500"
+                    )}
+                  >
+                    <User className="h-3.5 w-3.5" /> Manual
+                  </button>
+                  <button
+                    onClick={() => setInputMode('aadhaar')}
+                    className={cn("flex-1 h-9 rounded-lg text-[13px] font-semibold transition-all flex items-center justify-center gap-1 active:scale-[0.97]",
+                      inputMode === 'aadhaar' ? "bg-white text-slate-900 shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "text-slate-500"
+                    )}
+                  >
+                    <ScanLine className="h-3.5 w-3.5" /> Aadhaar
+                  </button>
+                  {voiceSupported && (
                     <button
-                      key={mode}
-                      onClick={() => setInputMode(mode)}
-                      className={cn(
-                        "flex-1 h-9 rounded-lg text-[14px] font-semibold transition-all flex items-center justify-center gap-1.5 active:scale-[0.97]",
-                        inputMode === mode
-                          ? "bg-white text-slate-900 shadow-[0_1px_3px_rgba(0,0,0,0.1)]"
-                          : "text-slate-500"
+                      onClick={() => setInputMode('voice')}
+                      className={cn("flex-1 h-9 rounded-lg text-[13px] font-semibold transition-all flex items-center justify-center gap-1 active:scale-[0.97]",
+                        inputMode === 'voice' ? "bg-white text-slate-900 shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "text-slate-500"
                       )}
                     >
-                      {mode === 'manual'
-                        ? <><User className="h-4 w-4" /> Manual Entry</>
-                        : <><ScanLine className="h-4 w-4" /> Scan Aadhaar</>
-                      }
+                      <Mic className="h-3.5 w-3.5" /> Voice
                     </button>
-                  ))}
+                  )}
                 </div>
 
                 <AnimatePresence mode="wait" initial={false}>
@@ -438,7 +505,7 @@ export default function IntakePage() {
                         <p className="text-[13px] text-slate-400 ml-4 mt-2">Required only if you wish to link your ABHA health ID.</p>
                       </div>
                     </motion.div>
-                  ) : (
+                  ) : inputMode === 'aadhaar' ? (
                     <motion.div
                       key="aadhaar-scan"
                       initial={{ opacity: 0, x: 16 }}
@@ -526,7 +593,98 @@ export default function IntakePage() {
                         Your Aadhaar data is processed locally and never stored on our servers.
                       </p>
                     </motion.div>
-                  )}
+                  ) : inputMode === 'voice' ? (
+                    <motion.div
+                      key="voice"
+                      initial={{ opacity: 0, x: 16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -16 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className="space-y-4"
+                    >
+                      {/* Language + Elderly Mode toggles */}
+                      <div className="flex gap-2">
+                        <div className="bg-slate-200/60 p-1 rounded-xl flex gap-1 flex-1">
+                          {(['en', 'hi'] as const).map(lang => (
+                            <button
+                              key={lang}
+                              onClick={() => setVoiceLang(lang)}
+                              className={cn("flex-1 h-8 rounded-lg text-[13px] font-semibold transition-all",
+                                voiceLang === lang ? "bg-white text-slate-900 shadow-[0_1px_3px_rgba(0,0,0,0.1)]" : "text-slate-500"
+                              )}
+                            >
+                              {lang === 'en' ? 'English' : 'हिंदी'}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => setElderlyMode(e => !e)}
+                          className={cn("px-3 h-10 rounded-xl text-[12px] font-semibold border transition-all",
+                            elderlyMode ? "bg-amber-50 border-amber-200 text-amber-800" : "bg-white border-slate-200 text-slate-500"
+                          )}
+                        >
+                          {elderlyMode ? '🔡 Large' : 'Normal'}
+                        </button>
+                      </div>
+
+                      {/* Mic button */}
+                      <div className="flex flex-col items-center gap-4 py-6">
+                        <button
+                          onClick={voiceState === 'listening' ? stopVoice : startVoice}
+                          disabled={voiceState === 'processing'}
+                          className={cn(
+                            "h-24 w-24 rounded-full flex items-center justify-center transition-all active:scale-95",
+                            voiceState === 'listening'
+                              ? "bg-red-500 shadow-[0_0_0_12px_rgba(239,68,68,0.15),0_0_0_24px_rgba(239,68,68,0.07)] animate-pulse"
+                              : voiceState === 'processing'
+                              ? "bg-amber-400"
+                              : "bg-blue-600 shadow-[0_8px_20px_rgba(37,99,235,0.3)]"
+                          )}
+                        >
+                          {voiceState === 'listening'
+                            ? <MicOff className="h-10 w-10 text-white" />
+                            : <Mic className="h-10 w-10 text-white" />
+                          }
+                        </button>
+
+                        <p className={cn("text-[15px] font-semibold text-center", elderlyMode && "text-[20px]")}>
+                          {voiceState === 'idle' && 'Tap to speak'}
+                          {voiceState === 'listening' && 'Listening… tap to stop'}
+                          {voiceState === 'processing' && 'Extracting details…'}
+                          {voiceState === 'done' && 'Done! Review below.'}
+                        </p>
+
+                        {/* Waveform bars when listening */}
+                        {voiceState === 'listening' && (
+                          <div className="flex items-center gap-1 h-8">
+                            {[0.6, 1, 0.4, 0.9, 0.7, 1, 0.5].map((h, i) => (
+                              <motion.div
+                                key={i}
+                                className="w-1.5 bg-red-400 rounded-full"
+                                animate={{ scaleY: [h, h * 0.4, h] }}
+                                transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.08 }}
+                                style={{ height: 32 }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Transcript */}
+                      {voiceTranscript && (
+                        <div className="bg-slate-100 rounded-[16px] p-4">
+                          <p className="text-[12px] text-slate-500 font-medium mb-1 uppercase tracking-wide">Transcript</p>
+                          <p className={cn("text-slate-800", elderlyMode ? "text-[18px]" : "text-[14px]")}>&ldquo;{voiceTranscript}&rdquo;</p>
+                        </div>
+                      )}
+
+                      {voiceState === 'done' && (
+                        <p className="text-[13px] text-green-700 font-medium text-center">
+                          Fields pre-filled below. Review and edit if needed.
+                        </p>
+                      )}
+                    </motion.div>
+                  ) : null}
                 </AnimatePresence>
               </motion.div>
             )}
@@ -702,6 +860,55 @@ export default function IntakePage() {
                     <CheckCircle className="h-5 w-5 text-teal-500 flex-shrink-0" />
                   </motion.div>
                 )}
+
+                {/* DISHA Family Tracking Consent */}
+                <div className="bg-white rounded-[20px] overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                  <button
+                    onClick={() => setDishaConsent(d => !d)}
+                    className="w-full flex items-center justify-between px-5 py-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn("h-8 w-8 rounded-full flex items-center justify-center", dishaConsent ? "bg-blue-100" : "bg-slate-100")}>
+                        <QrCode className={cn("h-4 w-4", dishaConsent ? "text-blue-600" : "text-slate-500")} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-[15px] font-semibold text-slate-900">Share journey with family?</p>
+                        <p className="text-[12px] text-slate-400 mt-0.5">DISHA compliant · Non-clinical info only</p>
+                      </div>
+                    </div>
+                    <div className={cn("h-6 w-11 rounded-full transition-colors", dishaConsent ? "bg-blue-500" : "bg-slate-200")}>
+                      <div className={cn("h-6 w-6 rounded-full bg-white shadow transition-transform", dishaConsent ? "translate-x-5" : "translate-x-0")} />
+                    </div>
+                  </button>
+
+                  <AnimatePresence>
+                    {dishaConsent && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden border-t border-slate-100"
+                      >
+                        <div className="px-5 py-4 flex items-center gap-3">
+                          <Phone className="h-5 w-5 text-slate-400 flex-shrink-0" />
+                          <input
+                            className="w-full bg-transparent border-none text-slate-900 text-[17px] focus:outline-none placeholder:text-slate-400"
+                            placeholder="Family member's phone"
+                            type="tel"
+                            inputMode="tel"
+                            maxLength={10}
+                            value={familyPhone}
+                            onChange={e => setFamilyPhone(e.target.value)}
+                          />
+                        </div>
+                        <p className="px-5 pb-4 text-[12px] text-slate-400">
+                          They will receive a link to see ward, condition, and estimated wait — no diagnoses or test results.
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </motion.div>
             )}
 
@@ -750,6 +957,44 @@ export default function IntakePage() {
                 >
                   View Live Queue
                 </button>
+
+                {familyToken && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-6 bg-white rounded-[24px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
+                  >
+                    <div className="flex items-center gap-2 mb-4">
+                      <QrCode className="h-5 w-5 text-blue-600" />
+                      <p className="text-[15px] font-bold text-slate-900">Family Tracking Link</p>
+                    </div>
+                    <div className="flex justify-center mb-4">
+                      <QRCodeSVG
+                        value={`${typeof window !== 'undefined' ? window.location.origin : ''}/family-track/${familyToken}`}
+                        size={160}
+                        level="M"
+                        className="rounded-lg"
+                      />
+                    </div>
+                    <p className="text-[12px] text-slate-400 text-center mb-4">
+                      Scan to see ward, condition &amp; estimated wait. No medical data shared.
+                    </p>
+                    <button
+                      onClick={() => {
+                        const url = `${window.location.origin}/family-track/${familyToken}`
+                        if (navigator.share) {
+                          navigator.share({ title: 'Patient Status', url })
+                        } else {
+                          navigator.clipboard.writeText(url)
+                        }
+                      }}
+                      className="w-full h-12 rounded-xl font-semibold text-[15px] bg-slate-100 text-slate-700 flex items-center justify-center gap-2 active:scale-[0.97] transition-all"
+                    >
+                      <Share2 className="h-4 w-4" /> Share with Family
+                    </button>
+                  </motion.div>
+                )}
+
                 <button
                   onClick={() => router.push('/')}
                   className="w-full h-14 rounded-2xl font-semibold text-[17px] text-slate-500 mt-3 active:bg-slate-200/50 transition-colors"

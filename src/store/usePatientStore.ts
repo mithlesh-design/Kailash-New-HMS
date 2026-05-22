@@ -3,6 +3,14 @@ import { create } from 'zustand'
 export type QueueStatus = 'waiting' | 'vitals' | 'consulting' | 'pharmacy' | 'billing' | 'done'
 export type TriageLevel = 'Low' | 'Medium' | 'High' | 'Critical'
 
+export type FamilyViewableStatus = {
+  wardRoom?: string
+  journeyStatus?: string
+  condition?: 'Stable' | 'Monitoring' | 'Critical' | 'Discharging'
+  lastUpdatedAt?: string
+  estimatedWaitMinutes?: number
+}
+
 export type Patient = {
   id: string
   name: string
@@ -27,6 +35,10 @@ export type Patient = {
   registeredAt: string
   triageLevel?: TriageLevel
   hasReports?: boolean
+  familyAccessToken?: string
+  familyPhones?: string[]
+  dishaConsentGiven?: boolean
+  familyViewableStatus?: FamilyViewableStatus
 }
 
 export type Appointment = {
@@ -60,6 +72,9 @@ interface PatientState {
   addPatient: (patient: Partial<Patient> & { name: string; phone: string }) => void
   bookAppointment: (appt: Omit<Appointment, 'id'>) => void
   cancelAppointment: (id: string) => void
+  generateFamilyToken: (patientId: string, familyPhones: string[], consentGiven: boolean) => string
+  updateFamilyViewableStatus: (patientId: string, status: FamilyViewableStatus) => void
+  getPatientByFamilyToken: (token: string) => Patient | undefined
 }
 
 const MOCK_PATIENTS: Patient[] = [
@@ -69,6 +84,16 @@ const MOCK_PATIENTS: Patient[] = [
     vitals: { bp: '118/76', temp: '98.4°F', weight: '58 kg', spo2: '99%', pulse: '72 bpm' },
     symptoms: ['Headache for 2 days', 'Mild nausea'], history: ['Migraine history'], registeredAt: '09:10 AM',
     triageLevel: 'Medium',
+    familyAccessToken: 'demo-family-token-meera-001',
+    familyPhones: ['9876543211'],
+    dishaConsentGiven: true,
+    familyViewableStatus: {
+      wardRoom: 'OPD Room 3',
+      journeyStatus: 'In consultation with Dr. Priya Nair',
+      condition: 'Stable',
+      lastUpdatedAt: new Date().toISOString(),
+      estimatedWaitMinutes: 0,
+    },
   },
   {
     id: 'PT-20392', name: 'Aarav Sharma', age: 42, gender: 'Male', phone: '9871234560', bloodGroup: 'O+', token: 2,
@@ -138,7 +163,7 @@ const MOCK_APPOINTMENTS: Appointment[] = [
   },
 ]
 
-export const usePatientStore = create<PatientState>((set) => ({
+export const usePatientStore = create<PatientState>((set, get) => ({
   patients: MOCK_PATIENTS,
   queue: MOCK_PATIENTS.filter(p => ['waiting', 'vitals', 'consulting'].includes(p.queueStatus)),
   visits: MOCK_VISITS,
@@ -163,10 +188,33 @@ export const usePatientStore = create<PatientState>((set) => ({
     appointments: s.appointments.map(a => a.id === id ? { ...a, status: 'cancelled' } : a),
   })),
 
+  generateFamilyToken: (patientId, familyPhones, consentGiven) => {
+    const token = crypto.randomUUID()
+    set(state => ({
+      patients: state.patients.map(p =>
+        p.id === patientId
+          ? { ...p, familyAccessToken: token, familyPhones, dishaConsentGiven: consentGiven, familyViewableStatus: { lastUpdatedAt: new Date().toISOString() } }
+          : p
+      ),
+    }))
+    return token
+  },
+
+  updateFamilyViewableStatus: (patientId, status) =>
+    set(state => ({
+      patients: state.patients.map(p =>
+        p.id === patientId ? { ...p, familyViewableStatus: { ...status, lastUpdatedAt: new Date().toISOString() } } : p
+      ),
+    })),
+
+  getPatientByFamilyToken: (token) => {
+    return get().patients.find(p => p.familyAccessToken === token)
+  },
+
   addPatient: (partial) => set((state) => {
     const nextToken = Math.max(...state.patients.map(p => p.token), 0) + 1
     const patient: Patient = {
-      id: `PT-${Date.now()}`,
+      id: partial.id ?? `PT-${Date.now()}`,
       name: partial.name,
       age: partial.age ?? 30,
       gender: partial.gender ?? 'Male',

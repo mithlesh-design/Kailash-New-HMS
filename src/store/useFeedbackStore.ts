@@ -13,10 +13,23 @@ export interface AiFeedback {
   timestamp: string
 }
 
+export interface AiPerformanceReport {
+  byFeature: Array<{
+    featureId: string
+    totalVotes: number
+    upVotes: number
+    downVotes: number
+    acceptanceRate: number
+  }>
+  totalFeedbacks: number
+  overallAcceptanceRate: number
+}
+
 interface FeedbackState {
   feedbacks: AiFeedback[]
   addFeedback: (f: Omit<AiFeedback, 'id' | 'timestamp'>) => void
   getFeatureSummary: (featureId: string) => { up: number; down: number }
+  getPerformanceReport: () => AiPerformanceReport
 }
 
 export const useFeedbackStore = create<FeedbackState>((set, get) => ({
@@ -35,5 +48,29 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => ({
   getFeatureSummary: (featureId) => {
     const list = get().feedbacks.filter((f) => f.featureId === featureId)
     return { up: list.filter((f) => f.vote === 'up').length, down: list.filter((f) => f.vote === 'down').length }
+  },
+  getPerformanceReport: () => {
+    const all = get().feedbacks
+    const byFeature = Object.entries(
+      all.reduce<Record<string, AiFeedback[]>>((acc, f) => {
+        acc[f.featureId] = [...(acc[f.featureId] ?? []), f]
+        return acc
+      }, {})
+    ).map(([featureId, list]) => {
+      const upVotes = list.filter(f => f.vote === 'up').length
+      return {
+        featureId,
+        totalVotes: list.length,
+        upVotes,
+        downVotes: list.length - upVotes,
+        acceptanceRate: list.length > 0 ? Math.round((upVotes / list.length) * 100) : 0,
+      }
+    })
+    const totalUp = all.filter(f => f.vote === 'up').length
+    return {
+      byFeature,
+      totalFeedbacks: all.length,
+      overallAcceptanceRate: all.length > 0 ? Math.round((totalUp / all.length) * 100) : 0,
+    }
   },
 }))

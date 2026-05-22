@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Patient } from './usePatientStore'
+import type { NoteContext, NoteType } from '@/ai-services/documentation-engine'
 
 export type Prescription = {
   id: string
@@ -57,10 +58,15 @@ interface ConsultationState {
   isPharmacySent: boolean
   aiSummaryVisible: boolean
   isGeneratingSummary: boolean
+  noteType: NoteType
+  noteContext: NoteContext
+  isScribeMode: boolean
 
   setCurrentPatient: (patient: Patient | null) => void
   setNotes: (notes: string) => void
   setDiagnosis: (diagnosis: string) => void
+  setNoteMetadata: (noteType: NoteType, noteContext: NoteContext) => void
+  setScribeMode: (active: boolean) => void
   addPrescription: (prescription: Prescription) => void
   removePrescription: (id: string) => void
   addLabOrder: (order: Omit<LabOrder, 'id' | 'orderedAt' | 'sentToLab'>) => void
@@ -93,6 +99,9 @@ export const useConsultationStore = create<ConsultationState>((set) => ({
   isPharmacySent: false,
   aiSummaryVisible: true,
   isGeneratingSummary: false,
+  noteType: 'SOAP',
+  noteContext: 'OPD',
+  isScribeMode: false,
 
   setCurrentPatient: (patient) => set({
     currentPatient: patient,
@@ -108,6 +117,8 @@ export const useConsultationStore = create<ConsultationState>((set) => ({
 
   setNotes: (notes) => set({ notes }),
   setDiagnosis: (diagnosis) => set({ diagnosis }),
+  setNoteMetadata: (noteType, noteContext) => set({ noteType, noteContext }),
+  setScribeMode: (active) => set({ isScribeMode: active }),
 
   addPrescription: (p) => set((s) => ({ prescriptions: [...s.prescriptions, p] })),
   removePrescription: (id) => set((s) => ({ prescriptions: s.prescriptions.filter(p => p.id !== id) })),
