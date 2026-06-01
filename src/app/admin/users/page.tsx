@@ -13,6 +13,8 @@ import { StaffProfileDrawer } from "@/components/admin/StaffProfileDrawer"
 import { AddStaffWizard } from "@/components/admin/AddStaffWizard"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
+import { useNotificationStore } from "@/store/useNotificationStore"
 
 const STATUS_TINT: Record<StaffMember['status'], string> = {
   active:      'bg-emerald-100 text-emerald-700',
@@ -59,6 +61,10 @@ export default function StaffManagementPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [drawerId, setDrawerId] = useState<string | null>(null)
   const [showWizard, setShowWizard] = useState(false)
+  const deactivateStaff = useHRStore(s => s.deactivateStaff)
+  const addNotification = useNotificationStore(s => s.add)
+  const { confirm, prompt, view: dialogView } = useDialogs()
+  const actorName = currentUser?.name ?? 'Administrator'
 
   const canWrite = canDo(currentUser?.role, 'hr.staff.write')
 
@@ -197,11 +203,47 @@ export default function StaffManagementPage() {
         <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-indigo-50 border border-indigo-200">
           <span className="text-xs font-bold text-indigo-800">{selected.size} selected</span>
-          <button onClick={() => toast.info('Broadcast composer arrives in Phase 10')}
-            className="text-xs font-bold text-indigo-700 hover:underline cursor-pointer">Send broadcast</button>
+          <button onClick={async () => {
+            const values = await prompt({
+              title: `Send broadcast to ${selected.size} selected`,
+              body: 'Pushed as an in-app notification to each recipient. Audited.',
+              confirmLabel: 'Send broadcast',
+              fields: [
+                { id: 'title', label: 'Title', placeholder: 'e.g. Mandatory training Mon 09:00', required: true },
+                { id: 'body',  label: 'Message', type: 'textarea', required: true },
+              ],
+            })
+            if (!values) return
+            const ids = Array.from(selected)
+            for (const id of ids) {
+              addNotification({
+                type: 'system', priority: 'medium',
+                title: values.title, body: values.body,
+                targetUserId: id, channels: ['in_app'],
+              })
+            }
+            toast.success(`Broadcast sent to ${ids.length} staff`)
+            setSelected(new Set())
+          }} className="text-xs font-bold text-indigo-700 hover:underline cursor-pointer">Send broadcast</button>
           <span className="text-slate-300">·</span>
-          <button onClick={() => toast.info('Bulk deactivate — confirm modal in M1.3')}
-            className="text-xs font-bold text-amber-700 hover:underline cursor-pointer">Bulk deactivate</button>
+          <button onClick={async () => {
+            const values = await prompt({
+              title: `Bulk deactivate ${selected.size} staff?`,
+              body: 'Each member loses portal access. Audited per staff.',
+              tone: 'danger',
+              confirmLabel: 'Deactivate selected',
+              fields: [
+                { id: 'reason', label: 'Reason', type: 'textarea',
+                  placeholder: 'e.g. Restructure / temporary suspension / end of contract',
+                  required: true },
+              ],
+            })
+            if (!values) return
+            const ids = Array.from(selected)
+            for (const id of ids) deactivateStaff(id, values.reason, actorName)
+            toast.success(`${ids.length} staff deactivated`)
+            setSelected(new Set())
+          }} className="text-xs font-bold text-amber-700 hover:underline cursor-pointer">Bulk deactivate</button>
           <span className="text-slate-300">·</span>
           <button onClick={() => setSelected(new Set())}
             className="text-xs font-bold text-slate-500 hover:underline cursor-pointer ml-auto">Clear</button>
@@ -293,6 +335,7 @@ export default function StaffManagementPage() {
 
       {/* Add Staff wizard */}
       <AddStaffWizard open={showWizard} onClose={() => setShowWizard(false)} onCreated={(id) => setDrawerId(id)} />
+      {dialogView}
     </div>
   )
 }

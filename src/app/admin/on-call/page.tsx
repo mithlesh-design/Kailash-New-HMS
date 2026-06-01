@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { canDo } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { SwapRequestModal } from "@/components/admin/SwapRequestModal"
 
 // On-call rotation is stored locally in component state for Phase 2; will be
 // promoted to its own slice in `useHRStore.onCallRotations` in a follow-up.
@@ -51,6 +52,7 @@ export default function OnCallPage() {
   const canWrite = canDo(currentUser?.role, 'hr.duty.write')
 
   const [weekOffset, setWeekOffset] = useState(0)
+  const [swapOpenFor, setSwapOpenFor] = useState<OnCallSlot | null>(null)
 
   // Seed a deterministic 14-day rotation
   const allSlots = useMemo<OnCallSlot[]>(() => {
@@ -91,7 +93,7 @@ export default function OnCallPage() {
 
   const handleEditSlot = (slot: OnCallSlot) => {
     if (!canWrite) { toast.error("You don't have permission to edit on-call rotations"); return }
-    toast.info(`Edit slot workflow ships in M3.4 (swap-request)`)
+    setSwapOpenFor(slot)
   }
 
   return (
@@ -236,8 +238,18 @@ export default function OnCallPage() {
           <span className="text-[11px] font-semibold text-slate-600">☾ Night (20:00–08:00)</span>
         </div>
         <span className="text-slate-300">·</span>
-        <span className="text-[11px] text-slate-500">Live banner refreshes per shift · click slot to swap (M3.4)</span>
+        <span className="text-[11px] text-slate-500">Live banner refreshes per shift · click any slot to file a swap request.</span>
       </div>
+
+      <SwapRequestModal
+        open={!!swapOpenFor}
+        onClose={() => setSwapOpenFor(null)}
+        defaults={swapOpenFor ? {
+          requesterId: swapOpenFor.staffId,
+          requesterDate: swapOpenFor.date,
+          requesterShift: swapOpenFor.shift === 'Day' ? 'Morning' : 'Night',
+        } : undefined}
+      />
     </div>
   )
 }

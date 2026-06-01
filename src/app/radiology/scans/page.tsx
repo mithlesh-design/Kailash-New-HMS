@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRadiologyStore, type RadiologyScan } from "@/store/useRadiologyStore"
-import { ScanLine, AlertCircle, ChevronDown, CheckCircle, Timer } from "lucide-react"
+import { ScanLine, AlertCircle, ChevronDown, CheckCircle, Timer, X, ZoomIn, ZoomOut, RotateCw, Maximize2 } from "lucide-react"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -66,6 +66,7 @@ export default function RadiologyScansPage() {
   const { scans, advanceStatus } = useRadiologyStore()
   const [filter, setFilter] = useState<'All' | 'Urgent' | 'Overdue' | RadiologyScan['status']>('All')
   const [now, setNow] = useState(Date.now())
+  const [viewerFor, setViewerFor] = useState<RadiologyScan | null>(null)
 
   useEffect(() => {
     const iv = setInterval(() => setNow(Date.now()), 60000)
@@ -194,7 +195,7 @@ export default function RadiologyScansPage() {
                         )}
                         {scan.status === 'Ready for Review' && (
                           <button
-                            onClick={() => toast.info('DICOM viewer integration coming soon')}
+                            onClick={() => setViewerFor(scan)}
                             className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors cursor-pointer border border-blue-200"
                           >
                             Open Report
@@ -214,6 +215,67 @@ export default function RadiologyScansPage() {
           </AnimatePresence>
         </div>
       )}
+      {viewerFor ? <DicomViewerStub scan={viewerFor} onClose={() => setViewerFor(null)} /> : null}
+    </div>
+  )
+}
+
+/* Mock DICOM viewer — Phase-1 demo. Shows a stylised viewport with toolbar
+ * and the scan's AI prelim text. Real vendor integration ships post-go-live. */
+function DicomViewerStub({ scan, onClose }: { scan: RadiologyScan; onClose: () => void }) {
+  const [zoom, setZoom] = useState(100)
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4"
+         onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}
+         role="dialog" aria-modal="true" aria-label="DICOM viewer">
+      <div className="flex w-[min(1080px,100%)] max-h-[90vh] flex-col rounded-2xl bg-slate-900 shadow-2xl">
+        <header className="flex items-center gap-3 border-b border-slate-700 px-4 py-3">
+          <ScanLine className="h-4 w-4 text-blue-400" />
+          <h2 className="text-[14px] font-semibold text-white">
+            {scan.scanType} · {scan.patientName}
+          </h2>
+          <span className="text-[11px] text-slate-400">{scan.bodyPart ?? ''}</span>
+          <div className="ml-auto flex items-center gap-1">
+            <button onClick={() => setZoom(z => Math.max(50, z - 10))} className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-800" aria-label="Zoom out"><ZoomOut className="h-4 w-4" /></button>
+            <span className="px-2 text-[12px] tabular-nums text-slate-400">{zoom}%</span>
+            <button onClick={() => setZoom(z => Math.min(300, z + 10))} className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-800" aria-label="Zoom in"><ZoomIn className="h-4 w-4" /></button>
+            <button onClick={() => setZoom(100)}                       className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-800" aria-label="Reset"><Maximize2 className="h-4 w-4" /></button>
+            <button onClick={() => toast.info('Rotating 90° (demo)')}  className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-800" aria-label="Rotate"><RotateCw className="h-4 w-4" /></button>
+            <button onClick={onClose}                                   className="rounded-lg p-1.5 text-slate-300 hover:bg-slate-800" aria-label="Close"><X className="h-4 w-4" /></button>
+          </div>
+        </header>
+        <div className="flex-1 grid grid-cols-3 gap-3 overflow-hidden p-4">
+          <div className="col-span-2 grid place-items-center rounded-xl bg-slate-950 ring-1 ring-slate-800 overflow-hidden">
+            <div className="relative h-full w-full grid place-items-center">
+              <div
+                className="relative aspect-square w-[min(560px,80%)] rounded-full bg-gradient-radial from-slate-700 via-slate-900 to-slate-950 ring-1 ring-slate-700"
+                style={{ transform: `scale(${zoom / 100})`, transition: 'transform 200ms ease' }}
+              >
+                <div className="absolute inset-[15%] rounded-full bg-gradient-to-tr from-slate-600/40 via-slate-700/60 to-slate-800" />
+                <div className="absolute left-[28%] top-[34%] h-[18%] w-[18%] rounded-full bg-slate-400/40 blur-sm" />
+                <div className="absolute right-[24%] top-[40%] h-[12%] w-[12%] rounded-full bg-slate-300/40 blur-sm" />
+                <p className="absolute bottom-3 left-3 text-[10px] font-mono text-slate-400">DEMO · {scan.scanType.toUpperCase()} · NO PHI</p>
+              </div>
+              <p className="absolute bottom-3 right-3 text-[10px] font-mono text-slate-500">{scan.priority ?? 'Routine'}</p>
+            </div>
+          </div>
+          <aside className="rounded-xl bg-slate-800/60 p-3 ring-1 ring-slate-700">
+            <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-400">AI Preliminary Finding</h3>
+            <p className="mt-1 text-[13px] leading-5 text-slate-100">{scan.aiFinding ?? 'No AI preliminary available.'}</p>
+            <h3 className="mt-4 text-[11px] font-bold uppercase tracking-wide text-slate-400">Study</h3>
+            <ul className="mt-1 space-y-1 text-[12px] text-slate-300">
+              <li>Patient: <span className="text-slate-100">{scan.patientName}</span></li>
+              <li>Modality: <span className="text-slate-100">{scan.scanType}</span></li>
+              {scan.bodyPart ? <li>Region: <span className="text-slate-100">{scan.bodyPart}</span></li> : null}
+              {scan.orderedBy ? <li>Ordered by: <span className="text-slate-100">{scan.orderedBy}</span></li> : null}
+              <li>Status: <span className="text-slate-100">{scan.status}</span></li>
+            </ul>
+            <p className="mt-4 rounded-lg bg-amber-500/10 px-2 py-1.5 text-[11px] text-amber-300 ring-1 ring-amber-500/30">
+              Phase-1 demo viewer · vendor DICOM integration ships post go-live.
+            </p>
+          </aside>
+        </div>
+      </div>
     </div>
   )
 }

@@ -12,6 +12,7 @@ import { canDo } from "@/lib/permissions"
 import { StaffProfileDrawer } from "@/components/admin/StaffProfileDrawer"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 const today = () => new Date().toISOString().split('T')[0]!
 const fmtDate = (s: string) => new Date(s + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -39,6 +40,14 @@ const BUCKET_LABEL: Record<CredentialRow['bucket'], string> = {
   valid:        'Valid >90d',
 }
 
+function addOneYear(iso: string): string {
+  try {
+    const d = new Date(iso + 'T00:00:00')
+    d.setFullYear(d.getFullYear() + 1)
+    return d.toISOString().split('T')[0]!
+  } catch { return iso }
+}
+
 function bucketize(days: number, isLifetime: boolean): CredentialRow['bucket'] {
   if (isLifetime) return 'valid'
   if (days < 0) return 'expired'
@@ -57,6 +66,32 @@ export default function CredentialsPage() {
   const [drawerId, setDrawerId] = useState<string | null>(null)
 
   const canWrite = canDo(currentUser?.role, 'hr.credential.write')
+  const renewCredential = useHRStore(s => s.renewCredential)
+  const { prompt, view: dialogView } = useDialogs()
+  const actorName = currentUser?.name ?? 'Administrator'
+
+  async function handleRenew(staffId: string, credentialId: string, label: string, currentExpiry: string, currentNumber: string) {
+    const values = await prompt({
+      title: `Renew ${label}`,
+      body: 'Capture the new expiry date and (optional) replacement registration number. Audited.',
+      confirmLabel: 'Renew credential',
+      fields: [
+        { id: 'expiry', label: 'New expiry date (YYYY-MM-DD)', placeholder: '2027-12-31',
+          defaultValue: addOneYear(currentExpiry), required: true },
+        { id: 'number', label: 'New registration number (optional)',
+          defaultValue: currentNumber },
+      ],
+    })
+    if (!values) return
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(values.expiry)) {
+      toast.error('Use date format YYYY-MM-DD'); return
+    }
+    renewCredential(staffId, credentialId, {
+      newExpiry: values.expiry,
+      newNumber: values.number?.trim() || undefined,
+    }, actorName)
+    toast.success(`${label} renewed`)
+  }
 
   // ── Build rows from every credential of every active staff ────────────
   const allRows = useMemo<CredentialRow[]>(() => {
@@ -247,7 +282,7 @@ export default function CredentialsPage() {
                       Reminders
                     </label>
                     {(r.bucket === 'expired' || r.bucket === 'this_week' || r.bucket === 'this_month') && canWrite && (
-                      <button onClick={() => toast.info('Renew workflow ships in M1.4 follow-up')}
+                      <button onClick={() => handleRenew(r.staff.id, r.credential.id, r.credential.label, r.credential.expiryDate, r.credential.number)}
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer">
                         <Mail className="h-3 w-3" />Renew
                       </button>
@@ -266,6 +301,7 @@ export default function CredentialsPage() {
 
       {/* Profile drawer cross-link */}
       <StaffProfileDrawer staffId={drawerId} onClose={() => setDrawerId(null)} />
+      {dialogView}
     </div>
   )
 }

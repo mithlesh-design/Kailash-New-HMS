@@ -30,6 +30,7 @@ import { useHRStore } from "@/store/useHRStore"
 import { CoverageStrip } from "@/components/admin/CoverageGauge"
 import { SickCallModal } from "@/components/admin/SickCallModal"
 import { SwapRequestModal } from "@/components/admin/SwapRequestModal"
+import { DemoSeedControl } from "@/components/admin/DemoSeedControl"
 import { AlertCircle, ArrowLeftRight, Wallet, ChevronRight } from "lucide-react"
 import { useVendorStore } from "@/store/useVendorStore"
 import { useStatutoryStore } from "@/store/useStatutoryStore"
@@ -259,6 +260,7 @@ export default function AdminDashboard() {
           <NeonBadge variant="teal">
             <ShieldCheck className="h-3 w-3" /> DISHA Compliant
           </NeonBadge>
+          <DemoSeedControl />
           <button onClick={() => setShowSickCall(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 cursor-pointer">
             <AlertCircle className="h-3 w-3" />Sick call

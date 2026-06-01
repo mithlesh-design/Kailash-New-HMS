@@ -170,7 +170,7 @@ function PatientCard({ patient }: { patient: DischargePatient }) {
                         addBlocker(patient.patientId, { type: newBlocker.type, description: newBlocker.description, owner: newBlocker.owner })
                         setNewBlocker({ type: 'Other', description: '', owner: '' })
                         setShowBlockerForm(false)
-                        toast.info("Blocker added")
+                        toast.success(`Blocker added · ${newBlocker.owner}`)
                       }}>Add</Button>
                     </div>
                   </div>

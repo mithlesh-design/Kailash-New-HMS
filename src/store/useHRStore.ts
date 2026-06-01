@@ -789,6 +789,7 @@ interface HRState {
   terminateStaff: (id: string, reason: string, actorName: string) => void
   addCredential: (staffId: string, cred: Omit<Credential, 'id'>, actorName: string) => void
   removeCredential: (staffId: string, credId: string, actorName: string) => void
+  renewCredential: (staffId: string, credId: string, patch: { newExpiry: string; newNumber?: string; newIssued?: string }, actorName: string) => void
 
   // ── Shifts ────────────────────────────────────────────────────────────
   updateShift: (staffId: string, date: string, shift: ShiftType, actorName?: string) => void
@@ -953,6 +954,26 @@ export const useHRStore = create<HRState>()(
         }))
         audit('hr_credential_added', 'staff_credential', credId,
           `${member.name} · ${cred.label} removed`, actorName)
+      },
+
+      renewCredential: (staffId, credId, patch, actorName) => {
+        const member = get().staff.find(s => s.id === staffId)
+        const cred = member?.credentials.find(c => c.id === credId)
+        if (!member || !cred) return
+        const renewed: Credential = {
+          ...cred,
+          expiryDate: patch.newExpiry,
+          number: patch.newNumber ?? cred.number,
+          issuedDate: patch.newIssued ?? new Date().toISOString().split('T')[0]!,
+        }
+        set(s => ({
+          staff: s.staff.map(x => x.id === staffId
+            ? { ...x, credentials: x.credentials.map(c => c.id === credId ? renewed : c) }
+            : x),
+        }))
+        audit('hr_credential_added', 'staff_credential', credId,
+          `${member.name} · ${cred.label} renewed (expires ${renewed.expiryDate}${renewed.number !== cred.number ? `, new # ${renewed.number}` : ''})`,
+          actorName)
       },
 
       // ── Shifts ───────────────────────────────────────────────────────
