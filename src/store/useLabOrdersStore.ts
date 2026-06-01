@@ -1,5 +1,7 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useNotificationStore } from './useNotificationStore'
+import { useAuditStore } from './useAuditStore'
 import { LAB_CATALOG, computeFlag, type Bench, type Priority, type SpecimenType, type AnalyteSpec } from '@/lib/labCatalog'
 import { evaluateReflex } from '@/lib/reflexRules'
 
@@ -408,7 +410,7 @@ const SEED_ORDERS: LabOrder[] = [
 
 // ─── Store ────────────────────────────────────────────────────────────────
 
-export const useLabOrdersStore = create<State>((set, get) => ({
+export const useLabOrdersStore = create<State>()(persist((set, get) => ({
   orders: SEED_ORDERS,
   reflexSuggestions: [],
 
@@ -462,6 +464,11 @@ export const useLabOrdersStore = create<State>((set, get) => ({
       specimens: Array.from(specimensByType.values()),
     }
     set(s => ({ orders: [order, ...s.orders] }))
+    useAuditStore.getState().log({
+      userId: 'LAB-SYS', userName: input.doctorName ?? 'Lab',
+      action: 'lab_order', resource: 'lab_order', resourceId: id,
+      detail: `${input.patientName} · ${tests.length} test(s) ordered (${input.source})`,
+    })
     return id
   },
 
@@ -541,14 +548,28 @@ export const useLabOrdersStore = create<State>((set, get) => ({
     })),
   })),
 
-  verifyTest: (testId, verifiedBy) => set(s => ({
-    orders: s.orders.map(o => ({
-      ...o,
-      tests: o.tests.map(t => t.id === testId && t.status === 'entered'
-        ? { ...t, status: 'verified' as TestStatus, verifiedBy }
-        : t),
-    })),
-  })),
+  verifyTest: (testId, verifiedBy) => {
+    let verified: TestRun | undefined
+    set(s => ({
+      orders: s.orders.map(o => ({
+        ...o,
+        tests: o.tests.map(t => {
+          if (t.id !== testId || t.status !== 'entered') return t
+          const v: TestRun = { ...t, status: 'verified', verifiedBy }
+          verified = v
+          return v
+        }),
+      })),
+    }))
+    if (verified) {
+      useAuditStore.getState().log({
+        userId: verifiedBy.id, userName: verifiedBy.name,
+        action: 'radiology_report_verified',  // shared "verified" code; module re-mapped via SEVERITY
+        resource: 'lab_test', resourceId: testId,
+        detail: `${verified.name} verified by ${verifiedBy.name}`,
+      })
+    }
+  },
 
   releaseTest: (testId) => {
     let releasedTest: TestRun | undefined
@@ -580,6 +601,12 @@ export const useLabOrdersStore = create<State>((set, get) => ({
         targetRole: 'doctor',
         patientName: parentOrder.patientName,
         channels: ['in_app'],
+      })
+      useAuditStore.getState().log({
+        userId: 'LAB-SYS', userName: 'Lab',
+        action: critical ? 'lab_critical_callback' : 'lab_result_released',
+        resource: 'lab_test', resourceId: testId,
+        detail: `${t.name} released · ${summary}`,
       })
       // Reflex auto-trigger — any rule matches land on the incharge's reflex queue
       const reflexMatches = evaluateReflex(t, parentOrder.patientName)
@@ -690,7 +717,13 @@ export const useLabOrdersStore = create<State>((set, get) => ({
   dismissReflex: (suggestionId) => set(s => ({
     reflexSuggestions: s.reflexSuggestions.filter(rs => rs.id !== suggestionId),
   })),
-}))
+}),
+  {
+    name: 'kailash-labordersstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))
 
 // ─── Back-compat: flat sample view for legacy consumers ───────────────────
 

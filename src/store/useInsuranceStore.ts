@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { useAuditStore } from './useAuditStore'
 
 export type InsuranceClaimStatus = 'Pending Pre-Auth' | 'Approved' | 'Rejected' | 'In Process'
 export type SubmissionStatus = 'not_submitted' | 'validating' | 'validated' | 'submitted' | 'acknowledged'
@@ -174,7 +176,7 @@ const SEED: InsuranceClaim[] = [
   },
 ]
 
-export const useInsuranceStore = create<InsuranceState>((set, get) => ({
+export const useInsuranceStore = create<InsuranceState>()(persist((set, get) => ({
   totalClaimsValue: 1250000,
   pendingApprovals: 8,
   claims: SEED,
@@ -186,14 +188,22 @@ export const useInsuranceStore = create<InsuranceState>((set, get) => ({
       ),
     })),
 
-  setSubmissionStatus: (claimId, status, tpaRef) =>
+  setSubmissionStatus: (claimId, status, tpaRef) => {
     set((s) => ({
       claims: s.claims.map(c =>
         c.id === claimId
           ? { ...c, submissionStatus: status, submittedAt: status === 'submitted' ? new Date().toISOString() : c.submittedAt, tpaReferenceId: tpaRef ?? c.tpaReferenceId }
           : c
       ),
-    })),
+    }))
+    if (status === 'submitted') {
+      useAuditStore.getState().log({
+        userId: 'INS-SYS', userName: 'Insurance Desk',
+        action: 'insurance_claim_submitted', resource: 'claim', resourceId: claimId,
+        detail: `Claim submitted${tpaRef ? ' · TPA ref ' + tpaRef : ''}`,
+      })
+    }
+  },
 
   setStatus: (claimId, status, opts) =>
     set((s) => ({
@@ -245,4 +255,10 @@ export const useInsuranceStore = create<InsuranceState>((set, get) => ({
         timeline: [...(c.timeline ?? []), { ...event, at: new Date().toISOString() }],
       })),
     })),
-}))
+}),
+  {
+    name: 'kailash-insurancestore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useNotificationStore } from './useNotificationStore'
 import { useAdmissionStore } from './useAdmissionStore'
 import { useAuditStore } from './useAuditStore'
@@ -207,7 +208,7 @@ const SEED: ERPatient[] = [
 
 // ── Store ─────────────────────────────────────────────────────────────────
 
-export const useERStore = create<ERState>((set, get) => ({
+export const useERStore = create<ERState>()(persist((set, get) => ({
   patients: SEED,
   mciActive: false,
 
@@ -318,7 +319,13 @@ export const useERStore = create<ERState>((set, get) => ({
       ? { ...p, callbackLogged: { calledBy, recipient, calledAt: new Date().toISOString() } }
       : p),
   })),
-}))
+}),
+  {
+    name: 'kailash-erstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))
 
 export function dispositionLabel(d: Disposition): string {
   return {

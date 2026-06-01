@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { useAuditStore } from './useAuditStore'
 
 export type OTStatus = 'Scheduled' | 'Pre-Op' | 'In Progress' | 'Recovery' | 'Completed'
 
@@ -314,7 +316,7 @@ const MOCK_PROCEDURES: OTProcedure[] = [
   },
 ]
 
-export const useOTStore = create<OTState>((set) => ({
+export const useOTStore = create<OTState>()(persist((set) => ({
   procedures: MOCK_PROCEDURES,
   otRooms: [
     { id: 'OT-1', name: 'OT-1 (Main)', status: 'In Use', currentProcedureId: 'OT-001' },
@@ -392,19 +394,36 @@ export const useOTStore = create<OTState>((set) => ({
 
   // ── v2 actions ───────────────────────────────────────────────────────────
 
-  checkWHO: (procedureId, itemId) => set(s => ({
-    procedures: s.procedures.map(p => {
-      if (p.id !== procedureId) return p
-      const list = p.whoChecklist ?? makeWHOChecklist()
-      return { ...p, whoChecklist: list.map(i => i.id === itemId ? { ...i, checked: !i.checked } : i) }
-    }),
-  })),
+  checkWHO: (procedureId, itemId) => {
+    let phase: string | undefined
+    set(s => ({
+      procedures: s.procedures.map(p => {
+        if (p.id !== procedureId) return p
+        const list = p.whoChecklist ?? makeWHOChecklist()
+        const item = list.find(i => i.id === itemId)
+        phase = item?.phase
+        return { ...p, whoChecklist: list.map(i => i.id === itemId ? { ...i, checked: !i.checked } : i) }
+      }),
+    }))
+    useAuditStore.getState().log({
+      userId: 'OT-SYS', userName: 'OT',
+      action: 'ot_who_checklist', resource: 'ot_procedure', resourceId: procedureId,
+      detail: `WHO ${phase ?? 'item'} toggled · ${itemId}`,
+    })
+  },
 
-  setClearance: (procedureId, pillar, status) => set(s => ({
-    procedures: s.procedures.map(p => p.id === procedureId
-      ? { ...p, clearance: { ...(p.clearance ?? emptyClearances()), [pillar]: status } }
-      : p),
-  })),
+  setClearance: (procedureId, pillar, status) => {
+    set(s => ({
+      procedures: s.procedures.map(p => p.id === procedureId
+        ? { ...p, clearance: { ...(p.clearance ?? emptyClearances()), [pillar]: status } }
+        : p),
+    }))
+    useAuditStore.getState().log({
+      userId: 'OT-SYS', userName: 'OT',
+      action: 'ot_clearance_set', resource: 'ot_procedure', resourceId: procedureId,
+      detail: `${pillar} → ${status}`,
+    })
+  },
 
   setASA: (procedureId, asa) => set(s => ({
     procedures: s.procedures.map(p => p.id === procedureId
@@ -462,4 +481,10 @@ export const useOTStore = create<OTState>((set) => ({
       ? { ...p, debrief: { ...d, recordedAt: new Date().toISOString() } }
       : p),
   })),
-}))
+}),
+  {
+    name: 'kailash-otstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

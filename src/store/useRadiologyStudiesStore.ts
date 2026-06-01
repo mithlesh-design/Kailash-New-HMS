@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useNotificationStore } from './useNotificationStore'
 import {
   RADIOLOGY_CATALOG,
@@ -310,7 +311,7 @@ const SEED_STUDIES: RadiologyStudy[] = [
 
 // ─── Store ────────────────────────────────────────────────────────────────
 
-export const useRadiologyStudiesStore = create<State>((set, get) => ({
+export const useRadiologyStudiesStore = create<State>()(persist((set, get) => ({
   studies: SEED_STUDIES,
 
   addOrder: (input) => {
@@ -450,7 +451,13 @@ export const useRadiologyStudiesStore = create<State>((set, get) => ({
   setContrastConsented: (id, ok) => set(s => ({
     studies: s.studies.map(x => x.id === id ? { ...x, contrastConsented: ok } : x),
   })),
-}))
+}),
+  {
+    name: 'kailash-radiologystudiesstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))
 
 // ─── AI prelim stubs (per code) ───────────────────────────────────────────
 

@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { useAuditStore } from './useAuditStore'
 
 export type ClearancePillar = 'doctor' | 'nursing' | 'pharmacy' | 'billing' | 'insurance'
 
@@ -127,7 +129,7 @@ const MOCK_DISCHARGE_PATIENTS: DischargePatient[] = [
   },
 ]
 
-export const useDischargeStore = create<DischargeState>((set) => ({
+export const useDischargeStore = create<DischargeState>()(persist((set) => ({
   dischargeQueue: MOCK_DISCHARGE_PATIENTS,
 
   initDischarge: (patient) =>
@@ -146,12 +148,18 @@ export const useDischargeStore = create<DischargeState>((set) => ({
       ],
     })),
 
-  setClearance: (patientId, pillar, status) =>
+  setClearance: (patientId, pillar, status) => {
     set((s) => ({
       dischargeQueue: s.dischargeQueue.map(p =>
         p.patientId === patientId ? { ...p, clearances: { ...p.clearances, [pillar]: status } } : p
       ),
-    })),
+    }))
+    useAuditStore.getState().log({
+      userId: 'DC-SYS', userName: 'Discharge',
+      action: 'discharge_clearance', resource: 'discharge', resourceId: patientId,
+      detail: `${pillar} → ${status}`,
+    })
+  },
 
   addBlocker: (patientId, blocker) =>
     set((s) => ({
@@ -185,12 +193,18 @@ export const useDischargeStore = create<DischargeState>((set) => ({
       ),
     })),
 
-  issueExitClearance: (patientId) =>
+  issueExitClearance: (patientId) => {
     set((s) => ({
       dischargeQueue: s.dischargeQueue.map(p =>
         p.patientId === patientId ? { ...p, exitClearanceIssued: true } : p
       ),
-    })),
+    }))
+    useAuditStore.getState().log({
+      userId: 'DC-SYS', userName: 'Discharge',
+      action: 'exit_clearance_issued', resource: 'discharge', resourceId: patientId,
+      detail: `Exit clearance issued for ${patientId}`,
+    })
+  },
 
   setFollowUp: (patientId, date) =>
     set((s) => ({
@@ -205,4 +219,10 @@ export const useDischargeStore = create<DischargeState>((set) => ({
         p.patientId === patientId ? { ...p, dischargeInstructions: instructions } : p
       ),
     })),
-}))
+}),
+  {
+    name: 'kailash-dischargestore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))
