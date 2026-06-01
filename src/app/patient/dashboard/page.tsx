@@ -1,0 +1,80 @@
+"use client"
+
+import { useEffect, useRef } from "react"
+import { toast } from "sonner"
+import { useAuthStore } from "@/store/useAuthStore"
+import { usePatientLiveStore, stagesFor } from "@/store/usePatientLiveStore"
+import { usePatientOrdersStore } from "@/store/usePatientOrdersStore"
+import { AiCompanionBar } from "@/components/patient/dashboard/AiCompanionBar"
+import { LiveJourneyCard } from "@/components/patient/dashboard/LiveJourneyCard"
+import { LiveFeed } from "@/components/patient/dashboard/LiveFeed"
+import { ForYouCard } from "@/components/patient/dashboard/ForYouCard"
+import { QuickActions } from "@/components/patient/dashboard/QuickActions"
+import { HealthTrendsCard } from "@/components/patient/dashboard/HealthTrendsCard"
+import { DoctorOrdersCard } from "@/components/patient/dashboard/DoctorOrdersCard"
+import { FamilyTrackingCard } from "@/components/patient/dashboard/FamilyTrackingCard"
+import { DemoControls } from "@/components/patient/dashboard/DemoControls"
+
+export default function PatientDashboard() {
+  const currentUser = useAuthStore(s => s.currentUser)
+  const stage = usePatientLiveStore(s => s.stage)
+  const mode = usePatientLiveStore(s => s.mode)
+  const prevStage = useRef(stage)
+
+  // Journey advancement is driven by the DemoControls presenter panel
+  // (auto-plays by default; pause to narrate and step through stages).
+
+  // Notify when called to a station — and when the doctor's orders arrive.
+  useEffect(() => {
+    if (stage !== prevStage.current) {
+      const meta = stagesFor(mode).find(s => s.key === stage)
+      if (meta?.isCall) toast.success(`It's your turn — ${meta.label}`, { description: meta.action })
+      else if (stage === 'done') toast.success(mode === 'video' ? 'Consultation complete' : 'Visit complete', { description: 'Your summary is ready.' })
+
+      // Doctor's orders land in real time the moment the prescription is issued.
+      if (stage === 'pharmacy' || stage === 'prescription') {
+        const orders = usePatientOrdersStore.getState()
+        if (!orders.received) {
+          orders.receiveOrders()
+          const tests = orders.items.filter(i => i.kind === 'test').length
+          const meds = orders.items.filter(i => i.kind === 'medicine').length
+          toast.message(`New orders from ${orders.doctor}`, {
+            description: `${tests} tests & ${meds} medicines to review and pay — tap Doctor's orders on your dashboard.`,
+          })
+        }
+      }
+      prevStage.current = stage
+    }
+  }, [stage, mode])
+
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const first = (currentUser?.name ?? 'there').split(' ')[0]
+
+  return (
+    <div className="max-w-6xl mx-auto pb-10">
+      <div className="mb-4">
+        <p className="text-[13px] font-semibold uppercase tracking-wider text-slate-400">{greeting}</p>
+        <h1 className="text-[26px] font-bold text-slate-900 tracking-tight">{first}, here&apos;s your health today</h1>
+      </div>
+
+      <div className="space-y-5">
+        <AiCompanionBar />
+        <div className="grid lg:grid-cols-3 gap-5 items-start">
+          <div className="lg:col-span-2 space-y-5">
+            <DoctorOrdersCard />
+            <LiveJourneyCard />
+            <HealthTrendsCard />
+            <ForYouCard />
+            <QuickActions />
+          </div>
+          <div className="lg:col-span-1 space-y-5">
+            <LiveFeed />
+            <FamilyTrackingCard />
+          </div>
+        </div>
+      </div>
+      <DemoControls />
+    </div>
+  )
+}

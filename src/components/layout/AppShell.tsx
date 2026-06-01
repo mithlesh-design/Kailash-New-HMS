@@ -1,0 +1,643 @@
+"use client"
+
+import { usePathname, useRouter } from "next/navigation"
+import Link from "next/link"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
+import {
+  Activity, BarChart3, Bell, Calendar, ClipboardList, ClipboardCheck,
+  FileText, Home, LogOut, Settings, Users, Stethoscope,
+  LayoutDashboard, Receipt, UserCog, Workflow, Bot,
+  FlaskConical, Pill, Search, PanelLeftClose, PanelLeft,
+  Package, CheckCircle, ShieldCheck, Microscope, ScanLine, Ambulance, X,
+  BedDouble, Scissors, CreditCard, Trash2, HeartPulse,
+  Droplets, Utensils, Truck, Heart, BookOpen, AlertTriangle, ShieldAlert,
+  Sparkles, ChevronRight, MessageSquare, Video, Siren, Menu, ShoppingCart,
+} from "lucide-react"
+import { useAuthStore, type Role } from "@/store/useAuthStore"
+import { usePatientStore } from "@/store/usePatientStore"
+import { useInpatientStore } from "@/store/useInpatientStore"
+import { useNotificationStore } from "@/store/useNotificationStore"
+import { Avatar } from "@/components/ui/avatar"
+import { LocaleToggle } from "@/components/ui/LocaleToggle"
+import { useState, useEffect } from "react"
+import { cn } from "@/lib/utils"
+
+type NavItem = { href: string; label: string; icon: React.ElementType }
+
+const PATIENT_SECTIONS: { header: string; items: NavItem[] }[] = [
+  { header: 'Care', items: [
+    { href: '/patient/dashboard',    label: 'Dashboard',       icon: Home },
+    { href: '/patient/ai-care',      label: 'AI Care',         icon: Sparkles },
+    { href: '/patient/health-story', label: 'My Health Story', icon: Activity },
+  ] },
+  { header: 'Consultations', items: [
+    { href: '/patient/consultations', label: 'My Consultations', icon: Calendar },
+    { href: '/patient/orders',        label: "Doctor's Orders",  icon: ClipboardList },
+  ] },
+  { header: 'Hospital Services', items: [
+    { href: '/patient/emergency',  label: 'Emergency Visits', icon: Siren },
+    { href: '/patient/ipd',        label: 'IPD / Admission', icon: BedDouble },
+    { href: '/patient/discharge',  label: 'My Discharge',    icon: CheckCircle },
+    { href: '/patient/pharmacy',   label: 'Pharmacy',        icon: Pill },
+    { href: '/patient/pathology',  label: 'Pathology',       icon: FlaskConical },
+    { href: '/patient/radiology',  label: 'Radiology',       icon: ScanLine },
+    { href: '/patient/blood-bank', label: 'Blood Bank',      icon: Droplets },
+    { href: '/patient/ambulance',  label: 'Ambulance',       icon: Truck },
+  ] },
+  { header: 'Records & Billing', items: [
+    { href: '/patient/downloads', label: 'Download Center', icon: FileText },
+    { href: '/patient/billing',   label: 'Billing',         icon: Receipt },
+    { href: '/patient/insurance', label: 'Insurance',       icon: ShieldCheck },
+  ] },
+  { header: 'Account', items: [
+    { href: '/patient/followup', label: 'Care & Follow-up',  icon: HeartPulse },
+    { href: '/patient/profile',  label: 'Profile & Privacy', icon: UserCog },
+    { href: '/patient/help',     label: 'Help & Emergency',  icon: AlertTriangle },
+  ] },
+]
+
+// Reception = front-desk command center. Owns the front-desk workflow;
+// surfaces read-only "visibility" windows into other modules; shared utilities.
+const RECEPTION_SECTIONS: { header: string; items: NavItem[] }[] = [
+  { header: 'Front Desk', items: [
+    { href: '/reception/dashboard',    label: 'Dashboard',     icon: Home },
+    { href: '/reception/opd',          label: 'OPD Queue',     icon: LayoutDashboard },
+    { href: '/reception/queue',        label: 'OPD Display',   icon: Activity },
+    { href: '/reception/appointments', label: 'Appointments',  icon: Calendar },
+    { href: '/reception/patients',     label: 'Patients',      icon: Users },
+  ] },
+  { header: 'Coordination', items: [
+    { href: '/reception/beds',        label: 'Bed Status',      icon: BedDouble },
+    { href: '/reception/billing',     label: 'Billing Status',  icon: CreditCard },
+    { href: '/reception/tpa',         label: 'TPA / Insurance', icon: ShieldCheck },
+    { href: '/reception/diagnostics', label: 'Diagnostics',     icon: FlaskConical },
+    { href: '/reception/ambulance',   label: 'Ambulance',       icon: Truck },
+  ] },
+  { header: 'Utilities', items: [
+    { href: '/reception/messages',  label: 'Messaging',       icon: MessageSquare },
+    { href: '/reception/downloads', label: 'Download Center', icon: FileText },
+    { href: '/reception/reports',   label: 'Reports',         icon: BarChart3 },
+    { href: '/checkin',             label: 'Kiosk Check-in',  icon: ScanLine },
+    { href: '/reception/setup',     label: 'Setup',           icon: Settings },
+  ] },
+]
+
+const DOCTOR_SECTIONS: { header: string; items: NavItem[] }[] = [
+  { header: 'Clinical', items: [
+    { href: '/doctor/dashboard',   label: 'OPD Consultations',  icon: Stethoscope },
+    { href: '/doctor/online',      label: 'Online Consultation', icon: Video },
+    { href: '/doctor/ipd',         label: 'IPD / Inpatients',   icon: HeartPulse },
+    { href: '/doctor/emergencies', label: 'Emergencies',        icon: Siren },
+  ] },
+  { header: 'Patients', items: [
+    { href: '/doctor/records',     label: 'Patient Records',    icon: ClipboardList },
+    { href: '/doctor/ai-assistant',label: 'AI Assistant',       icon: Sparkles },
+  ] },
+  { header: 'Workspace', items: [
+    { href: '/doctor/schedule',    label: 'My Schedule',        icon: Calendar },
+    { href: '/doctor/inbox',       label: 'Inbox',              icon: MessageSquare },
+  ] },
+  { header: 'Insights', items: [
+    { href: '/doctor/analytics',   label: 'My Activity',        icon: BarChart3 },
+    { href: '/doctor/beds',        label: 'Bed Availability',   icon: BedDouble },
+    { href: '/doctor/registries',  label: 'Disease Registries', icon: Users },
+  ] },
+]
+
+const PHARMACY_SECTIONS: { header: string; items: NavItem[] }[] = [
+  { header: 'Fulfilment', items: [
+    { href: '/pharmacy/dashboard', label: 'Overview',           icon: LayoutDashboard },
+    { href: '/pharmacy/queue',     label: 'Prescription Queue', icon: ClipboardList },
+  ] },
+  { header: 'Stock & Compliance', items: [
+    { href: '/pharmacy/inventory', label: 'Inventory',     icon: Package },
+    { href: '/pharmacy/master',    label: 'Drug Master',   icon: BookOpen },
+    { href: '/pharmacy/narcotics', label: 'Narcotics Log', icon: AlertTriangle },
+  ] },
+  { header: 'Utilities', items: [
+    { href: '/pharmacy/messages',  label: 'Messaging',     icon: MessageSquare },
+  ] },
+]
+
+const navByRole: Record<Role, NavItem[]> = {
+  patient: PATIENT_SECTIONS.flatMap(s => s.items),
+  doctor: DOCTOR_SECTIONS.flatMap(s => s.items),
+  reception: RECEPTION_SECTIONS.flatMap(s => s.items),
+  pharmacy: PHARMACY_SECTIONS.flatMap(s => s.items),
+  admin: [
+    { href: '/admin/dashboard',       label: 'COO Dashboard',    icon: LayoutDashboard },
+    { href: '/admin/users',           label: 'Staff Management', icon: UserCog },
+    { href: '/admin/credentials',     label: 'Credentials',      icon: ShieldCheck },
+    { href: '/admin/operations',      label: 'Operations',       icon: Workflow },
+    { href: '/admin/analytics',       label: 'Analytics',        icon: BarChart3 },
+    { href: '/admin/roster',          label: 'HR Roster',        icon: Calendar },
+    { href: '/admin/duty',            label: 'Duty Assignment',  icon: ClipboardList },
+    { href: '/admin/hours',           label: 'Hours & OT',       icon: Activity },
+    { href: '/admin/on-call',         label: 'On-Call Rotation', icon: Bell },
+    { href: '/admin/coverage',        label: 'Coverage Rules',   icon: ShieldCheck },
+    { href: '/admin/staffing',        label: 'Staffing Overview',icon: Users },
+    { href: '/admin/doctor-activity', label: 'Doctor Activity',  icon: Stethoscope },
+    { href: '/admin/finance',         label: 'Hospital P&L',     icon: CreditCard },
+    { href: '/admin/payroll',         label: 'Payroll',          icon: Receipt },
+    { href: '/admin/vendors',         label: 'Vendors',          icon: Truck },
+    { href: '/admin/disputes',        label: 'Disputes',         icon: ShieldAlert },
+    { href: '/admin/compliance',      label: 'Compliance',       icon: ShieldCheck },
+    { href: '/admin/statutory',       label: 'Statutory',        icon: Calendar },
+    { href: '/admin/disha',           label: 'DISHA / DPDP',     icon: ShieldCheck },
+    { href: '/quality/dashboard',     label: 'Quality',          icon: ShieldCheck },
+    { href: '/quality/nabh',          label: 'NABH Cockpit',     icon: ShieldCheck },
+    { href: '/admin/ai-performance',  label: 'AI Performance',   icon: Sparkles },
+  ],
+  nurse: [
+    { href: '/nurse/dashboard',       label: 'Ward Dashboard',  icon: LayoutDashboard },
+    { href: '/nurse/vitals-requests', label: 'Vitals Requests', icon: HeartPulse },
+    { href: '/nurse/orders',          label: 'Doctor Orders',   icon: ClipboardCheck },
+    { href: '/nurse/patients',        label: 'My Ward',         icon: Users },
+    { href: '/nurse/rounds',     label: 'Doctor Rounds',   icon: Stethoscope },
+    { href: '/nurse/tasks',      label: 'Daily Tasks',     icon: ClipboardList },
+    { href: '/nurse/medication', label: 'Medication (MAR)', icon: Pill },
+    { href: '/nurse/fluid-balance', label: 'Fluid Balance', icon: Droplets },
+    { href: '/nurse/handover',   label: 'Handover Brief',  icon: FileText },
+    { href: '/nurse/ai-assistant', label: 'AI Assistant',  icon: Sparkles },
+    { href: '/nurse/messages',   label: 'Messages',        icon: MessageSquare },
+  ],
+  emergency: [
+    { href: '/emergency/triage',    label: 'Triage',        icon: Ambulance },
+    { href: '/emergency/floor',     label: 'ER Floor',      icon: Activity },
+    { href: '/emergency/dashboard', label: 'ER Overview',   icon: LayoutDashboard },
+  ],
+  lab: [
+    { href: '/lab/inbox',         label: 'Inbox',           icon: ClipboardList },
+    { href: '/lab/benches',       label: 'Benches',         icon: Microscope },
+    { href: '/lab/microbiology',  label: 'Microbiology',    icon: Activity },
+    { href: '/lab/dashboard',     label: 'Lab Overview',    icon: FlaskConical },
+    { href: '/lab/qc',            label: 'Quality Control', icon: ShieldCheck },
+    { href: '/lab/reflex',        label: 'Reflex Tests',    icon: Activity },
+  ],
+  radiology: [
+    { href: '/radiology/inbox',         label: 'Inbox',            icon: ClipboardList },
+    { href: '/radiology/bench',         label: 'Modality Bench',   icon: ScanLine },
+    { href: '/radiology/reading',       label: 'Reading Room',     icon: FileText },
+    { href: '/radiology/verification',  label: 'Verification',     icon: ShieldCheck },
+    { href: '/radiology/dashboard',     label: 'RIS Overview',     icon: LayoutDashboard },
+    { href: '/radiology/viewer',        label: 'DICOM Viewer',     icon: FileText },
+    { href: '/radiology/templates',     label: 'Report Templates', icon: ClipboardList },
+  ],
+  insurance: [
+    { href: '/insurance/dashboard', label: 'TPA Overview',  icon: LayoutDashboard },
+    { href: '/insurance/claims',    label: 'Active Claims', icon: FileText },
+    { href: '/insurance/preauth',   label: 'Pre-Auth',      icon: ShieldCheck },
+    { href: '/insurance/documents', label: 'Documents',     icon: Package },
+  ],
+  inventory: [
+    { href: '/inventory/dashboard', label: 'Asset Overview',     icon: LayoutDashboard },
+    { href: '/inventory/stock',     label: 'Stock Levels',       icon: Package },
+    { href: '/inventory/requests',  label: 'Pharmacy Requests',  icon: ShoppingCart },
+  ],
+  bed_manager: [
+    { href: '/admission/dashboard', label: 'Admissions',   icon: BedDouble },
+    { href: '/admission/beds',      label: 'Bed Board',    icon: LayoutDashboard },
+    { href: '/admission/forecast',  label: 'Bed Forecast', icon: BarChart3 },
+  ],
+  discharge: [
+    { href: '/discharge/dashboard', label: 'Discharge Queue', icon: CheckCircle },
+  ],
+  billing: [
+    { href: '/billing/dashboard',   label: 'Billing Overview', icon: CreditCard },
+    { href: '/billing/packages',    label: 'Packages',         icon: Package },
+    { href: '/billing/refunds',     label: 'Refunds',          icon: Receipt },
+    { href: '/billing/discounts',   label: 'Discounts',        icon: Heart },
+  ],
+  ot: [
+    { href: '/ot/dashboard',    label: 'OT Live',          icon: Scissors },
+    { href: '/ot/schedule',     label: 'OT Schedule',      icon: Calendar },
+    { href: '/ot/checklist',    label: 'Pre-Op Checklist', icon: ClipboardList },
+  ],
+  housekeeping: [
+    { href: '/housekeeping/dashboard', label: 'Cleaning Queue', icon: Trash2 },
+  ],
+  quality: [
+    { href: '/quality/dashboard',  label: 'QI Dashboard', icon: ShieldCheck },
+    { href: '/quality/incidents',  label: 'Incidents',    icon: Activity },
+    { href: '/quality/nabh',       label: 'NABH Cockpit', icon: ShieldCheck },
+  ],
+  blood_bank: [
+    { href: '/bloodbank/dashboard',  label: 'BB Dashboard',         icon: Droplets },
+    { href: '/bloodbank/inventory',  label: 'Inventory',            icon: Package },
+    { href: '/bloodbank/requests',   label: 'Cross-Match Requests', icon: ClipboardList },
+    { href: '/bloodbank/donors',     label: 'Donor Registry',       icon: Heart },
+  ],
+  cssd: [
+    { href: '/cssd/dashboard',    label: 'CSSD Dashboard',       icon: LayoutDashboard },
+    { href: '/cssd/cycles',       label: 'Sterilization Cycles', icon: Activity },
+    { href: '/cssd/instruments',  label: 'Instruments',          icon: Package },
+  ],
+  dietary: [
+    { href: '/dietary/dashboard', label: 'Dietary Dashboard', icon: Utensils },
+    { href: '/dietary/plans',     label: 'Diet Plans',        icon: BookOpen },
+    { href: '/dietary/orders',    label: 'Meal Orders',       icon: ClipboardList },
+  ],
+  bmw: [
+    { href: '/bmw/dashboard', label: 'BMW Dashboard',      icon: AlertTriangle },
+    { href: '/bmw/log',       label: 'Waste Log',          icon: FileText },
+    { href: '/bmw/reports',   label: 'Compliance Reports', icon: BarChart3 },
+  ],
+  mortuary: [
+    { href: '/mortuary/dashboard',   label: 'Mortuary Dashboard', icon: LayoutDashboard },
+    { href: '/mortuary/records',     label: 'Deceased Records',   icon: FileText },
+    { href: '/mortuary/clearances',  label: 'Legal Clearances',   icon: CheckCircle },
+  ],
+  ambulance: [
+    { href: '/ambulance/dashboard', label: 'Fleet Dashboard', icon: Truck },
+    { href: '/ambulance/dispatch',  label: 'Dispatch',        icon: Activity },
+    { href: '/ambulance/log',       label: 'Trip Log',        icon: FileText },
+  ],
+  audit_officer: [
+    { href: '/audit/dashboard', label: 'Audit Dashboard',     icon: ShieldCheck },
+    { href: '/audit/log',       label: 'Audit Trail',         icon: FileText },
+    { href: '/audit/reports',   label: 'Compliance Reports',  icon: BarChart3 },
+  ],
+}
+
+const roleConfig: Record<Role, { label: string; color: string; bg: string; gradient: string }> = {
+  patient:       { label: 'Patient Portal',      color: '#2563EB', bg: 'rgba(37,99,235,0.08)',   gradient: 'linear-gradient(135deg,#2563EB,#0891B2)' },
+  doctor:        { label: 'Doctor Portal',       color: '#0EA5E9', bg: 'rgba(14,165,233,0.08)',  gradient: 'linear-gradient(135deg,#0EA5E9,#6366F1)' },
+  reception:     { label: 'Reception',           color: '#F59E0B', bg: 'rgba(245,158,11,0.08)', gradient: 'linear-gradient(135deg,#F59E0B,#EF4444)' },
+  admin:         { label: 'Admin Portal',        color: '#8B5CF6', bg: 'rgba(139,92,246,0.08)',  gradient: 'linear-gradient(135deg,#8B5CF6,#6366F1)' },
+  nurse:         { label: 'Nursing Station',     color: '#10B981', bg: 'rgba(16,185,129,0.08)', gradient: 'linear-gradient(135deg,#10B981,#06B6D4)' },
+  emergency:     { label: 'Emergency Room',      color: '#EF4444', bg: 'rgba(239,68,68,0.08)',  gradient: 'linear-gradient(135deg,#EF4444,#F97316)' },
+  lab:           { label: 'Laboratory',          color: '#8B5CF6', bg: 'rgba(139,92,246,0.08)', gradient: 'linear-gradient(135deg,#8B5CF6,#EC4899)' },
+  radiology:     { label: 'Radiology Dept',      color: '#6366F1', bg: 'rgba(99,102,241,0.08)', gradient: 'linear-gradient(135deg,#6366F1,#8B5CF6)' },
+  insurance:     { label: 'TPA & Insurance',     color: '#14B8A6', bg: 'rgba(20,184,166,0.08)', gradient: 'linear-gradient(135deg,#14B8A6,#0EA5E9)' },
+  inventory:     { label: 'Inventory Mgr',       color: '#D97706', bg: 'rgba(217,119,6,0.08)',  gradient: 'linear-gradient(135deg,#D97706,#EA580C)' },
+  pharmacy:      { label: 'Pharmacy',            color: '#EC4899', bg: 'rgba(236,72,153,0.08)', gradient: 'linear-gradient(135deg,#EC4899,#8B5CF6)' },
+  bed_manager:   { label: 'Admission Desk',      color: '#0891B2', bg: 'rgba(8,145,178,0.08)',  gradient: 'linear-gradient(135deg,#0891B2,#0EA5E9)' },
+  discharge:     { label: 'Discharge Desk',      color: '#059669', bg: 'rgba(5,150,105,0.08)',  gradient: 'linear-gradient(135deg,#059669,#10B981)' },
+  billing:       { label: 'Billing Dept',        color: '#B45309', bg: 'rgba(180,83,9,0.08)',   gradient: 'linear-gradient(135deg,#B45309,#D97706)' },
+  ot:            { label: 'Operation Theater',   color: '#DC2626', bg: 'rgba(220,38,38,0.08)',  gradient: 'linear-gradient(135deg,#DC2626,#9F1239)' },
+  housekeeping:  { label: 'Housekeeping',        color: '#7C3AED', bg: 'rgba(124,58,237,0.08)', gradient: 'linear-gradient(135deg,#7C3AED,#6366F1)' },
+  quality:       { label: 'Quality & Safety',    color: '#0D9488', bg: 'rgba(13,148,136,0.08)', gradient: 'linear-gradient(135deg,#0D9488,#0891B2)' },
+  blood_bank:    { label: 'Blood Bank',          color: '#DC2626', bg: 'rgba(220,38,38,0.08)',  gradient: 'linear-gradient(135deg,#DC2626,#B91C1C)' },
+  cssd:          { label: 'CSSD',               color: '#0D9488', bg: 'rgba(13,148,136,0.08)', gradient: 'linear-gradient(135deg,#0D9488,#0891B2)' },
+  dietary:       { label: 'Dietary Services',    color: '#16A34A', bg: 'rgba(22,163,74,0.08)',  gradient: 'linear-gradient(135deg,#16A34A,#0D9488)' },
+  bmw:           { label: 'Bio-Medical Waste',   color: '#D97706', bg: 'rgba(217,119,6,0.08)',  gradient: 'linear-gradient(135deg,#D97706,#B45309)' },
+  mortuary:      { label: 'Mortuary',            color: '#475569', bg: 'rgba(71,85,105,0.08)',  gradient: 'linear-gradient(135deg,#475569,#334155)' },
+  ambulance:     { label: 'Ambulance Svc.',      color: '#EA580C', bg: 'rgba(234,88,12,0.08)',  gradient: 'linear-gradient(135deg,#EA580C,#DC2626)' },
+  audit_officer: { label: 'Audit & Compliance',  color: '#4F46E5', bg: 'rgba(79,70,229,0.08)',  gradient: 'linear-gradient(135deg,#4F46E5,#7C3AED)' },
+}
+
+// Roles whose sidebar is rendered as grouped sections (with headers) instead of a flat list.
+const sectionsByRole: Partial<Record<Role, { header: string; items: NavItem[] }[]>> = {
+  patient: PATIENT_SECTIONS,
+  reception: RECEPTION_SECTIONS,
+  doctor: DOCTOR_SECTIONS,
+  pharmacy: PHARMACY_SECTIONS,
+}
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const { currentUser, activeRole, logout } = useAuthStore()
+  const pathname = usePathname()
+  const router = useRouter()
+  const nav = navByRole[activeRole] ?? []
+  const config = roleConfig[activeRole]
+  const [collapsed, setCollapsed] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [query, setQuery] = useState('')
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const shouldReduceMotion = useReducedMotion()
+
+  // Close the mobile sidebar drawer on navigation.
+  useEffect(() => { setMobileOpen(false) }, [pathname])
+
+  // Wired header search + bell (M16).
+  const allPatients = usePatientStore(s => s.patients)
+  const allInpatients = useInpatientStore(s => s.inpatients)
+  const notifications = useNotificationStore(s => s.notifications)
+  const markNotifRead = useNotificationStore(s => s.markRead)
+
+  const roleNotifs = notifications.filter(n => activeRole === 'admin' || !n.targetRole || n.targetRole === activeRole)
+  const unreadCount = roleNotifs.filter(n => !n.read).length
+
+  const q = query.trim().toLowerCase()
+  const searchResults = q.length >= 1 ? (() => {
+    const ipIds = new Set(allInpatients.map(i => i.patientId))
+    const out: { id: string; name: string; sub: string; admitted: boolean }[] = []
+    allInpatients.forEach(i => { if (i.name.toLowerCase().includes(q) || i.patientId.toLowerCase().includes(q)) out.push({ id: i.patientId, name: i.name, sub: `Admitted · ${i.ward} ${i.bed}`, admitted: true }) })
+    allPatients.forEach(p => { if (!out.some(m => m.id === p.id) && (p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q))) out.push({ id: p.id, name: p.name, sub: `${p.id} · ${p.department}`, admitted: ipIds.has(p.id) }) })
+    return out.slice(0, 6)
+  })() : []
+
+  const PATIENTS_ROUTE: Partial<Record<Role, string>> = { reception: '/reception/patients', nurse: '/nurse/patients', admin: '/admin/users' }
+  const gotoPatient = (m: { id: string; admitted: boolean }) => {
+    setQuery('')
+    if (activeRole === 'doctor') { router.push(m.admitted ? `/doctor/ipd/${m.id}` : '/doctor/records'); return }
+    const dest = PATIENTS_ROUTE[activeRole]; if (dest) router.push(dest)
+  }
+
+  // Page-enter animation is attached only after mount so the server render and
+  // the first client render emit identical (un-transformed) markup — avoids the
+  // framer-motion `initial` transform causing a hydration attribute mismatch.
+  useEffect(() => { setMounted(true) }, [])
+
+  const handleLogout = () => {
+    logout()
+    router.push('/')
+  }
+
+  const transition = shouldReduceMotion
+    ? { duration: 0 }
+    : { duration: 0.28, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }
+
+  const renderItem = (item: NavItem) => {
+    const isActive = pathname.startsWith(item.href)
+    const Icon = item.icon
+    return (
+      <Link key={item.href} href={item.href}>
+        <div
+          title={collapsed ? item.label : undefined}
+          aria-current={isActive ? 'page' : undefined}
+          className={cn(
+            "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 cursor-pointer relative group",
+            isActive ? "font-semibold" : "font-medium text-[#64748B] hover:text-[#0F172A]"
+          )}
+          style={isActive ? { background: `linear-gradient(135deg, ${config.bg}, rgba(15,23,42,0.02))`, color: config.color } : {}}
+        >
+          {isActive && <motion.div layoutId="active-nav-pill" className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full" style={{ background: config.gradient }} />}
+          {!isActive && <div className="absolute inset-0 rounded-xl bg-slate-50 opacity-0 group-hover:opacity-100 transition-opacity duration-150" />}
+          <Icon className="h-[18px] w-[18px] flex-shrink-0 relative z-10 transition-colors" style={{ color: isActive ? config.color : undefined }} aria-hidden="true" />
+          {!collapsed && <span className="flex-1 truncate relative z-10">{item.label}</span>}
+          {isActive && !collapsed && <ChevronRight className="h-3.5 w-3.5 relative z-10 opacity-50" style={{ color: config.color }} />}
+        </div>
+      </Link>
+    )
+  }
+
+  return (
+    <div className="flex h-screen overflow-hidden" style={{ background: '#F0F4F8' }}>
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+
+      {/* Mobile drawer backdrop */}
+      {mobileOpen && <div className="lg:hidden fixed inset-0 bg-black/40 z-40" onClick={() => setMobileOpen(false)} aria-hidden="true" />}
+
+      {/* ── Sidebar ──────────────────────────────────────── */}
+      <motion.aside
+        animate={{ width: collapsed ? 72 : 264 }}
+        transition={transition}
+        className={cn(
+          "flex-shrink-0 flex flex-col bg-white z-20 relative overflow-hidden",
+          "max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-64 max-lg:shadow-2xl transition-transform",
+          mobileOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full",
+        )}
+        style={{ boxShadow: '4px 0 24px rgba(15,23,42,0.07)' }}
+        aria-label="Main sidebar"
+      >
+        {/* Brand Header */}
+        <div className="h-[68px] flex items-center px-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(15,23,42,0.05)' }}>
+          <div className="flex items-center gap-3 overflow-hidden whitespace-nowrap w-full">
+            <div
+              className="flex items-center justify-center flex-shrink-0 h-10 w-10 rounded-xl bg-white"
+              style={{ boxShadow: '0 2px 8px rgba(15,23,42,0.12)' }}
+            >
+              <img src="/kailash-Logo.png" alt="Kailash" className="h-8 w-8 object-contain" />
+            </div>
+            {!collapsed && (
+              <motion.div
+                initial={false}
+                animate={{ opacity: 1 }}
+                className="min-w-0"
+              >
+                <p
+                  className="font-bold text-sm leading-tight tracking-tight"
+                  style={{
+                    background: 'linear-gradient(135deg, #0F172A, #334155)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  Kailash HMS
+                </p>
+                <p className="text-[11px] font-semibold truncate max-w-[160px]" style={{ color: config.color }}>{config.label}</p>
+              </motion.div>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav aria-label="Main navigation" className="flex-1 px-2.5 py-4 overflow-y-auto">
+          {sectionsByRole[activeRole] ? (
+            sectionsByRole[activeRole]!.map(section => (
+              <div key={section.header} className="mb-1">
+                {!collapsed && <p className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">{section.header}</p>}
+                <div className="space-y-0.5">{section.items.map(renderItem)}</div>
+              </div>
+            ))
+          ) : (
+            <div className="space-y-0.5">{nav.map(renderItem)}</div>
+          )}
+        </nav>
+
+        {/* Bottom: Role Switcher + User */}
+        <div className="px-2.5 pb-4 flex flex-col gap-2 pt-3" style={{ borderTop: '1px solid rgba(15,23,42,0.05)' }}>
+          {/* AI Status Chip */}
+          {!collapsed && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'linear-gradient(135deg, #FAF5FF, #F5F3FF)', border: '1px solid rgba(139,92,246,0.10)' }}>
+              <Sparkles className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#7C3AED' }} />
+              <span className="text-[11px] font-semibold" style={{ color: '#7C3AED' }}>AI Active</span>
+              <div className="ml-auto h-1.5 w-1.5 rounded-full bg-green-500" style={{ boxShadow: '0 0 6px #22c55e' }} />
+            </div>
+          )}
+
+          {/* User Row */}
+          <div className={cn("flex items-center", collapsed ? "justify-center flex-col gap-2" : "gap-3 px-1")}>
+            <Avatar name={currentUser?.name ?? 'User'} size="sm" />
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-[#0F172A] truncate">{currentUser?.name}</p>
+                <p className="text-[11px] font-medium text-[#94A3B8] truncate">{currentUser?.id}</p>
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              aria-label="Log out"
+              title="Log out"
+              className="p-1.5 rounded-lg transition-all flex-shrink-0 cursor-pointer"
+              style={{ color: '#94A3B8' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#EF4444'; (e.currentTarget as HTMLButtonElement).style.background = '#FEF2F2' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#94A3B8'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+            >
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </motion.aside>
+
+      {/* ── Main Area ────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        {/* Top Header */}
+        <header
+          className="h-[68px] flex-shrink-0 flex items-center justify-between px-6 bg-white relative z-10"
+          style={{ boxShadow: '0 1px 12px rgba(15,23,42,0.06)' }}
+        >
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              className="lg:hidden p-2 -ml-2 rounded-xl transition-all cursor-pointer"
+              style={{ color: '#64748B' }}
+            >
+              <Menu className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="hidden lg:block p-2 -ml-2 rounded-xl transition-all cursor-pointer"
+              style={{ color: '#94A3B8' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#0F172A'; (e.currentTarget as HTMLButtonElement).style.background = '#F8FAFC' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#94A3B8'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+            >
+              {collapsed
+                ? <PanelLeft className="h-5 w-5" aria-hidden="true" />
+                : <PanelLeftClose className="h-5 w-5" aria-hidden="true" />
+              }
+            </button>
+            <div>
+              <h1 className="text-lg font-bold tracking-tight text-[#0F172A]">
+                {pathname.startsWith('/doctor/settings') ? 'Profile & Settings' : nav.find(n => pathname.startsWith(n.href))?.label ?? 'Dashboard'}
+              </h1>
+              <nav aria-label="breadcrumb">
+                <ol className="flex items-center gap-1 text-xs font-medium text-[#94A3B8]">
+                  <li>{config.label}</li>
+                  {nav.find(n => pathname.startsWith(n.href)) && (
+                    <>
+                      <li aria-hidden="true">/</li>
+                      <li aria-current="page" className="font-semibold" style={{ color: config.color }}>
+                        {nav.find(n => pathname.startsWith(n.href))?.label}
+                      </li>
+                    </>
+                  )}
+                </ol>
+              </nav>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            {/* Global Search */}
+            <div className="relative hidden md:block w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8] z-10" aria-hidden="true" />
+              <input
+                type="search"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && searchResults[0]) gotoPatient(searchResults[0]); if (e.key === 'Escape') setQuery('') }}
+                placeholder={activeRole === 'patient' ? "Search your records, doctors…" : "Search patients..."}
+                aria-label="Search"
+                className="w-full h-9 pl-9 pr-4 rounded-xl text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:outline-none transition-all"
+                style={{
+                  background: '#F8FAFC',
+                  border: '1px solid rgba(15,23,42,0.06)',
+                  boxShadow: 'inset 0 1px 3px rgba(15,23,42,0.04)',
+                }}
+                onFocus={e => { e.currentTarget.style.boxShadow = `0 0 0 2px ${config.color}30`; e.currentTarget.style.borderColor = config.color }}
+                onBlur={e => { setTimeout(() => setQuery(''), 150); e.currentTarget.style.boxShadow = 'inset 0 1px 3px rgba(15,23,42,0.04)'; e.currentTarget.style.borderColor = 'rgba(15,23,42,0.06)' }}
+              />
+              {searchResults.length > 0 && (
+                <div className="absolute left-0 right-0 top-11 w-72 bg-white rounded-2xl z-50 overflow-hidden py-1.5" style={{ boxShadow: '0 8px 32px rgba(15,23,42,0.14), 0 2px 8px rgba(15,23,42,0.08)' }}>
+                  {searchResults.map(m => (
+                    <button key={m.id} onMouseDown={e => e.preventDefault()} onClick={() => gotoPatient(m)}
+                      className="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center justify-between gap-2">
+                      <span className="min-w-0"><span className="block text-[13px] font-semibold text-slate-800 truncate">{m.name}</span><span className="block text-[11px] text-slate-400 truncate">{m.sub}</span></span>
+                      {m.admitted && <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 flex-shrink-0">IPD</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Notifications */}
+            <div className="relative">
+              <button
+                onClick={() => setNotifOpen(!notifOpen)}
+                aria-label="Notifications"
+                aria-expanded={notifOpen}
+                className="relative p-2 rounded-xl transition-all cursor-pointer"
+                style={{ background: '#F8FAFC', border: '1px solid rgba(15,23,42,0.06)', boxShadow: '0 1px 4px rgba(15,23,42,0.06)', color: '#64748B' }}
+              >
+                <Bell className="h-4 w-4" aria-hidden="true" />
+                {unreadCount > 0 && <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-[#EF4444] text-white text-[9px] font-bold flex items-center justify-center" style={{ boxShadow: '0 0 0 1.5px white' }} aria-label={`${unreadCount} new notifications`}>{unreadCount}</span>}
+              </button>
+              <AnimatePresence>
+                {notifOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-12 w-72 bg-white rounded-2xl z-50 overflow-hidden"
+                    style={{ boxShadow: '0 8px 32px rgba(15,23,42,0.14), 0 2px 8px rgba(15,23,42,0.08)' }}
+                  >
+                    <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid rgba(15,23,42,0.05)' }}>
+                      <p className="text-sm font-bold text-[#0F172A]">Notifications{unreadCount > 0 ? ` · ${unreadCount}` : ''}</p>
+                      <button onClick={() => setNotifOpen(false)} aria-label="Close" className="p-1 rounded-lg hover:bg-slate-100 cursor-pointer">
+                        <X className="h-4 w-4 text-slate-400" />
+                      </button>
+                    </div>
+                    {roleNotifs.length === 0 ? (
+                      <div className="p-6 text-center text-sm text-[#94A3B8]">All caught up — no new notifications</div>
+                    ) : (
+                      <div className="max-h-80 overflow-y-auto">
+                        {roleNotifs.slice(0, 8).map(n => (
+                          <button key={n.id} onClick={() => markNotifRead(n.id)}
+                            className={cn("w-full text-left px-4 py-2.5 border-b border-slate-50 last:border-0 hover:bg-slate-50 flex items-start gap-2.5", !n.read && "bg-blue-50/40")}>
+                            {!n.read ? <span className={cn("h-2 w-2 rounded-full mt-1.5 flex-shrink-0", n.priority === 'critical' ? "bg-red-500" : n.priority === 'high' ? "bg-orange-500" : "bg-blue-500")} /> : <span className="w-2 flex-shrink-0" />}
+                            <span className="min-w-0">
+                              <span className="block text-[12.5px] font-semibold text-slate-800 truncate">{n.title}</span>
+                              <span className="block text-[11.5px] text-slate-500 truncate">{n.body}</span>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <LocaleToggle />
+
+            <Link href={activeRole === 'patient' ? '/patient/profile' : activeRole === 'reception' ? '/reception/setup' : activeRole === 'doctor' ? '/doctor/settings' : '/admin/analytics'}>
+              <button
+                aria-label="Settings"
+                className="p-2 rounded-xl transition-all cursor-pointer"
+                style={{ background: '#F8FAFC', border: '1px solid rgba(15,23,42,0.06)', boxShadow: '0 1px 4px rgba(15,23,42,0.06)', color: '#64748B' }}
+              >
+                <Settings className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </Link>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main id="main-content" className="flex-1 overflow-y-auto px-6 pb-8 pt-6 relative z-10">
+          {mounted ? (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pathname}
+                initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
+                transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.18, ease: 'easeOut' as const }}
+                className="h-full max-w-7xl mx-auto"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          ) : (
+            <div className="h-full max-w-7xl mx-auto">{children}</div>
+          )}
+        </main>
+      </div>
+    </div>
+  )
+}

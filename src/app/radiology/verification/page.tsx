@@ -1,0 +1,138 @@
+"use client"
+
+import { useMemo, useState } from "react"
+import {
+  ShieldCheck, ChevronDown, ChevronRight, CheckCircle, Stethoscope, Clock, ShieldAlert,
+} from "lucide-react"
+import {
+  useRadiologyStudiesStore,
+  type RadiologyStudy, type RadTech,
+} from "@/store/useRadiologyStudiesStore"
+import { RADIOLOGY_CATALOG, TEMPLATE_SECTIONS, type Priority } from "@/lib/radiologyCatalog"
+import { useAuthStore } from "@/store/useAuthStore"
+import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+
+const PRIORITY_STYLE: Record<Priority, string> = {
+  STAT: "bg-red-100 text-red-700", Urgent: "bg-amber-100 text-amber-700", Routine: "bg-slate-100 text-slate-600",
+}
+const timeAgo = (iso?: string) => {
+  if (!iso) return ""
+  const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m ago`
+  return `${Math.round(mins / 60)}h ago`
+}
+const CRITICAL_RE = /\b(haemorrhage|hemorrhage|bleed|pneumothorax|tamponade|stroke|infarct|free air|pe\b|pulmonary embolism|bi-?rads (4|5|6)|lung-?rads (4|4a|4b|4x)|pi-?rads (4|5))\b/i
+
+export default function Verification() {
+  const studies = useRadiologyStudiesStore(s => s.studies)
+  const verifyAndRelease = useRadiologyStudiesStore(s => s.verifyAndRelease)
+  const currentUser = useAuthStore(s => s.currentUser)
+  const me: RadTech = { id: currentUser?.id ?? "RD-202", name: currentUser?.name ?? "Verifier" }
+
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  const pending = useMemo(
+    () => studies.filter(s => s.status === "reported")
+      .sort((a, b) => {
+        const pri = { STAT: 0, Urgent: 1, Routine: 2 } as const
+        return pri[a.priority] - pri[b.priority]
+      }),
+    [studies]
+  )
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
+          <ShieldCheck className="h-6 w-6 text-violet-600" /> Verification
+        </h1>
+        <p className="text-sm text-[#64748B] mt-1">Second-read sign-off · releases the report to the ordering doctor and the patient</p>
+      </div>
+
+      <div className="space-y-2">
+        {pending.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+            <ShieldCheck className="h-9 w-9 mb-2 opacity-40" />
+            <p className="text-sm font-semibold">No reports pending verification</p>
+          </div>
+        )}
+        {pending.map(s => (
+          <VerificationRow key={s.id} s={s}
+            expanded={expandedId === s.id}
+            onToggle={() => setExpandedId(id => id === s.id ? null : s.id)}
+            onVerify={() => {
+              verifyAndRelease(s.id, me)
+              toast.success(`${s.name} verified & released · ${s.doctorName} notified`)
+            }} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function VerificationRow(props: {
+  s: RadiologyStudy
+  expanded: boolean
+  onToggle: () => void
+  onVerify: () => void
+}) {
+  const { s, expanded } = props
+  const cat = RADIOLOGY_CATALOG[s.code]
+  const tmpl = cat ? TEMPLATE_SECTIONS[cat.template] : []
+  const minsElapsed = Math.round((Date.now() - new Date(s.orderedAt).getTime()) / 60000)
+  const isCritical = CRITICAL_RE.test(s.reportSections.impression ?? "") ||
+                     CRITICAL_RE.test(s.reportSections.findings ?? "")
+
+  return (
+    <div className={cn("rounded-xl bg-white ring-1 overflow-hidden", isCritical ? "ring-red-200" : "ring-slate-200/70")}>
+      <div className="flex items-center gap-3 p-3 sm:p-4">
+        <span className={cn("flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-lg", PRIORITY_STYLE[s.priority])}>{s.priority}</span>
+
+        <button onClick={props.onToggle} className="flex-1 min-w-0 text-left cursor-pointer">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-bold text-slate-900 truncate">{s.patientName}</span>
+            <span className="text-[11px] font-bold text-slate-400">{s.patientId}</span>
+            <span className="text-[12px] font-bold text-violet-700">{s.name}</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700">{s.modality}</span>
+            {isCritical && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700 flex items-center gap-0.5">
+                <ShieldAlert className="h-3 w-3" />CRITICAL
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5 truncate flex items-center gap-1">
+            <Stethoscope className="h-3 w-3" />read by {s.readingBy?.name ?? "—"}
+            <span className="text-slate-400 mx-1">·</span>
+            <Clock className="h-3 w-3" />{minsElapsed}m elapsed · reported {timeAgo(s.reportedAt)}
+          </p>
+        </button>
+
+        <button onClick={props.onVerify}
+          className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap"
+          style={{ background: "linear-gradient(135deg,#16A34A,#0D9488)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
+          <CheckCircle className="h-3.5 w-3.5" />Verify &amp; release
+        </button>
+        <button onClick={props.onToggle} className="p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer text-slate-400">
+          {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </button>
+      </div>
+
+      {expanded && (
+        <div className="border-t border-slate-100 bg-slate-50/60 p-4 space-y-2">
+          {tmpl.map(sec => {
+            const value = s.reportSections[sec.key] ?? ""
+            if (!value) return null
+            return (
+              <div key={sec.key} className="bg-white rounded-lg ring-1 ring-slate-200/70 p-2.5">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1">{sec.label}</p>
+                <p className="text-[12px] text-slate-700 whitespace-pre-wrap">{value}</p>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
