@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from './useAuditStore'
 
 export type VehicleStatus = 'available' | 'on_trip' | 'maintenance' | 'out_of_service'
@@ -59,7 +60,7 @@ const TRIPS: AmbulanceTrip[] = [
   { id: 'TRIP-002', vehicleId: 'AMB-01', vehicleNumber: 'MH-01-AA-1234', tripType: 'transfer', patientName: 'Kiran Patil', patientId: 'PT-20394', pickupLocation: 'Kailash Hospital', destination: 'AIIMS Delhi', dispatchedAt: new Date(Date.now() - 86400000).toISOString(), completedAt: new Date(Date.now() - 75600000).toISOString(), status: 'completed', responseTimeMinutes: 5 },
 ]
 
-export const useAmbulanceStore = create<AmbulanceState>((set, get) => ({
+export const useAmbulanceStore = create<AmbulanceState>()(persist((set, get) => ({
   vehicles: VEHICLES,
   trips: TRIPS,
   dispatch: (vehicleId, trip) => {
@@ -102,4 +103,10 @@ export const useAmbulanceStore = create<AmbulanceState>((set, get) => ({
   updateVehicle: (id, update) =>
     set((state) => ({ vehicles: state.vehicles.map((v) => v.id === id ? { ...v, ...update } : v) })),
   availableVehicles: () => get().vehicles.filter((v) => v.status === 'available'),
-}))
+}),
+  {
+    name: 'kailash-ambulancestore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

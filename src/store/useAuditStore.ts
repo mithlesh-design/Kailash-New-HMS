@@ -328,9 +328,44 @@ const SEED_ENTRIES: AuditEntry[] = [
     timestamp: hoursAgo(24) }),
 ]
 
+// ─── API-backed persistence ────────────────────────────────────────────
+// The mock API layer (src/lib/api) is the source of truth for audit. This
+// store keeps an in-memory mirror for fast renders. On bootstrap we hydrate
+// from the API; every `log()` writes through to the API; the API in turn
+// re-broadcasts via onAudit() so any other tab / surface stays in sync.
+//
+// The seed entries below are used only if the API has nothing yet (first
+// load, fresh DB). The demo seed in src/lib/api/_seed.ts will normally
+// populate the API table before this store mounts.
+
+interface AuditState {
+  entries: AuditEntry[]
+  log: (entry: Omit<AuditEntry, 'id' | 'timestamp' | 'ipStub'>) => void
+  clear: () => void
+  hydrate: (rows: AuditEntry[]) => void
+  push: (entry: AuditEntry) => void
+}
+
 export const useAuditStore = create<AuditState>((set) => ({
   entries: SEED_ENTRIES,
-  log: (entry) =>
+  log: (entry) => {
+    // The api/audit bridge (when installed) will create the persisted entry
+    // and `push` it back here. If no bridge yet (SSR / very early), keep the
+    // legacy in-memory fallback so callers still get a snapshot row.
+    if (typeof window !== 'undefined') {
+      void import('@/lib/api').then(({ Audit, installAuditBridge }) => {
+        installAuditBridge()
+        const persisted: AuditEntry = {
+          ...entry,
+          id: `AUD-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          timestamp: new Date().toISOString(),
+          ipStub: '192.168.1.x',
+        }
+        void Audit.put(persisted)
+        set((state) => ({ entries: [persisted, ...state.entries] }))
+      })
+      return
+    }
     set((state) => ({
       entries: [
         {
@@ -341,6 +376,18 @@ export const useAuditStore = create<AuditState>((set) => ({
         },
         ...state.entries,
       ],
-    })),
+    }))
+  },
   clear: () => set({ entries: [] }),
+  hydrate: (rows) =>
+    set(() => ({
+      // De-dup by id; rows arrive sorted newest-first from the API.
+      entries: rows.length ? rows : SEED_ENTRIES,
+    })),
+  push: (entry) =>
+    set((state) => ({
+      entries: state.entries.some((e) => e.id === entry.id)
+        ? state.entries
+        : [entry, ...state.entries],
+    })),
 }))

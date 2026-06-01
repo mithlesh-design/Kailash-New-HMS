@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type TriagePatient = {
   id: string
@@ -17,7 +18,7 @@ interface EmergencyState {
   addToTriage: (patient: Omit<TriagePatient, 'id'>) => void
 }
 
-export const useEmergencyStore = create<EmergencyState>((set) => ({
+export const useEmergencyStore = create<EmergencyState>()(persist((set) => ({
   activeTraumas: 2,
   codeBlueCount: 0,
   triageQueue: [
@@ -40,4 +41,10 @@ export const useEmergencyStore = create<EmergencyState>((set) => ({
       ],
       activeTraumas: state.activeTraumas + (patient.severity === 'Red' ? 1 : 0),
     })),
-}))
+}),
+  {
+    name: 'kailash-emergencystore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

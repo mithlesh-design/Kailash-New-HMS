@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type Vitals = { hr: number; bp: string; temp: number; spo2: number }
 
@@ -52,7 +53,7 @@ interface WardState {
   addIVDrip: (patientId: string, drip: IVDrip) => void
 }
 
-export const useWardStore = create<WardState>((set) => ({
+export const useWardStore = create<WardState>()(persist((set) => ({
   activeNurses: 12,
   availableBeds: 5,
   patients: [
@@ -135,4 +136,10 @@ export const useWardStore = create<WardState>((set) => ({
           : p
       ),
     })),
-}))
+}),
+  {
+    name: 'kailash-wardstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 // Doctor's orders for the logged-in patient — the tests and medicines a
 // doctor prescribes during/after the consultation. Front-end simulation
@@ -71,7 +72,7 @@ interface OrdersState {
   reset: () => void
 }
 
-export const usePatientOrdersStore = create<OrdersState>((set, get) => ({
+export const usePatientOrdersStore = create<OrdersState>()(persist((set, get) => ({
   received: false,
   receivedAt: null,
   doctor: 'Dr. Priya Nair',
@@ -102,4 +103,10 @@ export const usePatientOrdersStore = create<OrdersState>((set, get) => ({
   payNow: () => set({ paid: true, paidAt: Date.now() }),
 
   reset: () => set({ received: false, receivedAt: null, paid: false, paidAt: null, items: seed() }),
-}))
+}),
+  {
+    name: 'kailash-patientordersstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

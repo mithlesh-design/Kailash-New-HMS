@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Patient } from './usePatientStore'
 import type { NoteContext, NoteType } from '@/ai-services/documentation-engine'
 
@@ -112,7 +113,7 @@ const RESET_BLOCK = {
   labOrders: [] as LabOrder[], radiologyOrders: [] as RadiologyOrder[], referrals: [] as Referral[], admissionOrder: null,
 }
 
-export const useConsultationStore = create<ConsultationState>((set) => ({
+export const useConsultationStore = create<ConsultationState>()(persist((set) => ({
   currentPatient: null,
   isOnlineConsult: false,
   notes: '',
@@ -211,4 +212,10 @@ export const useConsultationStore = create<ConsultationState>((set) => ({
       isDictating: false,
       aiSuggestions: [...DEFAULT_AI_SUGGESTIONS],
     }),
-}))
+}),
+  {
+    name: 'kailash-consultationstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

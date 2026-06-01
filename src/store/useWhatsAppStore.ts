@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type IntentType =
   | 'APPOINTMENT_BOOK'
@@ -137,7 +138,7 @@ const DEMO_THREADS: WhatsAppThread[] = [
   },
 ]
 
-export const useWhatsAppStore = create<WhatsAppStore>((set) => ({
+export const useWhatsAppStore = create<WhatsAppStore>()(persist((set) => ({
   threads: DEMO_THREADS,
 
   addThread: (thread) =>
@@ -176,4 +177,10 @@ export const useWhatsAppStore = create<WhatsAppStore>((set) => ({
         t.id === threadId ? { ...t, status: 'resolved' } : t
       ),
     })),
-}))
+}),
+  {
+    name: 'kailash-whatsappstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from '@/store/useAuditStore'
 
 export type JourneyState =
@@ -136,7 +137,7 @@ const DEMO_ENTRIES: JourneyEntry[] = [
   },
 ]
 
-export const useJourneyStore = create<JourneyStore>((set, get) => ({
+export const useJourneyStore = create<JourneyStore>()(persist((set, get) => ({
   entries: DEMO_ENTRIES,
 
   addPatient: (patientId, patientName, assignedDoctor) => {
@@ -199,4 +200,10 @@ export const useJourneyStore = create<JourneyStore>((set, get) => ({
   removePatient: (patientId) => {
     set((state) => ({ entries: state.entries.filter((e) => e.patientId !== patientId) }))
   },
-}))
+}),
+  {
+    name: 'kailash-journeystore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

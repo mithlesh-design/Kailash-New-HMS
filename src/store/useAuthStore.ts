@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Role } from '@/types/roles'
 
 export type { Role }
@@ -56,10 +57,16 @@ const DEMO_USERS: Record<Role, User> = {
 
 export const DEMO_USERS_MAP = DEMO_USERS
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>()(persist((set) => ({
   currentUser: DEMO_USERS.doctor,
   activeRole: 'doctor',
   setUser: (user) => set({ currentUser: user }),
   setRole: (role) => set({ activeRole: role, currentUser: DEMO_USERS[role] }),
   logout: () => set({ currentUser: null }),
-}))
+}),
+  {
+    name: 'kailash-authstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

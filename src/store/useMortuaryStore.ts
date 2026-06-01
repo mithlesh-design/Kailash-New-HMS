@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from './useAuditStore'
 
 export type LegalClearanceStatus = 'pending' | 'mlc' | 'cleared' | 'released'
@@ -44,7 +45,7 @@ const RECORDS: DeceasedRecord[] = [
   { id: 'MRT-002', patientId: 'PT-19045', patientName: 'Unknown Male', age: 35, gender: 'M', ward: 'Emergency', bedNumber: 'ER-2', timeOfDeath: '2026-05-09T06:10:00Z', certifiedBy: 'Dr. Vikram Rathore', causeOfDeath: 'Accidental', isMLC: true, mlcNumber: 'MLC-2026-0234', policeStation: 'Andheri PS', bodySlot: 2, legalClearance: 'mlc', autopsyRequired: true },
 ]
 
-export const useMortuaryStore = create<MortuaryState>((set, get) => ({
+export const useMortuaryStore = create<MortuaryState>()(persist((set, get) => ({
   records: RECORDS,
   totalSlots: 10,
   addRecord: (r) =>
@@ -120,4 +121,10 @@ export const useMortuaryStore = create<MortuaryState>((set, get) => ({
       detail: `Body of ${rec.patientName} released to ${releasedTo}${rec.deathCertificateNumber ? ` · cert ${rec.deathCertificateNumber}` : ''}`,
     })
   },
-}))
+}),
+  {
+    name: 'kailash-mortuarystore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

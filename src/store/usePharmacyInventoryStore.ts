@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 // Live pharmacy stock. Dispensing decrements quantities (by drug name); the page
 // surfaces reorder alerts. Stock is owned by the Inventory Manager — the
@@ -88,7 +89,7 @@ interface InventoryState {
 }
 
 let _po = 0
-export const usePharmacyInventoryStore = create<InventoryState>((set, get) => ({
+export const usePharmacyInventoryStore = create<InventoryState>()(persist((set, get) => ({
   items: SEED,
   purchaseOrders: PO_SEED,
   decrementByName: (name, qty) => {
@@ -126,4 +127,10 @@ export const usePharmacyInventoryStore = create<InventoryState>((set, get) => ({
       }
       return { purchaseOrders }
     }),
-}))
+}),
+  {
+    name: 'kailash-pharmacyinventorystore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from './useAuditStore'
 
 export type DietType = 'Regular' | 'Diabetic' | 'Low Salt' | 'Low Fat' | 'High Protein' | 'Liquid' | 'Soft' | 'NPO' | 'Custom'
@@ -59,7 +60,7 @@ const MEAL_ORDERS: MealOrder[] = [
   { id: 'MO-003', dietPlanId: 'DP-002', patientId: 'PT-20398', patientName: 'Mohan Lal', ward: 'ICU', bedNumber: 'ICU-3', mealType: 'Breakfast', scheduledAt: '2026-05-09T08:00:00Z', status: 'delivered', items: ['Ensure via NGT'], deliveredAt: '2026-05-09T08:10:00Z' },
 ]
 
-export const useDietaryStore = create<DietaryState>((set, get) => ({
+export const useDietaryStore = create<DietaryState>()(persist((set, get) => ({
   dietPlans: DIET_PLANS,
   mealOrders: MEAL_ORDERS,
   addPlan: (p) =>
@@ -127,4 +128,10 @@ export const useDietaryStore = create<DietaryState>((set, get) => ({
     }
     return { conflict: reasons.length > 0, reasons }
   },
-}))
+}),
+  {
+    name: 'kailash-dietarystore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

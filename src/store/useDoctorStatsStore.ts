@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 // Not persisted: the 365-day series is seeded relative to "now" and live actions
 // bump today's row, so a fresh seed each load keeps the trend correct (persisting
@@ -85,7 +86,7 @@ function inWindow(date: string, period: PeriodKey): boolean {
   return dayDiff >= 0 && dayDiff < p.days
 }
 
-export const useDoctorStatsStore = create<StatsState>((set, get) => ({
+export const useDoctorStatsStore = create<StatsState>()(persist((set, get) => ({
   dayStats: seedDayStats(),
 
   record: (doctorId, metric, n = 1) =>
@@ -128,4 +129,10 @@ export const useDoctorStatsStore = create<StatsState>((set, get) => ({
     }
     return out
   },
-}))
+}),
+  {
+    name: 'kailash-doctorstatsstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

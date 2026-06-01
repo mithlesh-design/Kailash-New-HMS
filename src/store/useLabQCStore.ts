@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 // Quality Control store. Tracks Levey-Jennings runs per analyzer/level/analyte,
 // evaluates Westgard rules on each new run, and surfaces active violations that
@@ -132,7 +133,7 @@ interface QCState {
   clear: (analyzer: AnalyzerId) => void
 }
 
-export const useLabQCStore = create<QCState>((set, get) => ({
+export const useLabQCStore = create<QCState>()(persist((set, get) => ({
   runs: SEED_RUNS,
   violations: SEED_VIOLATIONS,
   overrides: [],
@@ -161,7 +162,13 @@ export const useLabQCStore = create<QCState>((set, get) => ({
   clear: (analyzer) => {
     set(s => ({ violations: { ...s.violations, [analyzer]: [] } }))
   },
-}))
+}),
+  {
+    name: 'kailash-labqcstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))
 
 // Convenience selector: does this analyzer have active rejection-level violations?
 export function isBlocked(analyzer: string | undefined, violations: Record<string, Violation[]>): boolean {

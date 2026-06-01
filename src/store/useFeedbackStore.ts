@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type FeedbackVote = 'up' | 'down'
 
@@ -32,7 +33,7 @@ interface FeedbackState {
   getPerformanceReport: () => AiPerformanceReport
 }
 
-export const useFeedbackStore = create<FeedbackState>((set, get) => ({
+export const useFeedbackStore = create<FeedbackState>()(persist((set, get) => ({
   feedbacks: [],
   addFeedback: (f) =>
     set((state) => ({
@@ -73,4 +74,10 @@ export const useFeedbackStore = create<FeedbackState>((set, get) => ({
       overallAcceptanceRate: all.length > 0 ? Math.round((totalUp / all.length) * 100) : 0,
     }
   },
-}))
+}),
+  {
+    name: 'kailash-feedbackstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

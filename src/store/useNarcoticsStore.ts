@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 // Controlled-substance (Schedule H1/X) register. Dispensing a scheduled drug
 // auto-appends a dual-signature entry (NDPS-style audit). Physical register still
@@ -29,7 +30,13 @@ interface NarcoticsState {
 }
 
 let _seq = 0
-export const useNarcoticsStore = create<NarcoticsState>((set) => ({
+export const useNarcoticsStore = create<NarcoticsState>()(persist((set) => ({
   log: SEED,
   addEntry: (e) => set(s => ({ log: [{ ...e, id: `N-${Date.now()}-${++_seq}` }, ...s.log] })),
-}))
+}),
+  {
+    name: 'kailash-narcoticsstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

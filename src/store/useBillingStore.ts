@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from './useAuditStore'
 
 export type ChargeType = 'consultation' | 'lab' | 'radiology' | 'pharmacy' | 'ward' | 'procedure' | 'consumable' | 'nursing' | 'ot'
@@ -154,7 +155,7 @@ const KIRAN_BILL: Bill = {
 }
 MOCK_BILLS.push(KIRAN_BILL)
 
-export const useBillingStore = create<BillingState>((set, get) => ({
+export const useBillingStore = create<BillingState>()(persist((set, get) => ({
   bills: MOCK_BILLS,
   lineItems: MOCK_LINE_ITEMS,
 
@@ -258,4 +259,10 @@ export const useBillingStore = create<BillingState>((set, get) => ({
     }
     return alerts
   },
-}))
+}),
+  {
+    name: 'kailash-billingstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

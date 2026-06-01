@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from './useAuditStore'
 
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'
@@ -102,7 +103,7 @@ const SEEDED_UNITS: BloodUnit[] = BLOOD_UNITS.map(u =>
   : u,
 )
 
-export const useBloodBankStore = create<BloodBankState>((set, get) => ({
+export const useBloodBankStore = create<BloodBankState>()(persist((set, get) => ({
   units: SEEDED_UNITS,
   crossMatchRequests: CROSS_MATCH_REQUESTS,
 
@@ -191,4 +192,10 @@ export const useBloodBankStore = create<BloodBankState>((set, get) => ({
     set((state) => ({
       units: state.units.map((u) => u.id === unitId ? { ...u, status: 'issued', issuedTo: patientId } : u),
     })),
-}))
+}),
+  {
+    name: 'kailash-bloodbankstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

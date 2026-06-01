@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 // Live patient journey for the dashboard. Front-end simulation today;
 // the same shape would be fed by real backend events in production.
@@ -84,7 +85,7 @@ function seedEvents(mode: LiveMode, token: number): LiveEvent[] {
   ]
 }
 
-export const usePatientLiveStore = create<LiveState>((set, get) => ({
+export const usePatientLiveStore = create<LiveState>()(persist((set, get) => ({
   mode: 'in_person',
   stage: 'waiting',
   token: 4,
@@ -133,4 +134,10 @@ export const usePatientLiveStore = create<LiveState>((set, get) => ({
   }),
 
   reset: () => get().startVisit(get().token, get().mode),
-}))
+}),
+  {
+    name: 'kailash-patientlivestore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

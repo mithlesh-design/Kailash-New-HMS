@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { news2FromRecord, type Band } from '@/lib/vitals'
 import { useNotificationStore } from '@/store/useNotificationStore'
 import { useEmergencyStore } from '@/store/useEmergencyStore'
@@ -212,7 +213,7 @@ const MOCK_APPOINTMENTS: Appointment[] = [
   },
 ]
 
-export const usePatientStore = create<PatientState>((set, get) => ({
+export const usePatientStore = create<PatientState>()(persist((set, get) => ({
   patients: MOCK_PATIENTS,
   queue: MOCK_PATIENTS.filter(p => ['waiting', 'vitals', 'consulting'].includes(p.queueStatus)),
   visits: MOCK_VISITS,
@@ -384,4 +385,10 @@ export const usePatientStore = create<PatientState>((set, get) => ({
       })
     }
   },
-}))
+}),
+  {
+    name: 'kailash-patientstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

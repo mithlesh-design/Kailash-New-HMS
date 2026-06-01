@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type PostDischargeEventType =
   | 'wellness_checkin'
@@ -80,7 +81,7 @@ const d1Discharged = new Date(Date.now() - 2 * 24 * 3600000).toISOString()
 const d1FollowUp = new Date(Date.now() + 12 * 24 * 3600000).toISOString()
 const d2Discharged = new Date(Date.now() - 1 * 24 * 3600000).toISOString()
 
-export const useFollowupStore = create<FollowupState>((set) => ({
+export const useFollowupStore = create<FollowupState>()(persist((set) => ({
   patients: [
     {
       id: 'FU-001',
@@ -145,4 +146,10 @@ export const useFollowupStore = create<FollowupState>((set) => ({
     set((s) => ({
       patients: s.patients.map(p => p.patientId === patientId ? { ...p, callbackDone: true } : p),
     })),
-}))
+}),
+  {
+    name: 'kailash-followupstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

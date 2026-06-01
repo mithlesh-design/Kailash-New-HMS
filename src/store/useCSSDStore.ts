@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from './useAuditStore'
 
 export type SterilizationMethod = 'Autoclave' | 'ETO' | 'Plasma' | 'Chemical'
@@ -70,7 +71,7 @@ const CYCLES: SterilizationCycle[] = [
 
 const seq = { n: 3 }
 
-export const useCSSDStore = create<CSSDState>((set, get) => ({
+export const useCSSDStore = create<CSSDState>()(persist((set, get) => ({
   cycles: CYCLES,
   instruments: INSTRUMENTS,
 
@@ -175,4 +176,10 @@ export const useCSSDStore = create<CSSDState>((set, get) => ({
       })
     }
   },
-}))
+}),
+  {
+    name: 'kailash-cssdstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

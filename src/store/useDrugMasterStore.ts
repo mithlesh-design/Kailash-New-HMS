@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type DrugSchedule = 'OTC' | 'H' | 'H1' | 'X' | 'G'
 export type DrugForm = 'tablet' | 'capsule' | 'syrup' | 'injection' | 'cream' | 'drops' | 'inhaler' | 'patch'
@@ -35,7 +36,7 @@ const DRUG_CATALOG: DrugEntry[] = [
   { id: 'D-008', genericName: 'Paracetamol', brandNames: ['Crocin', 'Dolo', 'Combiflam'], form: 'tablet', strength: '500mg', schedule: 'OTC', atcCode: 'N02BE01', contraindications: ['Severe hepatic impairment'], interactions: ['Warfarin', 'Alcohol'], allergyClasses: ['Analgesic-antipyretic'], maxDailyDoseMg: 4000 },
 ]
 
-export const useDrugMasterStore = create<DrugMasterState>(() => ({
+export const useDrugMasterStore = create<DrugMasterState>()(persist(() => ({
   drugs: DRUG_CATALOG,
   search: (query) => {
     const q = query.toLowerCase()
@@ -46,4 +47,10 @@ export const useDrugMasterStore = create<DrugMasterState>(() => ({
     )
   },
   getById: (id) => DRUG_CATALOG.find((d) => d.id === id),
-}))
+}),
+  {
+    name: 'kailash-drugmasterstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

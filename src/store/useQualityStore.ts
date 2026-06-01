@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type IncidentType = 'Fall' | 'Medication Error' | 'Healthcare-Associated Infection' | 'Equipment Failure' | 'Near Miss' | 'Other'
 export type IncidentSeverity = 'Low' | 'Medium' | 'High' | 'Critical'
@@ -59,7 +60,7 @@ interface QualityState {
   updateNabhIndicator: (indicator: keyof NabhIndicator, value: number) => void
 }
 
-export const useQualityStore = create<QualityState>((set) => ({
+export const useQualityStore = create<QualityState>()(persist((set) => ({
   incidents: [
     {
       id: 'INC-001',
@@ -160,4 +161,10 @@ export const useQualityStore = create<QualityState>((set) => ({
         t.id === id ? { ...t, status: 'Completed', completedAt: new Date().toISOString(), completedBy } : t
       ),
     })),
-}))
+}),
+  {
+    name: 'kailash-qualitystore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

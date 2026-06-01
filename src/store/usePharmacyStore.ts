@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from '@/store/useAuditStore'
 import { useNotificationStore } from '@/store/useNotificationStore'
 import { usePharmacyInventoryStore } from '@/store/usePharmacyInventoryStore'
@@ -231,7 +232,7 @@ const DEMO_PRESCRIPTIONS: PharmacyPrescription[] = [
   },
 ]
 
-export const usePharmacyStore = create<PharmacyStore>((set, get) => ({
+export const usePharmacyStore = create<PharmacyStore>()(persist((set, get) => ({
   prescriptions: DEMO_PRESCRIPTIONS,
 
   addPrescription: (p) => {
@@ -446,4 +447,10 @@ export const usePharmacyStore = create<PharmacyStore>((set, get) => ({
         return { ...p, quantityModifications: mods }
       }),
     })),
-}))
+}),
+  {
+    name: 'kailash-pharmacystore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from './useAuditStore'
 
 export type CleaningPriority = 'Urgent' | 'High' | 'Routine'
@@ -31,7 +32,7 @@ interface HousekeepingState {
   verifyTask: (taskId: string, verifiedBy: string) => void
 }
 
-export const useHousekeepingStore = create<HousekeepingState>((set) => ({
+export const useHousekeepingStore = create<HousekeepingState>()(persist((set) => ({
   tasks: [
     {
       id: 'HK-001',
@@ -134,4 +135,10 @@ export const useHousekeepingStore = create<HousekeepingState>((set) => ({
       })
     }
   },
-}))
+}),
+  {
+    name: 'kailash-housekeepingstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

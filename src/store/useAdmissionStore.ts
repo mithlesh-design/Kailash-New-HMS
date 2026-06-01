@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from './useAuditStore'
 
 export type BedStatus = 'Available' | 'Occupied' | 'Cleaning' | 'Reserved' | 'Maintenance'
@@ -114,7 +115,7 @@ const MOCK_BEDS: Bed[] = [
   { id: 'BED-DC-02', bedNumber: 'DC-02', ward: 'Day Care', floor: '1st', status: 'Available', gender: 'Any' },
 ]
 
-export const useAdmissionStore = create<AdmissionState>((set) => ({
+export const useAdmissionStore = create<AdmissionState>()(persist((set) => ({
   beds: MOCK_BEDS,
   admissionRequests: [
     {
@@ -264,4 +265,10 @@ export const useAdmissionStore = create<AdmissionState>((set) => ({
         r.id === requestId ? { ...r, status: 'Cancelled' } : r
       ),
     })),
-}))
+}),
+  {
+    name: 'kailash-admissionstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

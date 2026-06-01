@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { useAuditStore } from './useAuditStore'
 
 export type WasteCategory = 'Yellow' | 'Red' | 'Blue' | 'Black' | 'White' | 'Cytotoxic'
@@ -76,7 +77,7 @@ const WASTE_LOGS: WasteLog[] = [
     collectedBy: 'BW-1501', collectedByName: 'Ganesh Rao', collectedAt: now(-30), status: 'collected' },
 ]
 
-export const useBMWStore = create<BMWState>((set, get) => ({
+export const useBMWStore = create<BMWState>()(persist((set, get) => ({
   wasteLogs: WASTE_LOGS,
   reports: [],
 
@@ -165,4 +166,10 @@ export const useBMWStore = create<BMWState>((set, get) => ({
     }))
     return report
   },
-}))
+}),
+  {
+    name: 'kailash-bmwstore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))

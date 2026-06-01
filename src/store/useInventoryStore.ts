@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type Asset = {
   id: string
@@ -15,7 +16,7 @@ interface InventoryState {
   assets: Asset[]
 }
 
-export const useInventoryStore = create<InventoryState>(() => ({
+export const useInventoryStore = create<InventoryState>()(persist((): InventoryState => ({
   totalAssetsValue: 55000000,
   lowStockItems: 12,
   assets: [
@@ -23,4 +24,10 @@ export const useInventoryStore = create<InventoryState>(() => ({
     { id: 'CS-105', name: 'N95 Masks', category: 'Consumable', status: 'Low Stock', quantity: 150 },
     { id: 'EQ-002', name: 'Portable Ventilator', category: 'Equipment', status: 'Active' },
   ],
-}))
+}),
+  {
+    name: 'kailash-inventorystore', version: 1,
+    storage: createJSONStorage(() => localStorage),
+    skipHydration: true,
+  },
+))
