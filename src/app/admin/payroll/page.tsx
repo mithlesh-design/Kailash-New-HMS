@@ -13,6 +13,7 @@ import { useAuditStore } from "@/store/useAuditStore"
 import { canDo } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 const fmtINR = (n: number) => `₹${Math.round(n).toLocaleString('en-IN')}`
 const fmtDate = (s: string) => new Date(s + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -50,6 +51,7 @@ export default function PayrollPage() {
 
   const canClose = canDo(currentUser?.role, 'finance.payroll')
   const actorName = currentUser?.name ?? 'Administrator'
+  const { confirm, view: dialogView } = useDialogs()
 
   const currentMonth = isoDay(new Date()).slice(0, 7)
   const [month, setMonth] = useState(currentMonth)
@@ -107,10 +109,16 @@ export default function PayrollPage() {
     return Array.from(byDept.entries()).sort((a, b) => b[1] - a[1])
   }, [rows])
 
-  const handleLockPeriod = () => {
+  const handleLockPeriod = async () => {
     if (!canClose) { toast.error("You don't have permission to lock payroll"); return }
     if (isLocked) { toast.error('Period already locked'); return }
-    if (typeof window !== 'undefined' && !window.confirm(`Lock payroll for ${label}? ₹${Math.round(totals.netPay).toLocaleString('en-IN')} net, ${rows.length} staff.`)) return
+    const ok = await confirm({
+      title: `Lock payroll for ${label}?`,
+      body: `Net ₹${Math.round(totals.netPay).toLocaleString('en-IN')} across ${rows.length} staff. Once locked, the period cannot be edited without an override.`,
+      confirmLabel: 'Lock period',
+      tone: 'warn',
+    })
+    if (!ok) return
 
     // Push a PayrollPeriod entry into the HR store directly
     const period = {
@@ -295,6 +303,7 @@ export default function PayrollPage() {
           </div>
         </div>
       )}
+      {dialogView}
     </div>
   )
 }

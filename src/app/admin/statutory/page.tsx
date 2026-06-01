@@ -14,6 +14,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { canDo } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 const STATUS_TINT: Record<StatutoryStatus, string> = {
   upcoming:  'bg-slate-50 border-slate-200 text-slate-600',
@@ -69,6 +70,7 @@ export default function StatutoryPage() {
 
   const canWrite = canDo(currentUser?.role, 'compliance.attest')
   const actorName = currentUser?.name ?? 'Administrator'
+  const { prompt, view: dialogView } = useDialogs()
 
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState<StatutoryType | 'all'>('all')
@@ -111,21 +113,36 @@ export default function StatutoryPage() {
 
   const totalAmountFiled = liveEntries.filter(e => e.status === 'filed' && e.amount).reduce((s, e) => s + (e.amount ?? 0), 0)
 
-  const handleFile = (id: string) => {
+  const handleFile = async (id: string) => {
     if (!canWrite) { toast.error("You don't have permission to file"); return }
-    const ack = typeof window !== 'undefined' ? window.prompt('Enter acknowledgement number') : null
-    if (!ack) return
-    const amountStr = typeof window !== 'undefined' ? window.prompt('Filed amount (₹), or 0 if N/A', '0') : '0'
-    const amount = Number(amountStr ?? 0)
-    markFiled(id, ack, amount, actorName)
-    toast.success(`Marked filed · ack ${ack}`)
+    const values = await prompt({
+      title: 'Mark obligation filed',
+      body: 'Capture the portal acknowledgement number and amount; both will be audit-logged.',
+      confirmLabel: 'Mark filed',
+      fields: [
+        { id: 'ack',    label: 'Acknowledgement number', placeholder: 'GST-AB12345 / EPF-987...', required: true },
+        { id: 'amount', label: 'Filed amount (₹)',        placeholder: '0',  type: 'number', defaultValue: '0', required: true },
+      ],
+    })
+    if (!values) return
+    markFiled(id, values.ack, Number(values.amount ?? 0), actorName)
+    toast.success(`Marked filed · ack ${values.ack}`)
   }
 
-  const handleExempt = (id: string) => {
+  const handleExempt = async (id: string) => {
     if (!canWrite) { toast.error("You don't have permission"); return }
-    const reason = typeof window !== 'undefined' ? window.prompt('Reason for exemption') : null
-    if (!reason) return
-    markExempted(id, reason, actorName)
+    const values = await prompt({
+      title: 'Mark obligation exempted',
+      body: 'Provide a reason — this gets audit-logged.',
+      tone: 'warn',
+      confirmLabel: 'Mark exempted',
+      fields: [
+        { id: 'reason', label: 'Reason for exemption', type: 'textarea',
+          placeholder: 'e.g. Below threshold / approved waiver / N/A this period', required: true },
+      ],
+    })
+    if (!values) return
+    markExempted(id, values.reason, actorName)
     toast.success(`Marked exempted`)
   }
 
@@ -315,6 +332,7 @@ export default function StatutoryPage() {
       <p className="text-[11px] text-slate-400">
         Showing {filtered.length} of {entries.length} statutory entries · {kpis.filed} filed · ack #s logged to audit (NABH IMS)
       </p>
+      {dialogView}
     </div>
   )
 }

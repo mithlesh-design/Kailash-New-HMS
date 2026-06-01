@@ -33,6 +33,7 @@ import { isSpeechSupported, startDictation, toSOAP, type Recognition } from "@/l
 import { openPrint, olFrom, para } from "@/lib/printDoc"
 import { useDoctorProfileStore } from "@/store/useDoctorProfileStore"
 import { useHRStore } from "@/store/useHRStore"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 const DRUGS = ["Paracetamol 500mg","Amoxicillin 500mg","Azithromycin 500mg","Cetirizine 10mg","Pantoprazole 40mg","Dolo 650mg","Metformin 500mg","Amlodipine 5mg","Atorvastatin 20mg","Omeprazole 20mg","Ibuprofen 400mg","Montelukast 10mg","Metronidazole 400mg","Ondansetron 4mg","Diclofenac 50mg"]
 // Lab tests come straight from the central catalog so every doctor-selected
@@ -169,6 +170,7 @@ export default function DoctorDashboard() {
   const { requestAdmission, beds } = useAdmissionStore()
 
   const [medSearch, setMedSearch] = useState("")
+  const { confirm, view: dialogView } = useDialogs()
   const [showDrugs, setShowDrugs] = useState(false)
   const [dosage, setDosage] = useState("1-0-1")
   const [duration, setDuration] = useState("5 days")
@@ -255,18 +257,28 @@ export default function DoctorDashboard() {
   // Open a patient → mark them in consultation (handoff signal to reception/queue).
   // M2 — When on leave or OPD-paused, confirm the override before opening.
   // Phase 4 / M4.1 — Also check the HR roster: if the doctor is Off today, warn.
-  const openPatient = (p: Patient) => {
+  const openPatient = async (p: Patient) => {
     const { onLeave: ol, availableForOPD: aop } = useDoctorProfileStore.getState()
-    if ((ol || !aop) && typeof window !== 'undefined') {
-      const ok = window.confirm(`${ol ? "You're marked on leave" : "You're not currently accepting OPD"} — start consultation anyway?`)
+    if (ol || !aop) {
+      const ok = await confirm({
+        title: ol ? "You're marked on leave" : "You're not currently accepting OPD",
+        body: "Starting the consultation anyway will be audit-logged.",
+        tone: 'warn',
+        confirmLabel: 'Start anyway',
+      })
       if (!ok) return
     }
     const me = useAuthStore.getState().currentUser
-    if (me && typeof window !== 'undefined') {
+    if (me) {
       const today = new Date().toISOString().split('T')[0]!
       const myShift = useHRStore.getState().getShift(me.id, today)
       if (myShift === 'Off') {
-        const ok = window.confirm("Per the HR roster you're Off today — start consultation anyway?")
+        const ok = await confirm({
+          title: "Off-shift consultation",
+          body: "Per the HR roster you're Off today. Starting the consultation anyway will be audit-logged.",
+          tone: 'warn',
+          confirmLabel: 'Start anyway',
+        })
         if (!ok) return
       }
     }
@@ -1256,6 +1268,7 @@ export default function DoctorDashboard() {
           </div>
         </div>
       )}
+      {dialogView}
     </div>
   )
 }

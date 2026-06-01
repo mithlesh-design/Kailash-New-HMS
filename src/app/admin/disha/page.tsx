@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { canDo } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 // All DISHA / DPDP action codes we surface here
 const DISHA_ACTIONS = [
@@ -64,6 +65,7 @@ export default function DishaPage() {
 
   const canAttest = canDo(currentUser?.role, 'compliance.attest')
   const actorName = currentUser?.name ?? 'Administrator'
+  const { prompt, view: dialogView } = useDialogs()
 
   const [search, setSearch] = useState('')
   const [actionFilter, setActionFilter] = useState<DishaAction | 'all'>('all')
@@ -98,15 +100,25 @@ export default function DishaPage() {
     })
   }, [dishaEntries, actionFilter, search])
 
-  const logBreach = () => {
+  const logBreach = async () => {
     if (!canAttest) { toast.error("You don't have permission to attest breaches"); return }
-    const summary = typeof window !== 'undefined' ? window.prompt('Breach summary (will be audit-logged + DPO must notify CERT-In within 6 hours):') : null
-    if (!summary) return
+    const values = await prompt({
+      title: 'Log data breach',
+      body: 'Will be audit-logged. DPO must notify CERT-In within 6 hours per DPDP §8(6).',
+      tone: 'danger',
+      confirmLabel: 'Log breach',
+      fields: [
+        { id: 'summary', label: 'Breach summary', type: 'textarea',
+          placeholder: 'What happened, scope of records affected, mitigation in flight',
+          required: true },
+      ],
+    })
+    if (!values) return
     log({
       userId: 'ADM-01', userName: actorName,
       action: 'disha_breach_logged',
       resource: 'breach', resourceId: `BRC-${Date.now()}`,
-      detail: summary,
+      detail: values.summary,
     })
     toast.error(`Breach logged — DPO notification required within 6 hours`)
   }
@@ -290,6 +302,7 @@ export default function DishaPage() {
         <ScanSearch className="h-3 w-3" />Showing {filtered.length} of {dishaEntries.length} DISHA / DPDP events ·
         Patient record views are logged automatically · rights exercised under DPDP Act 2023.
       </p>
+      {dialogView}
     </div>
   )
 }

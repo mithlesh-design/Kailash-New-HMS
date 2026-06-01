@@ -12,6 +12,7 @@ import { useAuditStore, moduleOf, severityOf } from "@/store/useAuditStore"
 import { useDoctorStatsStore } from "@/store/useDoctorStatsStore"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 type Tab = 'profile' | 'schedule' | 'credentials' | 'activity' | 'audit'
 
@@ -103,6 +104,7 @@ export function StaffProfileDrawer({ staffId, onClose }: StaffProfileDrawerProps
   if (!member) return null
 
   const actorName = currentUser?.name ?? 'Administrator'
+  const { confirm, prompt, view: dialogView } = useDialogs()
 
   // ── Actions ──────────────────────────────────────────────────────────
   const handleSave = () => {
@@ -112,12 +114,19 @@ export function StaffProfileDrawer({ staffId, onClose }: StaffProfileDrawerProps
     toast.success(`${member.name} updated`)
   }
 
-  const handleDeactivate = () => {
-    const reason = typeof window !== 'undefined'
-      ? window.prompt(`Deactivate ${member.name}? Reason:`, 'Temporary leave')
-      : null
-    if (!reason) return
-    deactivateStaff(member.id, reason, actorName)
+  const handleDeactivate = async () => {
+    const values = await prompt({
+      title: `Deactivate ${member.name}?`,
+      body: 'Staff member loses portal access. Re-activation requires admin sign-off.',
+      tone: 'warn',
+      confirmLabel: 'Deactivate',
+      fields: [
+        { id: 'reason', label: 'Reason', type: 'textarea',
+          defaultValue: 'Temporary leave', required: true },
+      ],
+    })
+    if (!values) return
+    deactivateStaff(member.id, values.reason, actorName)
     toast.success(`${member.name} deactivated`)
   }
 
@@ -126,12 +135,19 @@ export function StaffProfileDrawer({ staffId, onClose }: StaffProfileDrawerProps
     toast.success(`${member.name} reactivated`)
   }
 
-  const handleTerminate = () => {
-    const reason = typeof window !== 'undefined'
-      ? window.prompt(`⚠ Terminate ${member.name}? This is permanent and logged to the audit trail. Reason:`)
-      : null
-    if (!reason) return
-    terminateStaff(member.id, reason, actorName)
+  const handleTerminate = async () => {
+    const values = await prompt({
+      title: `Terminate ${member.name}?`,
+      body: 'PERMANENT action — staff status changes to terminated and the audit trail records the reason.',
+      tone: 'danger',
+      confirmLabel: 'Terminate',
+      fields: [
+        { id: 'reason', label: 'Reason for termination', type: 'textarea',
+          placeholder: 'e.g. End of contract, performance issue, retirement', required: true },
+      ],
+    })
+    if (!values) return
+    terminateStaff(member.id, values.reason, actorName)
     toast.success(`${member.name} terminated`)
     onClose()
   }
@@ -349,8 +365,14 @@ export function StaffProfileDrawer({ staffId, onClose }: StaffProfileDrawerProps
                                   )}
                                 </p>
                               </div>
-                              <button onClick={() => {
-                                if (typeof window !== 'undefined' && window.confirm(`Remove "${c.label}" from ${member.name}?`)) {
+                              <button onClick={async () => {
+                                const ok = await confirm({
+                                  title: `Remove "${c.label}"?`,
+                                  body: `Credential will be deleted from ${member.name}'s profile. Audited.`,
+                                  tone: 'danger',
+                                  confirmLabel: 'Remove',
+                                })
+                                if (ok) {
                                   removeCredential(member.id, c.id, actorName)
                                   toast.success(`Credential removed`)
                                 }
@@ -455,6 +477,7 @@ export function StaffProfileDrawer({ staffId, onClose }: StaffProfileDrawerProps
           </motion.div>
         </>
       )}
+      {dialogView}
     </AnimatePresence>
   )
 }

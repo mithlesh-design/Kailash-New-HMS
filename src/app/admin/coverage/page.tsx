@@ -13,6 +13,7 @@ import type { Role } from "@/types/roles"
 import { CoverageGauge } from "@/components/admin/CoverageGauge"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 const SEVERITY_TINT: Record<'critical' | 'warning' | 'ok', string> = {
   critical: 'bg-red-50 border-red-200 text-red-700',
@@ -33,6 +34,7 @@ export default function CoveragePage() {
 
   const canWrite = canDo(currentUser?.role, 'hr.shift.write')
   const actorName = currentUser?.name ?? 'Administrator'
+  const { confirm, view: dialogView } = useDialogs()
 
   const [editing, setEditing] = useState<string | null>(null)
   const [drafts, setDrafts] = useState<Record<string, Partial<DeptMinimum>>>({})
@@ -60,8 +62,14 @@ export default function CoveragePage() {
     toast.success(`${dept} requirements saved`)
   }
 
-  const handleRemove = (dept: string) => {
-    if (typeof window !== 'undefined' && !window.confirm(`Remove minimum requirement for ${dept}?`)) return
+  const handleRemove = async (dept: string) => {
+    const ok = await confirm({
+      title: `Remove minimum requirement for ${dept}?`,
+      body: 'Coverage gauges for this department will no longer fire alerts. You can re-add a minimum later.',
+      confirmLabel: 'Remove',
+      tone: 'danger',
+    })
+    if (!ok) return
     removeDeptMinimum(dept, actorName)
     toast.success(`${dept} requirement removed`)
   }
@@ -320,6 +328,7 @@ export default function CoveragePage() {
           </div>
         </motion.div>
       )}
+      {dialogView}
     </div>
   )
 }

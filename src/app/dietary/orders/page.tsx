@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { useDietaryStore } from "@/store/useDietaryStore"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
@@ -18,6 +19,7 @@ export default function DietaryOrdersPage() {
   const detect      = useDietaryStore(s => s.detectAllergyConflict)
 
   const [tab, setTab] = useState<'scheduled' | 'delivered'>('scheduled')
+  const { confirm, view: dialogView } = useDialogs()
 
   const conflictByOrder = useMemo(() => {
     const map = new Map<string, string[]>()
@@ -37,11 +39,15 @@ export default function DietaryOrdersPage() {
   const filtered = mealOrders.filter(o => tab === 'scheduled' ? o.status !== 'delivered' : o.status === 'delivered')
     .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
 
-  const onServe = (orderId: string) => {
+  const onServe = async (orderId: string) => {
     const conf = conflictByOrder.get(orderId)
     if (conf && conf.length > 0) {
-      const proceed = typeof window !== 'undefined' &&
-        window.confirm(`⚠ Allergy conflict for this meal:\n${conf.join('\n')}\n\nServe anyway?`)
+      const proceed = await confirm({
+        title: 'Allergy conflict detected',
+        body: `${conf.join(' · ')}\n\nServing despite the allergy will be audit-logged and routed to the dietitian for review.`,
+        tone: 'danger',
+        confirmLabel: 'Serve anyway',
+      })
       if (!proceed) return
     }
     serveMeal(orderId, currentUser?.name ?? 'Dietary Tech')
@@ -125,6 +131,7 @@ export default function DietaryOrdersPage() {
           )
         })}
       </div>
+      {dialogView}
     </div>
   )
 }

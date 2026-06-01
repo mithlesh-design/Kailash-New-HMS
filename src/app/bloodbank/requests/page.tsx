@@ -10,6 +10,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { useBloodBankStore, BEDSIDE_CHECK_LABELS, type BedsideCheck, type CrossMatchRequest } from "@/store/useBloodBankStore"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
@@ -28,6 +29,7 @@ export default function BloodBankRequestsPage() {
   const [tab, setTab]      = useState<'pending' | 'compatible' | 'issued'>('pending')
   const [filter, setFilter] = useState('')
   const [open, setOpen]    = useState<string | null>(null)
+  const { prompt, view: dialogView } = useDialogs()
 
   const filtered = useMemo(() => {
     const f = filter.trim().toLowerCase()
@@ -59,12 +61,20 @@ export default function BloodBankRequestsPage() {
     toast.success(`${reserved.length} unit(s) reserved · ${req.patientName}`)
   }
 
-  const onMarkIncompatible = (req: CrossMatchRequest) => {
-    const note = typeof window !== 'undefined'
-      ? window.prompt('Reason for incompatibility?', 'Donor antibody screen positive')
-      : null
-    if (!note) return
-    markIncompatible(req.id, note)
+  const onMarkIncompatible = async (req: CrossMatchRequest) => {
+    const values = await prompt({
+      title: `Mark crossmatch incompatible · ${req.patientName}`,
+      body: 'Will be audit-logged. Lab will be asked to retest with another donor.',
+      tone: 'danger',
+      confirmLabel: 'Mark incompatible',
+      fields: [
+        { id: 'note', label: 'Reason', type: 'textarea',
+          defaultValue: 'Donor antibody screen positive',
+          required: true },
+      ],
+    })
+    if (!values) return
+    markIncompatible(req.id, values.note)
     toast.success(`Marked incompatible · ${req.patientName}`)
   }
 
@@ -276,6 +286,7 @@ export default function BloodBankRequestsPage() {
           )
         })}
       </div>
+      {dialogView}
     </div>
   )
 }

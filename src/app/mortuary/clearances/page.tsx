@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { useMortuaryStore } from "@/store/useMortuaryStore"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
@@ -24,24 +25,37 @@ export default function MortuaryClearancesPage() {
       .sort((a, b) => new Date(a.timeOfDeath).getTime() - new Date(b.timeOfDeath).getTime()),
     [records],
   )
+  const { confirm, prompt, view: dialogView } = useDialogs()
 
   const onIssueCert = (id: string) => {
     issueDeathCertificate(id, currentUser?.name ?? 'Mortuary Officer')
     toast.success('Death certificate issued')
   }
 
-  const onClearMLC = (id: string) => {
-    const autopsy = typeof window !== 'undefined' && window.confirm('Mark autopsy as completed?')
+  const onClearMLC = async (id: string) => {
+    const autopsy = await confirm({
+      title: 'Clear MLC',
+      body: 'Was autopsy completed prior to MLC clearance? This is captured in the audit trail.',
+      confirmLabel: 'Yes, autopsy completed',
+      cancelLabel: 'No, MLC only',
+    })
     clearMLC(id, currentUser?.name ?? 'Mortuary Officer', autopsy)
     toast.success('MLC cleared')
   }
 
-  const onRelease = (id: string) => {
-    const releasedTo = typeof window !== 'undefined'
-      ? window.prompt('Released to (next-of-kin name + relation):', 'Family · son')
-      : null
-    if (!releasedTo) return
-    releaseBody(id, releasedTo, currentUser?.name ?? 'Mortuary Officer')
+  const onRelease = async (id: string) => {
+    const values = await prompt({
+      title: 'Release body to next of kin',
+      body: 'Captures name + relationship for the audit trail. Required before release.',
+      tone: 'warn',
+      confirmLabel: 'Release',
+      fields: [
+        { id: 'name',     label: 'Next-of-kin name',         placeholder: 'e.g. Rajesh Patil', required: true },
+        { id: 'relation', label: 'Relation to deceased',      placeholder: 'son / spouse / daughter / father', required: true },
+      ],
+    })
+    if (!values) return
+    releaseBody(id, `${values.name} · ${values.relation}`, currentUser?.name ?? 'Mortuary Officer')
     toast.success('Body released · audit logged')
   }
 
@@ -123,6 +137,7 @@ export default function MortuaryClearancesPage() {
       <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
         <ScanLine className="h-3 w-3" />Every certificate issue · MLC clearance · release is recorded as NABH ROM evidence.
       </p>
+      {dialogView}
     </div>
   )
 }

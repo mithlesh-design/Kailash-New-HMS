@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { canDo } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 const CATEGORY_TINT: Record<VendorCategory, string> = {
   bmw:          'bg-amber-50 text-amber-700 ring-amber-200',
@@ -55,6 +56,7 @@ export default function VendorsPage() {
 
   const canWrite = canDo(currentUser?.role, 'finance.vendor')
   const actorName = currentUser?.name ?? 'Administrator'
+  const { prompt, view: dialogView } = useDialogs()
 
   const [tab, setTab] = useState<Tab>('overview')
   const [search, setSearch] = useState('')
@@ -121,11 +123,21 @@ export default function VendorsPage() {
     toast.success(`${inv.vendorName} paid · ${ref}`)
   }
 
-  const handleDispute = (id: string) => {
+  const handleDispute = async (id: string) => {
     if (!canWrite) { toast.error("You don't have permission"); return }
-    const reason = typeof window !== 'undefined' ? window.prompt('Reason for dispute?') : null
-    if (!reason) return
-    disputeInvoice(id, reason, actorName)
+    const values = await prompt({
+      title: 'Raise invoice dispute',
+      body: 'Captured in the audit trail and routed to Finance Head for resolution.',
+      tone: 'warn',
+      confirmLabel: 'Mark disputed',
+      fields: [
+        { id: 'reason', label: 'Reason for dispute', type: 'textarea',
+          placeholder: 'e.g. weight discrepancy, missing items, billing error',
+          required: true },
+      ],
+    })
+    if (!values) return
+    disputeInvoice(id, values.reason, actorName)
     toast.success('Invoice marked disputed')
   }
 
@@ -469,6 +481,7 @@ export default function VendorsPage() {
           </div>
         </>
       )}
+      {dialogView}
     </div>
   )
 }
