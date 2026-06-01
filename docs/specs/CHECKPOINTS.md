@@ -26,8 +26,9 @@ any checkpoint state with `git checkout <tag>` (read-only) or
 
 | Tag | Date (IST) | Branch | Scope | Notes |
 |---|---|---|---|---|
-| `phase-1-complete` | 2026-06-01 | — | Phase-1 ship & GitHub push | Pre-overhaul snapshot (= `checkpoint/M0-baseline`) |
-| `checkpoint/M0-baseline` | 2026-06-01 | `baseline/pre-overhaul` | Preservation contract + regression sweep + baseline screenshots | Aliased to `phase-1-complete`. Contract = [11_Feature_Flow_Inventory_v1_0.docx](11_Feature_Flow_Inventory_v1_0.docx). |
+| `phase-1-complete` | 2026-06-01 | — | Phase-1 ship & GitHub push | Pre-overhaul snapshot. |
+| `checkpoint/M0-baseline` | 2026-06-01 | `baseline/pre-overhaul` | Preservation contract + regression sweep + baseline screenshots | Contract = [11_Feature_Flow_Inventory_v1_0.docx](11_Feature_Flow_Inventory_v1_0.docx). |
+| `checkpoint/M1-verified` | 2026-06-01 | — | Closures re-verified against src/ + live state; 09 issued | 20/20 Phase-1 closures Verified · 0 Re-opened · 32 Still-open (Phase 2) · 3 Deferred (v2). |
 
 ---
 
@@ -70,3 +71,28 @@ git checkout baseline/pre-overhaul         # branch
 - **2. GROWTH-FOCUSED** — surface the levers (throughput, utilisation,
   revenue capture, denial reduction, retention).
 - **3. AI-CENTRIC** — HITL AI everywhere; accept/reject/modify with reasoning.
+
+---
+
+## M1 — Verification (2026-06-01)
+
+### What's in this checkpoint
+- All M0 deliverables (still green).
+- [scripts/verify-closures.cjs](../../scripts/verify-closures.cjs) — re-runnable verifier.
+- [docs/specs/verification.json](verification.json) — machine-readable verdicts.
+- [docs/specs/09_Verification_Report_v1_0.docx](09_Verification_Report_v1_0.docx) — report.
+- [docs/specs/screens/M1/](screens/M1/) — fresh per-role screenshots, regression report.
+
+### Tally (against the 19 + 1 closures from 07 v1.1)
+| Verdict | Count |
+|---|---|
+| Verified | **20** |
+| Re-opened | **0** |
+| Still-open (Phase 2 backlog) | 32 |
+| Deferred to v2 | 3 |
+| Total tracked | 55 |
+
+### Restore
+```
+git checkout checkpoint/M1-verified
+```
