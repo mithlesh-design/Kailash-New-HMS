@@ -12,6 +12,7 @@ import { canDo } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useDialogs } from "@/components/ui/ConfirmDialog"
+import { DpdpSelfAuditPanel } from "@/components/admin/DpdpSelfAuditPanel"
 
 // All DISHA / DPDP action codes we surface here
 const DISHA_ACTIONS = [
@@ -167,6 +168,10 @@ export default function DishaPage() {
       </div>
 
       {/* KPIs */}
+      {/* M4-W4 — S10: DPDP / DISHA Self-Audit Panel. Five-dimension live
+          scorecard with HITL action per principle. */}
+      <DpdpSelfAuditPanel />
+
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <KPI label="Record accesses" value={kpis.access} icon={Eye} tint="bg-blue-50 border-blue-200 text-blue-700" />
         <KPI label="Consents captured" value={kpis.consentCaptured} icon={ShieldCheck} tint="bg-emerald-50 border-emerald-200 text-emerald-700" />

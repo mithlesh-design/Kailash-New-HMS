@@ -14,6 +14,7 @@ import { useBMWStore } from "@/store/useBMWStore"
 import { useHRStore } from "@/store/useHRStore"
 import { buildNabhEvidence } from "@/lib/nabhEvidence"
 import { cn } from "@/lib/utils"
+import { NabhEvidenceLiveCockpit } from "@/components/admin/NabhEvidenceLiveCockpit"
 
 const today = () => new Date().toISOString().split('T')[0]!
 const daysUntil = (s: string) => Math.round((new Date(s + 'T00:00:00').getTime() - new Date(today() + 'T00:00:00').getTime()) / 86400000)
@@ -140,6 +141,10 @@ export default function ComplianceCockpit() {
           </div>
         </div>
       </div>
+
+      {/* M4-W4 — S9: NABH Evidence Live Cockpit. Live evidence per chapter
+          with AI-suggested next-action + HITL accept/dismiss. */}
+      <NabhEvidenceLiveCockpit />
 
       {/* 6-stream KPI strip */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

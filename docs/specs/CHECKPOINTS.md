@@ -34,6 +34,7 @@ any checkpoint state with `git checkout <tag>` (read-only) or
 | `checkpoint/M4-wave-1` | 2026-06-02 | — | Innovation Wave 1 — clinical safety wow (S1, S2, S3, S15) | DrugSafetyReasoningCard (S1) mounted in doctor OPD Rx panel · EarlyWarningBanner (S2) on doctor IPD · CriticalValueBanner (S3) globally in AppShell for doctor + nurse with closed-loop acknowledgement · DaySummaryCard (S15) on doctor analytics. Shared ReasoningChip primitive. 10_Competitive_Innovation v1.1 issued. Regression 54/54. |
 | `checkpoint/M4-wave-2` | 2026-06-02 | — | Innovation Wave 2 — operating-speed wow (S4, S5, S6) | aiCopilot intent parser + CopilotPreviewCard wired into the global Command Palette (S4) · VoiceScribeButton mounted on doctor IPD (Quick-note) + nurse rounds (AI-SOAP companion) with surface-typed fallback transcripts (S5) · OcrIntakeCard mounted at the top of the Register-Walk-in modal with three doc types (Aadhaar / insurance / lab paper), 800 ms simulated OCR, per-field confidence chips (S6). 10_Competitive_Innovation v1.2 issued. Regression 54/54. |
 | `checkpoint/M4-wave-3` | 2026-06-02 | — | Innovation Wave 3 — GROWTH pillar (S7, S8) | predictiveOps engine (4 forecasters: ED arrivals · OR utilisation · ICU pressure · staffing gap) + PredictiveOpsCockpit mounted on /admin/operations (S7) · revenueGrowth engine (4 levers: denial-risk exposure · days-in-AR · charge-capture gaps · payer-mix concentration) + RevenueCycleGrowthCockpit mounted on /admin/finance (S8). Each card carries reasoning drivers + recommended action + HITL accept/dismiss. Two new audit resources (`ops_prediction`, `rcm_growth`). 10_Competitive_Innovation v1.3 issued. Regression 54/54. |
+| `checkpoint/M4-wave-4` | 2026-06-02 | — | Innovation Wave 4 — Compliance Autopilot (S9, S10) | NabhEvidenceLiveCockpit mounted on /admin/compliance — one card per NABH chapter with freshest-evidence + AI suggested next-action + Open-desk HITL routing (S9) · dpdpAudit engine (5 dimensions: consent rate · RTBF SLA · export audit · breach response · RBAC discipline) + DpdpSelfAuditPanel mounted on /admin/disha with 0-100 score per dimension and overall-score badge (S10). Two new audit resources (`nabh_evidence`, `dpdp_audit`). 10_Competitive_Innovation v1.4 issued. Regression 54/54. |
 
 ---
 
@@ -222,4 +223,25 @@ git checkout checkpoint/M4-wave-2
 ### Restore
 ```
 git checkout checkpoint/M4-wave-3
+```
+
+---
+
+## M4-Wave-4 — Compliance Autopilot (2026-06-02)
+
+### What's in this checkpoint
+- All M0 + M1 + M2 + M3 + M4-W1 + M4-W2 + M4-W3 deliverables (still green).
+- **S9** NABH Evidence Live Cockpit — component at [src/components/admin/NabhEvidenceLiveCockpit.tsx](../../src/components/admin/NabhEvidenceLiveCockpit.tsx), mounted on [src/app/admin/compliance/page.tsx](../../src/app/admin/compliance/page.tsx). One card per NABH chapter (AAC / COP / MOM / HIC / PRE / IMS / CQI / ROM / HRM) over the existing buildNabhEvidence engine. Shows event count, freshest evidence (relative time), AI suggested next-action when sparse, Open-desk HITL routing to the right remediation surface.
+- **S10** DPDP / DISHA Self-Audit Panel — engine at [src/lib/dpdpAudit.ts](../../src/lib/dpdpAudit.ts), component at [src/components/admin/DpdpSelfAuditPanel.tsx](../../src/components/admin/DpdpSelfAuditPanel.tsx), mounted on [src/app/admin/disha/page.tsx](../../src/app/admin/disha/page.tsx). Five DPDP / DISHA principles scored 0-100: consent capture rate · RTBF SLA (30-day) · data-export audit coverage (purpose+requester) · breach response (72h gate) · RBAC discipline (rapid cross-role detector). Overall-score badge in header.
+- [docs/specs/10_Competitive_Innovation_v1_4.docx](10_Competitive_Innovation_v1_4.docx).
+- [docs/specs/screens/M4-W4/](screens/M4-W4/) — 2 W4 close-ups (S9 NABH 9-chapter grid, S10 DPDP 5-dimension scorecard).
+
+### Pillars advanced
+- **0. PRESERVE** ✅ Regression 54/54. Both surfaces mount additively (top of compliance / DISHA pages, above existing content).
+- **2. GROWTH-FOCUSED** ✅ Compliance cockpit surfaces are themselves a growth lever — they cut NABH evidence prep from manual weeks to live.
+- **3. AI-CENTRIC** ✅ Every card carries HITL accept/dismiss with audit-log under `nabh_evidence` / `dpdp_audit` resources.
+
+### Restore
+```
+git checkout checkpoint/M4-wave-4
 ```
