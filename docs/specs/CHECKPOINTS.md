@@ -37,6 +37,7 @@ any checkpoint state with `git checkout <tag>` (read-only) or
 | `checkpoint/M4-wave-4` | 2026-06-02 | — | Innovation Wave 4 — Compliance Autopilot (S9, S10) | NabhEvidenceLiveCockpit mounted on /admin/compliance — one card per NABH chapter with freshest-evidence + AI suggested next-action + Open-desk HITL routing (S9) · dpdpAudit engine (5 dimensions: consent rate · RTBF SLA · export audit · breach response · RBAC discipline) + DpdpSelfAuditPanel mounted on /admin/disha with 0-100 score per dimension and overall-score badge (S10). Two new audit resources (`nabh_evidence`, `dpdp_audit`). 10_Competitive_Innovation v1.4 issued. Regression 54/54. |
 | `checkpoint/M4-wave-5` | 2026-06-02 | — | Innovation Wave 5 — Patient Super-App (S11, S12, S13) | AiHealthSummaryCard mounted at top of /patient/dashboard with 3 narration variants + 3-tile mini-strip + HITL accept/regenerate/hide (S11) · FamilyInviteCard with mock WhatsApp send flow (sent → delivered → accepted progression), per-recipient masked phone + status chip + revoke (S12) · patientNudges engine (8 nudge generators) + ProactiveNudgesFeed with priority-sorted feed capped at 5, persisted dismissals (S13). Three new audit resources (`patient_health_summary`, `family_invite`, `patient_nudge`). 10_Competitive_Innovation v1.5 issued. Regression 54/54. |
 | `checkpoint/M4-wave-6` | 2026-06-02 | — | Innovation Wave 6 — FINAL CARD · Care-Team Presence + Live Handover (S14) | careTeamPresence engine over useHRStore.staff + shifts + duty + wall-clock → PresenceStatus (on_shift / handover_pending / on_call / off) · CareTeamPresenceCard renders pill strip + in-card SBAR compose with AI-generated skeleton + Incoming panel with two-sided HITL (sign + receive) backed by useShiftStore.signHandover / receiveHandover · mounted on /doctor/ipd and /nurse/dashboard. One new audit resource (`live_handover`). **Slate 15/15 shipped.** 10_Competitive_Innovation v1.6 issued. Regression 54/54. |
+| `checkpoint/M5-demo-ready` | 2026-06-02 | — | Demo-Readiness Sweep — runbook + 10-beat hero journey | scripts/hero-journey-walker.cjs walks Anil + Kiran across every W1-W6 surface in demo order (10 PNGs at docs/specs/screens/M5/) · docs/specs/M5_Demo_Runbook.md is the presenter cheat sheet (10 beats, talk-track, recovery & rollback). Regression 54/54 green; flow-walker 12 PASS / 4 PARTIAL / 0 FAIL (improved from M3's 11/5/0). **Slate 15/15 verified live across roles.** |
 
 ---
 
@@ -291,4 +292,32 @@ W1: S1 · S2 · S3 · S15 · W2: S4 · S5 · S6 · W3: S7 · S8 · W4: S9 · S10
 ### Restore
 ```
 git checkout checkpoint/M4-wave-6
+```
+
+---
+
+## M5 — Demo-Readiness Sweep (2026-06-02)
+
+### What's in this checkpoint
+- All M0 + M1 + M2 + M3 + M4-W1...W6 deliverables (still green).
+- [scripts/hero-journey-walker.cjs](../../scripts/hero-journey-walker.cjs) — 10-beat Puppeteer pass across Admin / Doctor / Nurse / Patient / Reception roles, capturing every W1-W6 surface in demo order.
+- [docs/specs/screens/M5/](screens/M5/) — 10 PNGs + [hero-journey.json](screens/M5/hero-journey.json) machine-readable log.
+- [docs/specs/M5_Demo_Runbook.md](M5_Demo_Runbook.md) — presenter cheat sheet: pre-flight, hero patients, 10-beat live walk with talk-track per beat, recovery & rollback table.
+
+### Verification numbers (M5)
+| Suite | Result |
+|---|---|
+| `scripts/regression-suite.cjs` | **54 / 54 passed**, 0 failed, 0 console errors |
+| `scripts/flow-walker.cjs` (16 flows) | **12 PASS / 4 PARTIAL / 0 FAIL** (improved from M3's 11 / 5 / 0) |
+| `scripts/hero-journey-walker.cjs` | **10 / 10 beats captured** |
+
+### Pillars at M5
+- **0. PRESERVE** ✅ Regression contract unbroken at every checkpoint M0 → M5.
+- **1. INTUITIVE** ✅ Compact tokens · global Cmd/Ctrl+K palette · every AI card has a single primary action.
+- **2. GROWTH-FOCUSED** ✅ Predictive ops + RCM cockpits + NABH-evidence-as-product.
+- **3. AI-CENTRIC** ✅ 13 typed HITL audit resources across W1-W6; every accept/reject/modify is traceable.
+
+### Restore
+```
+git checkout checkpoint/M5-demo-ready
 ```
