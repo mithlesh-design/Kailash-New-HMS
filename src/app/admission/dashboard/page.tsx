@@ -186,7 +186,7 @@ export default function AdmissionDashboard() {
                       <p className="text-sm text-slate-600 font-medium mb-1">{req.diagnosis}</p>
                       <div className="flex items-center gap-3 text-xs text-slate-500">
                         <span className="flex items-center gap-1"><Bed className="h-3 w-3" />{req.admissionType}</span>
-                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{elapsed(req.requestedAt)}</span>
+                        <span className="flex items-center gap-1" suppressHydrationWarning><Clock className="h-3 w-3" />{elapsed(req.requestedAt)}</span>
                         <span>{req.payerType}</span>
                       </div>
                     </div>

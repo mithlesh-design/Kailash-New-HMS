@@ -42,10 +42,19 @@ type Refund = {
   processedBy?: string
 }
 
+// Stable demo timestamps — frozen so SSR + client see identical strings.
+// (Earlier this seed used `new Date(Date.now() - X).toISOString()` which
+// drifted by ~1s between Node and the browser, firing hydration warnings.)
+const T_NOW       = '2026-06-02T20:44:00.000Z'
+const T_2H_AGO    = '2026-06-02T18:44:00.000Z'
+const T_5H_AGO    = '2026-06-02T15:44:00.000Z'
+const T_1D_AGO    = '2026-06-01T20:44:00.000Z'
+const T_2D_AGO    = '2026-05-31T20:44:00.000Z'
+void T_NOW
 const SEED: Refund[] = [
-  { id: 'REF-001', billId: 'BIL-2026-0041', patient: 'Kiran Patil',  amount: 4500, reason: 'Service not rendered — cancelled procedure',  requestedAt: new Date(Date.now() - 7200_000).toISOString(),  requestedBy: 'Naveen Patel · Billing', status: 'pending' },
-  { id: 'REF-002', billId: 'BIL-2026-0038', patient: 'Priya Sharma', amount: 1200, reason: 'Duplicate charge on lab tests',                requestedAt: new Date(Date.now() - 86400_000).toISOString(), requestedBy: 'Naveen Patel · Billing', status: 'approved_lead', approvedLeadAt: new Date(Date.now() - 7200_000).toISOString(), approvedLeadBy: 'Suman Pillai (Billing Lead)' },
-  { id: 'REF-003', billId: 'BIL-2026-0031', patient: 'Rahul Mehta',  amount:  800, reason: 'Insurance covered — excess payment',           requestedAt: new Date(Date.now() - 172800_000).toISOString(), requestedBy: 'Naveen Patel · Billing', status: 'approved_finance', approvedLeadAt: new Date(Date.now() - 86400_000).toISOString(), approvedLeadBy: 'Suman Pillai (Billing Lead)', approvedFinanceAt: new Date(Date.now() - 18000_000).toISOString(), approvedFinanceBy: 'Rajesh Kulkarni (Finance Head)' },
+  { id: 'REF-001', billId: 'BIL-2026-0041', patient: 'Kiran Patil',  amount: 4500, reason: 'Service not rendered — cancelled procedure',  requestedAt: T_2H_AGO,  requestedBy: 'Naveen Patel · Billing', status: 'pending' },
+  { id: 'REF-002', billId: 'BIL-2026-0038', patient: 'Priya Sharma', amount: 1200, reason: 'Duplicate charge on lab tests',                requestedAt: T_1D_AGO, requestedBy: 'Naveen Patel · Billing', status: 'approved_lead', approvedLeadAt: T_2H_AGO, approvedLeadBy: 'Suman Pillai (Billing Lead)' },
+  { id: 'REF-003', billId: 'BIL-2026-0031', patient: 'Rahul Mehta',  amount:  800, reason: 'Insurance covered — excess payment',           requestedAt: T_2D_AGO, requestedBy: 'Naveen Patel · Billing', status: 'approved_finance', approvedLeadAt: T_1D_AGO, approvedLeadBy: 'Suman Pillai (Billing Lead)', approvedFinanceAt: T_5H_AGO, approvedFinanceBy: 'Rajesh Kulkarni (Finance Head)' },
 ]
 
 const STATUS_CONFIG: Record<RefundStatus, { label: string; color: string; icon: React.ElementType }> = {

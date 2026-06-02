@@ -45,6 +45,12 @@ export function CriticalValueBanner({ role = 'both', className }: Props) {
   const log = useAuditStore((s) => s.log)
   const router = useRouter()
   const [, setTick] = useState(0)  // re-render after ack
+  // SSR vs client see different "minutes ago" from the audit seed (seeded
+  // via `Date.now()` at module-eval). Gate any rendered timestamp behind
+  // mounted so SSR shows '—' and client hydrates to the real time without
+  // a mismatch.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
 
   // Find every recent critical-value event that hasn't been acknowledged
   // by this role yet. We treat the 50 most-recent audit rows as the
@@ -85,8 +91,15 @@ export function CriticalValueBanner({ role = 'both', className }: Props) {
     setTick((t) => t + 1)
   }
 
+  // Render nothing on SSR — the banner depends on audit seed timestamps
+  // (Date.now() at module-eval, differs SSR vs client), localStorage ack
+  // state (unavailable on server), and a Date.now() countdown chip. All
+  // three are hydration hazards. Showing the empty container on SSR keeps
+  // layout stable; client-mount swaps in real banners.
+  if (!mounted) return <div className={cn("space-y-2", className)} role="alert" aria-live="assertive" suppressHydrationWarning />
+
   return (
-    <div className={cn("space-y-2", className)} role="alert" aria-live="assertive">
+    <div className={cn("space-y-2", className)} role="alert" aria-live="assertive" suppressHydrationWarning>
       {open.map((e) => {
         // Soft blocker — 2 min from the event time (mock).
         const eventTs = new Date(e.timestamp).getTime()
@@ -116,7 +129,7 @@ export function CriticalValueBanner({ role = 'both', className }: Props) {
               </p>
               <p className="text-[10.5px] text-rose-600 mt-0.5">
                 Source: {e.resource} {e.resourceId ? `· ${e.resourceId}` : ''}
-                · audited {new Date(e.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                · audited {mounted ? new Date(e.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }) : '—'}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">

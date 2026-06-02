@@ -272,7 +272,7 @@ export default function OTDashboard() {
                     <p className="text-xs font-semibold truncate">{proc.patientName}</p>
                     <p className="text-[11px] text-current opacity-70 truncate mt-0.5">{proc.procedureName}</p>
                     {proc.startedAt && (
-                      <div className="flex items-center gap-1 mt-2 text-[11px] font-bold">
+                      <div className="flex items-center gap-1 mt-2 text-[11px] font-bold" suppressHydrationWarning>
                         <Clock className="h-3 w-3" />
                         {remaining > 0 ? `~${remaining}m remaining` : 'Overtime'}
                       </div>
@@ -347,7 +347,7 @@ export default function OTDashboard() {
                           <span>{proc.durationMinutes}m</span>
                         </div>
                         {proc.status === 'In Progress' && proc.startedAt && (
-                          <div className="flex items-center gap-1.5 mt-2 text-xs font-bold text-blue-700">
+                          <div className="flex items-center gap-1.5 mt-2 text-xs font-bold text-blue-700" suppressHydrationWarning>
                             <Clock className="h-3.5 w-3.5" />
                             {elapsed}m elapsed — ~{Math.max(proc.durationMinutes - elapsed, 0)}m remaining
                           </div>
