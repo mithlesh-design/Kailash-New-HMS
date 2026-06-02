@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { usePatientLiveStore, stagesFor } from "@/store/usePatientLiveStore"
 import { usePatientOrdersStore } from "@/store/usePatientOrdersStore"
 import { AiCompanionBar } from "@/components/patient/dashboard/AiCompanionBar"
+import { AiHealthSummaryCard } from "@/components/patient/dashboard/AiHealthSummaryCard"
 import { LiveJourneyCard } from "@/components/patient/dashboard/LiveJourneyCard"
 import { LiveFeed } from "@/components/patient/dashboard/LiveFeed"
 import { ForYouCard } from "@/components/patient/dashboard/ForYouCard"
@@ -13,6 +14,8 @@ import { QuickActions } from "@/components/patient/dashboard/QuickActions"
 import { HealthTrendsCard } from "@/components/patient/dashboard/HealthTrendsCard"
 import { DoctorOrdersCard } from "@/components/patient/dashboard/DoctorOrdersCard"
 import { FamilyTrackingCard } from "@/components/patient/dashboard/FamilyTrackingCard"
+import { FamilyInviteCard } from "@/components/patient/dashboard/FamilyInviteCard"
+import { ProactiveNudgesFeed } from "@/components/patient/dashboard/ProactiveNudgesFeed"
 import { DemoControls } from "@/components/patient/dashboard/DemoControls"
 
 export default function PatientDashboard() {
@@ -59,11 +62,15 @@ export default function PatientDashboard() {
       </div>
 
       <div className="space-y-5">
+        {/* M4-W5 — S11: AI Health Summary at the top of the patient portal. */}
+        <AiHealthSummaryCard />
         <AiCompanionBar />
         <div className="grid lg:grid-cols-3 gap-5 items-start">
           <div className="lg:col-span-2 space-y-5">
             <DoctorOrdersCard />
             <LiveJourneyCard />
+            {/* M4-W5 — S13: Proactive Patient Nudges feed. */}
+            <ProactiveNudgesFeed />
             <HealthTrendsCard />
             <ForYouCard />
             <QuickActions />
@@ -71,6 +78,8 @@ export default function PatientDashboard() {
           <div className="lg:col-span-1 space-y-5">
             <LiveFeed />
             <FamilyTrackingCard />
+            {/* M4-W5 — S12: Family-Track v2 mock WhatsApp invite. */}
+            <FamilyInviteCard />
           </div>
         </div>
       </div>

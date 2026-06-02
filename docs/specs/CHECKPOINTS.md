@@ -35,6 +35,7 @@ any checkpoint state with `git checkout <tag>` (read-only) or
 | `checkpoint/M4-wave-2` | 2026-06-02 | — | Innovation Wave 2 — operating-speed wow (S4, S5, S6) | aiCopilot intent parser + CopilotPreviewCard wired into the global Command Palette (S4) · VoiceScribeButton mounted on doctor IPD (Quick-note) + nurse rounds (AI-SOAP companion) with surface-typed fallback transcripts (S5) · OcrIntakeCard mounted at the top of the Register-Walk-in modal with three doc types (Aadhaar / insurance / lab paper), 800 ms simulated OCR, per-field confidence chips (S6). 10_Competitive_Innovation v1.2 issued. Regression 54/54. |
 | `checkpoint/M4-wave-3` | 2026-06-02 | — | Innovation Wave 3 — GROWTH pillar (S7, S8) | predictiveOps engine (4 forecasters: ED arrivals · OR utilisation · ICU pressure · staffing gap) + PredictiveOpsCockpit mounted on /admin/operations (S7) · revenueGrowth engine (4 levers: denial-risk exposure · days-in-AR · charge-capture gaps · payer-mix concentration) + RevenueCycleGrowthCockpit mounted on /admin/finance (S8). Each card carries reasoning drivers + recommended action + HITL accept/dismiss. Two new audit resources (`ops_prediction`, `rcm_growth`). 10_Competitive_Innovation v1.3 issued. Regression 54/54. |
 | `checkpoint/M4-wave-4` | 2026-06-02 | — | Innovation Wave 4 — Compliance Autopilot (S9, S10) | NabhEvidenceLiveCockpit mounted on /admin/compliance — one card per NABH chapter with freshest-evidence + AI suggested next-action + Open-desk HITL routing (S9) · dpdpAudit engine (5 dimensions: consent rate · RTBF SLA · export audit · breach response · RBAC discipline) + DpdpSelfAuditPanel mounted on /admin/disha with 0-100 score per dimension and overall-score badge (S10). Two new audit resources (`nabh_evidence`, `dpdp_audit`). 10_Competitive_Innovation v1.4 issued. Regression 54/54. |
+| `checkpoint/M4-wave-5` | 2026-06-02 | — | Innovation Wave 5 — Patient Super-App (S11, S12, S13) | AiHealthSummaryCard mounted at top of /patient/dashboard with 3 narration variants + 3-tile mini-strip + HITL accept/regenerate/hide (S11) · FamilyInviteCard with mock WhatsApp send flow (sent → delivered → accepted progression), per-recipient masked phone + status chip + revoke (S12) · patientNudges engine (8 nudge generators) + ProactiveNudgesFeed with priority-sorted feed capped at 5, persisted dismissals (S13). Three new audit resources (`patient_health_summary`, `family_invite`, `patient_nudge`). 10_Competitive_Innovation v1.5 issued. Regression 54/54. |
 
 ---
 
@@ -244,4 +245,26 @@ git checkout checkpoint/M4-wave-3
 ### Restore
 ```
 git checkout checkpoint/M4-wave-4
+```
+
+---
+
+## M4-Wave-5 — Patient Super-App (2026-06-02)
+
+### What's in this checkpoint
+- All M0 + M1 + M2 + M3 + M4-W1 + M4-W2 + M4-W3 + M4-W4 deliverables (still green).
+- **S11** AI Health Summary — [src/components/patient/dashboard/AiHealthSummaryCard.tsx](../../src/components/patient/dashboard/AiHealthSummaryCard.tsx) mounted at the top of [src/app/patient/dashboard/page.tsx](../../src/app/patient/dashboard/page.tsx). Composes plain-language summary from PatientProfile + recent audit; 3 narration variants; HITL accept / regenerate / hide.
+- **S12** Family-Track v2 — [src/components/patient/dashboard/FamilyInviteCard.tsx](../../src/components/patient/dashboard/FamilyInviteCard.tsx) mounted on the right rail next to the existing FamilyTrackingCard. Mock WhatsApp send → simulated delivery progression (1.1s/3.4s) → invited list with masked phone, status chip, revoke.
+- **S13** Proactive Nudges — engine at [src/lib/patientNudges.ts](../../src/lib/patientNudges.ts), component at [src/components/patient/dashboard/ProactiveNudgesFeed.tsx](../../src/components/patient/dashboard/ProactiveNudgesFeed.tsx) mounted in the main column. 8 nudge generators (result-ready, unpaid orders, pre-auth, follow-up, refill, HbA1c, BP-log, consent, stage-aware), priority-sorted, capped at 5, persisted dismissals.
+- [docs/specs/10_Competitive_Innovation_v1_5.docx](10_Competitive_Innovation_v1_5.docx).
+- [docs/specs/screens/M4-W5/](screens/M4-W5/) — patient dashboard full + 3 W5 close-ups.
+
+### Pillars advanced
+- **1. INTUITIVE** ✅ Health summary explains the record without medical jargon; nudges turn passive portal into active assistant.
+- **3. AI-CENTRIC** ✅ Every W5 card carries HITL accept/dismiss with audit-log under `patient_health_summary` / `family_invite` / `patient_nudge`.
+- **0. PRESERVE** ✅ Regression 54/54. All three cards additive — existing AI Companion / Live Journey / Family Tracking surfaces untouched.
+
+### Restore
+```
+git checkout checkpoint/M4-wave-5
 ```
