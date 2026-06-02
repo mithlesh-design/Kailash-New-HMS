@@ -7,6 +7,7 @@ import { PatientCard } from "@/components/features/PatientCard"
 import { Bell, MessageCircle, Smartphone, Mail, MonitorSmartphone, Radio } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { PredictiveOpsCockpit } from "@/components/admin/PredictiveOpsCockpit"
 
 const ALL_CHANNELS: NotificationChannel[] = ['in_app', 'push', 'whatsapp', 'sms', 'email']
 
@@ -40,6 +41,10 @@ export default function AdminOperations() {
         <h2 className="text-2xl font-bold text-slate-900">Operations Monitor</h2>
         <p className="text-slate-500 text-sm mt-1">Real-time patient activity and notification channel configuration</p>
       </div>
+
+      {/* M4-W3 — S7: Predictive Operations Cockpit. Forward-looking forecasts
+          over current store state. Each card carries reasoning + HITL action. */}
+      <PredictiveOpsCockpit />
 
       {/* Notification Channel Configuration */}
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">

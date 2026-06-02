@@ -13,6 +13,7 @@ import { useVendorStore } from "@/store/useVendorStore"
 import { useInsuranceStore } from "@/store/useInsuranceStore"
 import { hoursWorked } from "@/lib/shiftConflicts"
 import { cn } from "@/lib/utils"
+import { RevenueCycleGrowthCockpit } from "@/components/admin/RevenueCycleGrowthCockpit"
 
 const fmtINR = (n: number) => `₹${Math.round(n).toLocaleString('en-IN')}`
 const fmtINRk = (n: number) => {
@@ -179,6 +180,10 @@ export default function FinanceDashboard() {
           </Link>
         </div>
       </div>
+
+      {/* M4-W3 — S8: Revenue-Cycle Growth Cockpit. Reads claims + bills live;
+          surfaces four levers with reasoning + HITL action. */}
+      <RevenueCycleGrowthCockpit />
 
       {/* Top-line KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">

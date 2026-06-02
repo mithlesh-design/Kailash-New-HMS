@@ -33,6 +33,7 @@ any checkpoint state with `git checkout <tag>` (read-only) or
 | `checkpoint/M3-flows` | 2026-06-02 | — | Flow completeness — Anil hero journey walked end-to-end | Flow walker covers 16 flows × ~3 steps. 11 PASS · 5 PARTIAL (defensible filter behaviours, documented in §5.1 of 12). Anil seed extended into Patient/Billing/Discharge stores. 12_Flow_Completeness_Report v1.0 issued. Regression 54/54. |
 | `checkpoint/M4-wave-1` | 2026-06-02 | — | Innovation Wave 1 — clinical safety wow (S1, S2, S3, S15) | DrugSafetyReasoningCard (S1) mounted in doctor OPD Rx panel · EarlyWarningBanner (S2) on doctor IPD · CriticalValueBanner (S3) globally in AppShell for doctor + nurse with closed-loop acknowledgement · DaySummaryCard (S15) on doctor analytics. Shared ReasoningChip primitive. 10_Competitive_Innovation v1.1 issued. Regression 54/54. |
 | `checkpoint/M4-wave-2` | 2026-06-02 | — | Innovation Wave 2 — operating-speed wow (S4, S5, S6) | aiCopilot intent parser + CopilotPreviewCard wired into the global Command Palette (S4) · VoiceScribeButton mounted on doctor IPD (Quick-note) + nurse rounds (AI-SOAP companion) with surface-typed fallback transcripts (S5) · OcrIntakeCard mounted at the top of the Register-Walk-in modal with three doc types (Aadhaar / insurance / lab paper), 800 ms simulated OCR, per-field confidence chips (S6). 10_Competitive_Innovation v1.2 issued. Regression 54/54. |
+| `checkpoint/M4-wave-3` | 2026-06-02 | — | Innovation Wave 3 — GROWTH pillar (S7, S8) | predictiveOps engine (4 forecasters: ED arrivals · OR utilisation · ICU pressure · staffing gap) + PredictiveOpsCockpit mounted on /admin/operations (S7) · revenueGrowth engine (4 levers: denial-risk exposure · days-in-AR · charge-capture gaps · payer-mix concentration) + RevenueCycleGrowthCockpit mounted on /admin/finance (S8). Each card carries reasoning drivers + recommended action + HITL accept/dismiss. Two new audit resources (`ops_prediction`, `rcm_growth`). 10_Competitive_Innovation v1.3 issued. Regression 54/54. |
 
 ---
 
@@ -199,4 +200,26 @@ git checkout checkpoint/M4-wave-1
 ### Restore
 ```
 git checkout checkpoint/M4-wave-2
+```
+
+---
+
+## M4-Wave-3 — Growth Pillar (2026-06-02)
+
+### What's in this checkpoint
+- All M0 + M1 + M2 + M3 + M4-W1 + M4-W2 deliverables (still green).
+- **S7** Predictive Operations Cockpit — engine at [src/lib/predictiveOps.ts](../../src/lib/predictiveOps.ts), component at [src/components/admin/PredictiveOpsCockpit.tsx](../../src/components/admin/PredictiveOpsCockpit.tsx), mounted on [src/app/admin/operations/page.tsx](../../src/app/admin/operations/page.tsx). Four forecasters: ED arrivals (next 4h), OR utilisation (next 24h), ICU bed pressure (next 24h), staffing gap (current/next shift).
+- **S8** Revenue-Cycle Growth Cockpit — engine at [src/lib/revenueGrowth.ts](../../src/lib/revenueGrowth.ts), component at [src/components/admin/RevenueCycleGrowthCockpit.tsx](../../src/components/admin/RevenueCycleGrowthCockpit.tsx), mounted on [src/app/admin/finance/page.tsx](../../src/app/admin/finance/page.tsx). Four levers: denial-risk exposure, days-in-AR, charge-capture gaps, payer-mix concentration. Header shows total ₹-opportunity badge.
+- [docs/specs/10_Competitive_Innovation_v1_3.docx](10_Competitive_Innovation_v1_3.docx).
+- [docs/specs/screens/M4-W3/](screens/M4-W3/) — 2 W3 close-ups (S7 predictive-ops, S8 RCM-growth).
+
+### Pillars advanced
+- **2. GROWTH-FOCUSED** ✅ Two flagship cockpits surface the levers — throughput (ED/OR/ICU), staffing, denial reduction, AR aging, charge capture, payer mix — each with a ₹-impact estimate and a single primary action.
+- **3. AI-CENTRIC** ✅ Every card is HITL: accept/dismiss is audit-logged under `ops_prediction` / `rcm_growth` resources.
+- **1. INTUITIVE** ✅ 4-card grid pattern, consistent tone palette, one primary action per card.
+- **0. PRESERVE** ✅ Regression 54/54. Both surfaces mount additively (top of page, above existing content).
+
+### Restore
+```
+git checkout checkpoint/M4-wave-3
 ```
