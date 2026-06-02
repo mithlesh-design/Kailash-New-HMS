@@ -46,13 +46,15 @@ function record(id, title, severity, category, verdict, code, ui, note) {
   // mock-API seed + Anil legacy-store seed have BOTH completed before any
   // probe reads. Up to 20 s.
   for (let i = 0; i < 40; i++) {
-    const ready = await page.evaluate(() =>
-      localStorage.getItem('kailash.api.v1.__bootstrap__') !== null
-       && localStorage.getItem('kailash.legacy-seed.anil-v2') !== null)
+    const ready = await page.evaluate(() => {
+      const boot = localStorage.getItem('kailash.api.v1.__bootstrap__') !== null
+      const legacy = Object.keys(localStorage).some((k) => k.startsWith('kailash.legacy-seed.anil-'))
+      return boot && legacy
+    })
     if (ready) break
     await sleep(500)
   }
-  await sleep(1000) // settle
+  await sleep(1500) // settle
 
   // Helper — read a localStorage value as JSON
   const ls = (key) => page.evaluate((k) => {

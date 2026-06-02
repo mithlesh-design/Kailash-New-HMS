@@ -30,6 +30,7 @@ any checkpoint state with `git checkout <tag>` (read-only) or
 | `checkpoint/M0-baseline` | 2026-06-01 | `baseline/pre-overhaul` | Preservation contract + regression sweep + baseline screenshots | Contract = [11_Feature_Flow_Inventory_v1_0.docx](11_Feature_Flow_Inventory_v1_0.docx). |
 | `checkpoint/M1-verified` | 2026-06-01 | — | Closures re-verified against src/ + live state; 09 issued | 20/20 Phase-1 closures Verified · 0 Re-opened · 32 Still-open (Phase 2) · 3 Deferred (v2). |
 | `checkpoint/M2-compaction` | 2026-06-02 | — | Compact design system + Command Palette + INTUITIVE pillar | Foundation: design tokens, optimistic helper, CompactHeader/CompactKPI/KbdHint primitives. Global Cmd/Ctrl+K command palette mounted in AppShell. Three canonical surfaces compacted (Admin / Audit Trail / Doctor IPD). 04_UI_UX_Design_Blueprint_v1.1 issued. Regression 54/54. |
+| `checkpoint/M3-flows` | 2026-06-02 | — | Flow completeness — Anil hero journey walked end-to-end | Flow walker covers 16 flows × ~3 steps. 11 PASS · 5 PARTIAL (defensible filter behaviours, documented in §5.1 of 12). Anil seed extended into Patient/Billing/Discharge stores. 12_Flow_Completeness_Report v1.0 issued. Regression 54/54. |
 
 ---
 
@@ -122,4 +123,31 @@ git checkout checkpoint/M1-verified
 ### Restore
 ```
 git checkout checkpoint/M2-compaction
+```
+
+---
+
+## M3 — Flow Completeness (2026-06-02)
+
+### What's in this checkpoint
+- All M0 + M1 + M2 deliverables (still green).
+- [scripts/flow-walker.cjs](../../scripts/flow-walker.cjs) — 16-flow Puppeteer pass.
+- [docs/specs/flow-completeness.json](flow-completeness.json) — machine-readable matrix.
+- [docs/specs/12_Flow_Completeness_Report_v1_0.docx](12_Flow_Completeness_Report_v1_0.docx).
+- [docs/specs/screens/M3/](screens/M3/) — per-step screenshots (~50 PNGs).
+- Anil seed extended to `usePatientStore` / `useBillingStore` / `useDischargeStore`
+  (legacy-store marker bumped to `anil-v4`).
+- Walker hardened: bootstrap+legacy marker prefix-check, hydration-resilient navigation.
+
+### Walker totals (16 flows)
+| Verdict | Count |
+|---|---|
+| PASS    | **11** |
+| PARTIAL (defensible filter behaviours) | 5 |
+| FAIL    | **0** |
+| Console errors | 3 (pre-existing React 19 hydration warnings) |
+
+### Restore
+```
+git checkout checkpoint/M3-flows
 ```

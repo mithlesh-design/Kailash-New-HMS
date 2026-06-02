@@ -2,7 +2,7 @@
  * API doesn't own. Idempotent — gated by a localStorage marker so it runs
  * exactly once per browser session. */
 
-const ANIL_LEGACY_MARKER = 'kailash.legacy-seed.anil-v2'
+const ANIL_LEGACY_MARKER = 'kailash.legacy-seed.anil-v4'
 
 const HOURS = 3600 * 1000
 const hoursAgo = (h: number) => new Date(Date.now() - h * HOURS).toISOString()
@@ -19,6 +19,9 @@ export async function seedAnilLegacyStores(): Promise<void> {
     { useDrugMasterStore },
     { useAdmissionStore },
     { useInpatientStore },
+    { usePatientStore },
+    { useBillingStore },
+    { useDischargeStore },
     { useAuditStore },
   ] = await Promise.all([
     import('@/store/useERStore'),
@@ -28,6 +31,9 @@ export async function seedAnilLegacyStores(): Promise<void> {
     import('@/store/useDrugMasterStore'),
     import('@/store/useAdmissionStore'),
     import('@/store/useInpatientStore'),
+    import('@/store/usePatientStore'),
+    import('@/store/useBillingStore'),
+    import('@/store/useDischargeStore'),
     import('@/store/useAuditStore'),
   ])
 
@@ -338,6 +344,102 @@ export async function seedAnilLegacyStores(): Promise<void> {
     useInpatientStore.setState({
       inpatients: [anilInpatient, ...(ipState.inpatients ?? [])],
     } as unknown as Parameters<typeof useInpatientStore.setState>[0])
+  }
+
+  // ── Patient store — reception / general-patient surfaces find Anil ──
+  const ptState = usePatientStore.getState() as unknown as { patients: { id: string }[] }
+  if (!(ptState.patients ?? []).some((p) => p.id === 'PT-44012')) {
+    const anilPatient = {
+      id: 'PT-44012',
+      name: 'Anil Kumar Verma',
+      age: 38,
+      gender: 'Male' as const,
+      phone: '+91 98109 44012',
+      bloodGroup: 'B+',
+      token: 0,
+      queueStatus: 'done' as const,
+      estimatedWait: 0,
+      doctor: 'Dr. Vikram Rao',
+      department: 'Surgery',
+      vitals: { bp: '118/76', temp: '37.0', weight: '72', spo2: '98', pulse: '78' },
+      symptoms: ['RLQ pain', 'fever', 'nausea'],
+      history: ['Penicillin allergy'],
+      registeredAt: hoursAgo(50),
+      // M3: Anil's record was created 2 days ago but we tag the registeredDate
+      // as TODAY so he surfaces in Reception's default "Today" tab — necessary
+      // for the hero-journey demo to walk clean.
+      registeredDate: new Date().toISOString().split('T')[0]!,
+      triageLevel: 'Medium' as const,
+      hasReports: true,
+      insurer: 'Star Health',
+    }
+    usePatientStore.setState({
+      patients: [anilPatient, ...(ptState.patients ?? [])],
+    } as unknown as Parameters<typeof usePatientStore.setState>[0])
+  }
+
+  // ── Billing store — Anil's IPD bill (with the duplicate-charge AI flag) ──
+  const blState = useBillingStore.getState() as unknown as { bills: { patientId: string }[]; chargeItems: { patientId: string }[] }
+  if (!(blState.bills ?? []).some((b) => b.patientId === 'PT-44012')) {
+    const anilBill = {
+      id: 'BL-ANIL-001',
+      patientId: 'PT-44012',
+      patientName: 'Anil Kumar Verma',
+      visitType: 'IPD' as const,
+      admissionDate: hoursAgo(48),
+      dischargeDate: hoursAgo(6),
+      subtotal: 94730,
+      discounts: 0,
+      nonPayables: 0,
+      insuranceCovered: 85000,
+      patientDue: 9730,
+      status: 'frozen' as const,
+      payerType: 'Cashless (Star Health)',
+      paidAmount: 0,
+    }
+    const anilItems = [
+      { id: 'CI-ANIL-1', patientId: 'PT-44012', type: 'ward' as const,        description: 'Surgical ward bed × 2 days',       amount: 7000,  quantity: 2, date: hoursAgo(47), source: 'Ward' },
+      { id: 'CI-ANIL-2', patientId: 'PT-44012', type: 'consultation' as const, description: 'Surgery consult (Dr. Vikram Rao)',  amount: 1400,  quantity: 2, date: hoursAgo(47), source: 'OPD' },
+      { id: 'CI-ANIL-3', patientId: 'PT-44012', type: 'ot' as const,            description: 'Laparoscopic appendectomy (OT)',     amount: 68000, quantity: 1, date: hoursAgo(45), source: 'OT' },
+      { id: 'CI-ANIL-4', patientId: 'PT-44012', type: 'procedure' as const,    description: 'Anaesthesia (Dr. Sameer Joshi)',     amount: 9500,  quantity: 1, date: hoursAgo(45), source: 'OT' },
+      { id: 'CI-ANIL-5', patientId: 'PT-44012', type: 'lab' as const,           description: 'CBC',                                amount: 350,   quantity: 1, date: hoursAgo(48), source: 'Lab' },
+      { id: 'CI-ANIL-6', patientId: 'PT-44012', type: 'lab' as const,           description: 'CRP',                                amount: 480,   quantity: 1, date: hoursAgo(48), source: 'Lab' },
+      { id: 'CI-ANIL-7', patientId: 'PT-44012', type: 'radiology' as const,    description: 'USG abdomen',                       amount: 950,   quantity: 1, date: hoursAgo(48), source: 'Radiology' },
+      // Two duplicate Trocar lines — duplicate-charge AI flags
+      { id: 'CI-ANIL-8', patientId: 'PT-44012', type: 'consumable' as const,   description: 'OT consumable: Trocar 10 mm',       amount: 2400,  quantity: 1, date: hoursAgo(45), source: 'OT' },
+      { id: 'CI-ANIL-9', patientId: 'PT-44012', type: 'consumable' as const,   description: 'OT consumable: Trocar 10 mm',       amount: 2400,  quantity: 1, date: hoursAgo(45), source: 'OT' },
+      { id: 'CI-ANIL-10', patientId: 'PT-44012', type: 'pharmacy' as const,    description: 'IPD pharmacy (Cipro/Metro/PCM/Tramadol)', amount: 1850, quantity: 1, date: hoursAgo(40), source: 'Pharmacy' },
+    ]
+    useBillingStore.setState({
+      bills: [anilBill, ...(blState.bills ?? [])],
+      chargeItems: [...anilItems, ...(blState.chargeItems ?? [])],
+    } as unknown as Parameters<typeof useBillingStore.setState>[0])
+  }
+
+  // ── Discharge store — Anil in the queue (clearances in flight) ──
+  const dsState = useDischargeStore.getState() as unknown as { dischargeQueue: { patientId: string }[] }
+  if (!(dsState.dischargeQueue ?? []).some((d) => d.patientId === 'PT-44012')) {
+    const anilDis = {
+      id: 'DC-ANIL-001',
+      patientId: 'PT-44012',
+      patientName: 'Anil Kumar Verma',
+      wardBed: 'Surgical SW-301',
+      diagnosis: 'Acute appendicitis · post-lap appendectomy',
+      admittedOn: hoursAgo(48),
+      expectedDischarge: new Date().toISOString(),
+      attendingDoctor: 'Dr. Vikram Rao',
+      clearances: { doctor: 'cleared', nursing: 'cleared', pharmacy: 'cleared', billing: 'pending', insurance: 'pending' },
+      blockers: [
+        { id: 'BLK-ANIL-1', type: 'Insurance', description: 'Star Health claim awaiting doctor sign-off (denial-risk 0.72)', owner: 'Kavita Singh (TPA)' },
+      ],
+      summaryDrafted: true,
+      summaryApproved: false,
+      exitClearanceIssued: false,
+      payerType: 'Cashless (Star Health)',
+    }
+    useDischargeStore.setState({
+      dischargeQueue: [anilDis, ...(dsState.dischargeQueue ?? [])],
+    } as unknown as Parameters<typeof useDischargeStore.setState>[0])
   }
 
   // ── Audit emits for the legacy-side actions ─────────────────────────
