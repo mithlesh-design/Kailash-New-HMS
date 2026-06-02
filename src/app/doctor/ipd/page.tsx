@@ -19,6 +19,7 @@ import { CompactHeader } from "@/components/ui/CompactHeader"
 import { CompactKPI, CompactKPIStrip } from "@/components/ui/CompactKPI"
 import { EarlyWarningBanner } from "@/components/clinical/EarlyWarningBanner"
 import { VoiceScribeButton } from "@/components/clinical/VoiceScribeButton"
+import { CareTeamPresenceCard } from "@/components/clinical/CareTeamPresenceCard"
 
 const CONDITION_TINT: Record<Condition, string> = {
   Critical: 'bg-red-50 text-red-700 border-red-200', Serious: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -118,6 +119,11 @@ export default function DoctorIpd() {
             />
           )
         })}
+      </div>
+
+      {/* M4-W6 — S14: Care-Team Presence + Live Handover. */}
+      <div className="mb-4">
+        <CareTeamPresenceCard ward="Cardiac Care" department="Cardiology" />
       </div>
 
       {/* M4-W2 — S5: Voice Scribe quick action. Captures a progress note via

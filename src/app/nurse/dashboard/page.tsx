@@ -18,6 +18,7 @@ import { useAuditStore } from "@/store/useAuditStore"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useHRStore } from "@/store/useHRStore"
 import { OnShiftTeam } from "@/components/clinical/OnShiftTeam"
+import { CareTeamPresenceCard } from "@/components/clinical/CareTeamPresenceCard"
 import { Activity, AlertCircle, Bed, Stethoscope, Clock, CheckCircle, Pill, Droplets, LogOut, ArrowDownToLine, FileText, ShieldAlert, Info, Video, VideoOff, Send, TrendingUp } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { NeonBadge } from "@/components/ui/neon-badge"
@@ -162,6 +163,10 @@ export default function NurseDashboard() {
 
       {/* Shift & assigned ward */}
       <ShiftBanner />
+
+      {/* M4-W6 — S14: Care-Team Presence + Live Handover. Pill-style
+          presence + SBAR compose + incoming-handover accept. */}
+      <CareTeamPresenceCard ward="Cardiac Care" department="Cardiology" />
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

@@ -36,6 +36,7 @@ any checkpoint state with `git checkout <tag>` (read-only) or
 | `checkpoint/M4-wave-3` | 2026-06-02 | — | Innovation Wave 3 — GROWTH pillar (S7, S8) | predictiveOps engine (4 forecasters: ED arrivals · OR utilisation · ICU pressure · staffing gap) + PredictiveOpsCockpit mounted on /admin/operations (S7) · revenueGrowth engine (4 levers: denial-risk exposure · days-in-AR · charge-capture gaps · payer-mix concentration) + RevenueCycleGrowthCockpit mounted on /admin/finance (S8). Each card carries reasoning drivers + recommended action + HITL accept/dismiss. Two new audit resources (`ops_prediction`, `rcm_growth`). 10_Competitive_Innovation v1.3 issued. Regression 54/54. |
 | `checkpoint/M4-wave-4` | 2026-06-02 | — | Innovation Wave 4 — Compliance Autopilot (S9, S10) | NabhEvidenceLiveCockpit mounted on /admin/compliance — one card per NABH chapter with freshest-evidence + AI suggested next-action + Open-desk HITL routing (S9) · dpdpAudit engine (5 dimensions: consent rate · RTBF SLA · export audit · breach response · RBAC discipline) + DpdpSelfAuditPanel mounted on /admin/disha with 0-100 score per dimension and overall-score badge (S10). Two new audit resources (`nabh_evidence`, `dpdp_audit`). 10_Competitive_Innovation v1.4 issued. Regression 54/54. |
 | `checkpoint/M4-wave-5` | 2026-06-02 | — | Innovation Wave 5 — Patient Super-App (S11, S12, S13) | AiHealthSummaryCard mounted at top of /patient/dashboard with 3 narration variants + 3-tile mini-strip + HITL accept/regenerate/hide (S11) · FamilyInviteCard with mock WhatsApp send flow (sent → delivered → accepted progression), per-recipient masked phone + status chip + revoke (S12) · patientNudges engine (8 nudge generators) + ProactiveNudgesFeed with priority-sorted feed capped at 5, persisted dismissals (S13). Three new audit resources (`patient_health_summary`, `family_invite`, `patient_nudge`). 10_Competitive_Innovation v1.5 issued. Regression 54/54. |
+| `checkpoint/M4-wave-6` | 2026-06-02 | — | Innovation Wave 6 — FINAL CARD · Care-Team Presence + Live Handover (S14) | careTeamPresence engine over useHRStore.staff + shifts + duty + wall-clock → PresenceStatus (on_shift / handover_pending / on_call / off) · CareTeamPresenceCard renders pill strip + in-card SBAR compose with AI-generated skeleton + Incoming panel with two-sided HITL (sign + receive) backed by useShiftStore.signHandover / receiveHandover · mounted on /doctor/ipd and /nurse/dashboard. One new audit resource (`live_handover`). **Slate 15/15 shipped.** 10_Competitive_Innovation v1.6 issued. Regression 54/54. |
 
 ---
 
@@ -267,4 +268,27 @@ git checkout checkpoint/M4-wave-4
 ### Restore
 ```
 git checkout checkpoint/M4-wave-5
+```
+
+---
+
+## M4-Wave-6 — FINAL CARD · Care-Team Presence + Live Handover (2026-06-02)
+
+### What's in this checkpoint
+- All M0 + M1 + M2 + M3 + M4-W1 + M4-W2 + M4-W3 + M4-W4 + M4-W5 deliverables (still green).
+- **S14** Care-Team Presence + Live Handover — engine at [src/lib/careTeamPresence.ts](../../src/lib/careTeamPresence.ts), component at [src/components/clinical/CareTeamPresenceCard.tsx](../../src/components/clinical/CareTeamPresenceCard.tsx), mounted on [src/app/doctor/ipd/page.tsx](../../src/app/doctor/ipd/page.tsx) and [src/app/nurse/dashboard/page.tsx](../../src/app/nurse/dashboard/page.tsx). Pill-style presence strip (on_shift / handover_pending / on_call / off) + in-card SBAR compose with AI skeleton + Incoming panel with two-sided HITL (sign + receive) backed by the existing useShiftStore.
+- [docs/specs/10_Competitive_Innovation_v1_6.docx](10_Competitive_Innovation_v1_6.docx).
+- [docs/specs/screens/M4-W6/](screens/M4-W6/) — 3 W6 close-ups (Doctor IPD presence, SBAR compose draft, Nurse Dashboard presence).
+
+### Slate status — 15 / 15 SHIPPED ✅
+W1: S1 · S2 · S3 · S15 · W2: S4 · S5 · S6 · W3: S7 · S8 · W4: S9 · S10 · W5: S11 · S12 · S13 · W6: S14.
+
+### Pillars advanced
+- **3. AI-CENTRIC** ✅ Two-sided HITL handover with AI-generated SBAR skeleton; both sign + receive audit-logged.
+- **1. INTUITIVE** ✅ Presence at a glance (status dot on every avatar); single-tap receive.
+- **0. PRESERVE** ✅ Regression 54/54. Existing OnShiftTeam card on nurse dashboard preserved; W6 mounts additively above the ward overview.
+
+### Restore
+```
+git checkout checkpoint/M4-wave-6
 ```
