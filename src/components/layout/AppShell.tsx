@@ -20,6 +20,7 @@ import { useNotificationStore } from "@/store/useNotificationStore"
 import { Avatar } from "@/components/ui/avatar"
 import { LocaleToggle } from "@/components/ui/LocaleToggle"
 import { CommandPalette, CommandPaletteTrigger } from "@/components/layout/CommandPalette"
+import { CriticalValueBanner } from "@/components/clinical/CriticalValueBanner"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
@@ -624,6 +625,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Page Content */}
         <main id="main-content" className="flex-1 overflow-y-auto px-6 pb-8 pt-6 relative z-10">
+          {/* M4-W1 — Closed-loop critical-value banner. Visible only when
+              an unack'd lab_critical_callback exists, and only on the
+              roles that own the loop (doctor, nurse). */}
+          {(activeRole === 'doctor' || activeRole === 'nurse') ? (
+            <div className="max-w-7xl mx-auto mb-3">
+              <CriticalValueBanner role={activeRole === 'doctor' ? 'doctor' : 'nurse'} />
+            </div>
+          ) : null}
+
           {mounted ? (
             <AnimatePresence mode="wait">
               <motion.div

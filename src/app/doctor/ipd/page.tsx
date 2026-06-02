@@ -17,6 +17,7 @@ import { RoundModal } from "@/components/doctor/ipd/panels"
 import { ClientOnly } from "@/components/ClientOnly"
 import { CompactHeader } from "@/components/ui/CompactHeader"
 import { CompactKPI, CompactKPIStrip } from "@/components/ui/CompactKPI"
+import { EarlyWarningBanner } from "@/components/clinical/EarlyWarningBanner"
 
 const CONDITION_TINT: Record<Condition, string> = {
   Critical: 'bg-red-50 text-red-700 border-red-200', Serious: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -99,6 +100,25 @@ export default function DoctorIpd() {
       />
 
       <ClientOnly fallback={<div className="rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-12 flex items-center justify-center"><div className="h-7 w-7 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" role="status" aria-label="Loading inpatients" /></div>}>
+
+      {/* M4-W1 — S2: NEWS2 ambient watcher. Renders a banner per inpatient
+          whose most-recent vital crosses the NEWS2 threshold. Silent below. */}
+      <div className="space-y-2 mb-4">
+        {active.map((ip) => {
+          const v = (ip.vitals ?? []).slice().sort((a, b) => b.at.localeCompare(a.at))[0]
+          if (!v) return null
+          return (
+            <EarlyWarningBanner
+              key={'ew-' + ip.patientId}
+              patientId={ip.patientId}
+              patientName={ip.name}
+              vitals={{ hr: v.hr, rr: v.rr, sbp: v.systolicBP, dbp: v.diastolicBP, temp: v.temp, spo2: v.spo2 }}
+              onEscalate={() => router.push(`/doctor/ipd/${ip.patientId}`)}
+            />
+          )
+        })}
+      </div>
+
       {/* Rounds due */}
       <div className="rounded-2xl bg-amber-50/50 border border-amber-100 p-4 mb-5">
         <h3 className="text-[14px] font-bold text-amber-900 mb-2.5 flex items-center gap-2"><AlarmClock className="h-4.5 w-4.5 text-amber-500" /> Rounds due {due.length > 0 && <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">{due.length}</span>}</h3>

@@ -2,7 +2,7 @@
  * API doesn't own. Idempotent — gated by a localStorage marker so it runs
  * exactly once per browser session. */
 
-const ANIL_LEGACY_MARKER = 'kailash.legacy-seed.anil-v4'
+const ANIL_LEGACY_MARKER = 'kailash.legacy-seed.anil-v5'
 
 const HOURS = 3600 * 1000
 const hoursAgo = (h: number) => new Date(Date.now() - h * HOURS).toISOString()
@@ -463,6 +463,13 @@ export async function seedAnilLegacyStores(): Promise<void> {
         'Pre-auth filed · Star Health TPA · cashless approved ₹85,000', 'Kavita Singh')
   audit('insurance_denial_risk_run',         'claim',             'CLM-ANIL-001',
         'Denial-risk 0.72 — doctor sign-off required before submission', 'AI Denial Scorer')
+
+  // M4-W1 / S3 — seed a recent lab_critical_callback so the closed-loop
+  // banner is visible on first demo load. The presenter acknowledges it
+  // during the walkthrough; ack persists in localStorage (kailash.cv-ack.*).
+  audit('lab_critical_callback',             'lab_result',         'LR-ANIL-TROPI',
+        'CRITICAL — Anil Kumar Verma · Troponin I = 2.1 ng/mL (ref < 0.04). NSTEMI pattern. Doctor + nurse acknowledgement required.',
+        'Lab — Dr. Arun Menon')
 
   window.localStorage.setItem(ANIL_LEGACY_MARKER, JSON.stringify({ at: new Date().toISOString() }))
 }

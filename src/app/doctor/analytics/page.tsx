@@ -7,6 +7,7 @@ import { useDoctorStatsStore, PERIODS, type PeriodKey } from "@/store/useDoctorS
 import { useAuthStore } from "@/store/useAuthStore"
 import { ClientOnly } from "@/components/ClientOnly"
 import { cn } from "@/lib/utils"
+import { DaySummaryCard } from "@/components/doctor/DaySummaryCard"
 
 const GRAPH_DAYS: Record<PeriodKey, number> = { today: 7, yesterday: 7, week: 7, month: 30, quarter: 90, half: 182, year: 365 }
 
@@ -42,6 +43,10 @@ export default function DoctorAnalytics() {
 
   return (
     <div className="max-w-4xl mx-auto pb-8">
+      {/* M4-W1 — S15: Day-in-Review explainable narration. */}
+      <div className="mb-4">
+        <DaySummaryCard doctorId={doctorId} doctorName={currentUser?.name ?? 'Dr. Priya Nair'} />
+      </div>
       <div className="mb-4">
         <h1 className="text-[24px] font-bold text-slate-900 tracking-tight">My Activity</h1>
         <p className="text-[13px] text-slate-500 mt-1">{currentUser?.name} · {currentUser?.id} — your consultation & ordering record, for accountability.</p>

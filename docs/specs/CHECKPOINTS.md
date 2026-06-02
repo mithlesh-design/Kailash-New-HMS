@@ -31,6 +31,7 @@ any checkpoint state with `git checkout <tag>` (read-only) or
 | `checkpoint/M1-verified` | 2026-06-01 | — | Closures re-verified against src/ + live state; 09 issued | 20/20 Phase-1 closures Verified · 0 Re-opened · 32 Still-open (Phase 2) · 3 Deferred (v2). |
 | `checkpoint/M2-compaction` | 2026-06-02 | — | Compact design system + Command Palette + INTUITIVE pillar | Foundation: design tokens, optimistic helper, CompactHeader/CompactKPI/KbdHint primitives. Global Cmd/Ctrl+K command palette mounted in AppShell. Three canonical surfaces compacted (Admin / Audit Trail / Doctor IPD). 04_UI_UX_Design_Blueprint_v1.1 issued. Regression 54/54. |
 | `checkpoint/M3-flows` | 2026-06-02 | — | Flow completeness — Anil hero journey walked end-to-end | Flow walker covers 16 flows × ~3 steps. 11 PASS · 5 PARTIAL (defensible filter behaviours, documented in §5.1 of 12). Anil seed extended into Patient/Billing/Discharge stores. 12_Flow_Completeness_Report v1.0 issued. Regression 54/54. |
+| `checkpoint/M4-wave-1` | 2026-06-02 | — | Innovation Wave 1 — clinical safety wow (S1, S2, S3, S15) | DrugSafetyReasoningCard (S1) mounted in doctor OPD Rx panel · EarlyWarningBanner (S2) on doctor IPD · CriticalValueBanner (S3) globally in AppShell for doctor + nurse with closed-loop acknowledgement · DaySummaryCard (S15) on doctor analytics. Shared ReasoningChip primitive. 10_Competitive_Innovation v1.1 issued. Regression 54/54. |
 
 ---
 
@@ -150,4 +151,29 @@ git checkout checkpoint/M2-compaction
 ### Restore
 ```
 git checkout checkpoint/M3-flows
+```
+
+---
+
+## M4-Wave-1 — Demo-Defining Clinical Wow (2026-06-02)
+
+### What's in this checkpoint
+- All M0 + M1 + M2 + M3 deliverables (still green).
+- **S1** Drug-Safety Reasoning Card → [src/components/clinical/DrugSafetyReasoningCard.tsx](../../src/components/clinical/DrugSafetyReasoningCard.tsx), mounted in [src/app/doctor/dashboard/page.tsx](../../src/app/doctor/dashboard/page.tsx).
+- **S2** Early-Warning Banner → [src/components/clinical/EarlyWarningBanner.tsx](../../src/components/clinical/EarlyWarningBanner.tsx), mounted in [src/app/doctor/ipd/page.tsx](../../src/app/doctor/ipd/page.tsx).
+- **S3** Critical-Value Banner → [src/components/clinical/CriticalValueBanner.tsx](../../src/components/clinical/CriticalValueBanner.tsx), mounted globally in [src/components/layout/AppShell.tsx](../../src/components/layout/AppShell.tsx) for doctor + nurse roles.
+- **S15** Day-in-Review → [src/components/doctor/DaySummaryCard.tsx](../../src/components/doctor/DaySummaryCard.tsx), mounted in [src/app/doctor/analytics/page.tsx](../../src/app/doctor/analytics/page.tsx).
+- Shared **ReasoningChip** primitive at [src/components/clinical/ReasoningChip.tsx](../../src/components/clinical/ReasoningChip.tsx).
+- Seed bumped to `anil-v5` — `lab_critical_callback` audit row for Anil's Trop-I added so S3 fires on first demo load.
+- [docs/specs/10_Competitive_Innovation_v1_1.docx](10_Competitive_Innovation_v1_1.docx).
+- [docs/specs/screens/M4-W1/](screens/M4-W1/) — 16 regression screenshots + 2 W1 close-ups.
+
+### Pillars advanced
+- **3. AI-CENTRIC** ✅ Every W1 card carries HITL accept/reject/modify + reasoning + confidence.
+- **1. INTUITIVE** ✅ Transparent reasoning chips, single primary action per card.
+- **0. PRESERVE** ✅ Regression 54/54.
+
+### Restore
+```
+git checkout checkpoint/M4-wave-1
 ```

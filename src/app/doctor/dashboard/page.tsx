@@ -34,6 +34,7 @@ import { openPrint, olFrom, para } from "@/lib/printDoc"
 import { useDoctorProfileStore } from "@/store/useDoctorProfileStore"
 import { useHRStore } from "@/store/useHRStore"
 import { useDialogs } from "@/components/ui/ConfirmDialog"
+import { DrugSafetyReasoningCard } from "@/components/clinical/DrugSafetyReasoningCard"
 
 const DRUGS = ["Paracetamol 500mg","Amoxicillin 500mg","Azithromycin 500mg","Cetirizine 10mg","Pantoprazole 40mg","Dolo 650mg","Metformin 500mg","Amlodipine 5mg","Atorvastatin 20mg","Omeprazole 20mg","Ibuprofen 400mg","Montelukast 10mg","Metronidazole 400mg","Ondansetron 4mg","Diclofenac 50mg"]
 // Lab tests come straight from the central catalog so every doctor-selected
@@ -1140,6 +1141,25 @@ export default function DoctorDashboard() {
                     </div>
                   </div>
                 )}
+
+                {/* M4-W1 — S1: Transparent drug-safety reasoning + HITL
+                    alternatives. Renders only when the prescription has
+                    at least one med (and the patient has loaded). The
+                    existing one-line warnings below it are kept as a
+                    summary trail. */}
+                {prescriptions.length > 0 && currentPatient ? (
+                  <div className="mb-3">
+                    <DrugSafetyReasoningCard
+                      meds={prescriptions.map((p) => ({ name: p.medicine, dose: p.dosage }))}
+                      allergies={(currentPatient.history ?? []).filter((h) =>
+                        /allergy|allergic|penicillin/i.test(h))}
+                      comorbidities={currentPatient.history ?? []}
+                      onSubstitute={(alt) => {
+                        toast.success(`Suggested: ${alt.to}. Pick from the medicine search to add.`)
+                      }}
+                    />
+                  </div>
+                ) : null}
 
                 {rxWarnings.length > 0 && (
                   <div className="mb-3 space-y-1.5">
