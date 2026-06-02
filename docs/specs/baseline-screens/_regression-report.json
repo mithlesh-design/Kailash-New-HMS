@@ -1,6 +1,6 @@
 {
   "label": "M0-baseline",
-  "ranAt": "2026-06-01T16:22:53.234Z",
+  "ranAt": "2026-06-02T09:23:09.443Z",
   "base": "http://localhost:3000",
   "roles": [
     {
@@ -161,7 +161,7 @@
         "anilNews2Hit": true,
         "anilDuplicateBillFlag": true,
         "kiranPresent": true,
-        "auditTotal": 88,
+        "auditTotal": 89,
         "labCount": 4,
         "radCount": 3,
         "rxCount": 4,
@@ -187,6 +187,8 @@
       "keys": [
         "kailash-admissionstore",
         "kailash-authstore",
+        "kailash-billingstore",
+        "kailash-dischargestore",
         "kailash-drugmasterstore",
         "kailash-erstore",
         "kailash-insurancestore",
@@ -194,6 +196,7 @@
         "kailash-narcoticsstore",
         "kailash-notifications",
         "kailash-otstore",
+        "kailash-patientstore",
         "kailash.api.v1.__bootstrap__",
         "kailash.api.v1.audit_entries",
         "kailash.api.v1.beds",
@@ -215,7 +218,7 @@
         "kailash.api.v1.staff",
         "kailash.api.v1.visits",
         "kailash.api.v1.vitals",
-        "kailash.legacy-seed.anil-v2"
+        "kailash.legacy-seed.anil-v5"
       ]
     }
   ],

@@ -18,6 +18,7 @@ import { ClientOnly } from "@/components/ClientOnly"
 import { CompactHeader } from "@/components/ui/CompactHeader"
 import { CompactKPI, CompactKPIStrip } from "@/components/ui/CompactKPI"
 import { EarlyWarningBanner } from "@/components/clinical/EarlyWarningBanner"
+import { VoiceScribeButton } from "@/components/clinical/VoiceScribeButton"
 
 const CONDITION_TINT: Record<Condition, string> = {
   Critical: 'bg-red-50 text-red-700 border-red-200', Serious: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -117,6 +118,20 @@ export default function DoctorIpd() {
             />
           )
         })}
+      </div>
+
+      {/* M4-W2 — S5: Voice Scribe quick action. Captures a progress note via
+          speech, structures it into SOAP, audited on accept. */}
+      <div className="mb-4 flex items-center gap-2 flex-wrap">
+        <span className="text-[11.5px] font-semibold text-slate-500 uppercase tracking-wide">Quick note</span>
+        <VoiceScribeButton
+          surface="ipd_progress"
+          patientId={active[0]?.patientId}
+          patientName={active[0]?.name}
+          context={{ diagnosis: active[0]?.diagnosis, vitals: active[0]?.vitals?.[0] ? `HR ${active[0].vitals[0].hr}, BP ${active[0].vitals[0].systolicBP}/${active[0].vitals[0].diastolicBP}, T ${active[0].vitals[0].temp}` : undefined }}
+          onAccept={(soap) => toast.success('Progress note saved to chart', { description: soap.split('\n')[0] })}
+        />
+        <span className="text-[11px] text-slate-400">Speak naturally — AI structures into SOAP for review</span>
       </div>
 
       {/* Rounds due */}

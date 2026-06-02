@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { OcrIntakeCard } from "@/components/reception/OcrIntakeCard"
 
 const COLUMNS: { key: QueueStatus; label: string; color: string }[] = [
   { key: 'waiting',    label: 'Waiting Room',     color: 'border-t-slate-300' },
@@ -299,6 +300,22 @@ export default function OpdQueuePage() {
               </div>
 
               <div className="space-y-4">
+                {/* M4-W2 — S6: Mock OCR Intake. Scan Aadhaar / insurance / lab
+                    paper → 800 ms simulated OCR → prefill form fields. Every
+                    field stays editable; the form is the source of truth. */}
+                <OcrIntakeCard
+                  onApply={(fields, docType) => {
+                    setForm((f) => ({
+                      ...f,
+                      name:       fields.name?.value       ?? f.name,
+                      phone:      (fields.phone?.value     ?? f.phone).replace(/\D/g, '').slice(-10),
+                      age:        fields.age?.value        ?? f.age,
+                      gender:     (fields.gender?.value as WalkInForm['gender']) ?? f.gender,
+                    }))
+                    toast.success(`Prefilled from ${docType === 'aadhaar' ? 'Aadhaar' : docType === 'insurance' ? 'insurance card' : 'lab paper'}`, { description: 'Review and submit when ready' })
+                  }}
+                />
+
                 <div>
                   <label htmlFor="wi-name" className="block text-sm font-semibold text-slate-700 mb-1.5">Full Name <span className="text-red-500">*</span></label>
                   <Input id="wi-name" placeholder="Patient full name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="h-10 rounded-xl" />

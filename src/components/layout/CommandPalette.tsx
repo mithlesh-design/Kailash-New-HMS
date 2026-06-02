@@ -27,6 +27,8 @@ import { usePatientStore } from "@/store/usePatientStore"
 import { useInpatientStore } from "@/store/useInpatientStore"
 import { cn } from "@/lib/utils"
 import { KbdHint } from "@/components/ui/KbdHint"
+import { parseIntent } from "@/lib/aiCopilot"
+import { CopilotPreviewCard } from "@/components/clinical/CopilotPreviewCard"
 
 type CommandKind = "route" | "patient" | "intent" | "staff"
 type CommandItem = {
@@ -179,6 +181,31 @@ export function CommandPalette() {
         return q.split(/\s+/).every((token) => hay.includes(token))
       }).slice(0, 30)
 
+  // ── S4 — Natural-language Copilot intent ────────────────────────────────
+  // Trigger when the user types something verb-like or longer than two words
+  // AND we haven't already found a direct exact match in the top result.
+  const showCopilot = useMemo(() => {
+    if (q.length < 6) return false
+    const tokens = q.split(/\s+/)
+    if (tokens.length < 3) return false
+    return /\b(schedule|book|order|draft|prepare|discharge|show|find|search|summari[sz]e|recap)\b/i.test(q)
+  }, [q])
+  const intent = useMemo(() => {
+    if (!showCopilot) return null
+    const registry = [
+      ...(patients ?? []).map((p) => ({ id: p.id, name: p.name })),
+      ...(inpatients ?? []).map((ip) => ({ id: ip.patientId, name: ip.name })),
+    ]
+    return parseIntent(query.trim(), { patients: registry })
+  }, [showCopilot, query, patients, inpatients])
+
+  function acceptCopilot() {
+    if (!intent?.destination) return
+    router.push(intent.destination.route)
+    setOpen(false)
+    setQuery("")
+  }
+
   useEffect(() => { setCursor(0) }, [query, open])
 
   function selectAt(idx: number) {
@@ -233,6 +260,14 @@ export function CommandPalette() {
 
         {/* Results */}
         <div className="max-h-[60vh] overflow-y-auto py-1">
+          {intent ? (
+            <CopilotPreviewCard
+              intent={intent}
+              onAccept={acceptCopilot}
+              onReject={() => setQuery("")}
+            />
+          ) : null}
+
           {filtered.length === 0 ? (
             <div className="px-4 py-10 text-center text-slate-400">
               <p className="text-[13px] font-medium text-slate-500">No matches</p>

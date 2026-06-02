@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
+import { VoiceScribeButton } from "@/components/clinical/VoiceScribeButton"
 
 // ── Speech Recognition types ──────────────────────────────────────────────────
 type SpeechResultItem = { transcript: string }
@@ -272,6 +273,13 @@ function NotesPanel({ patient }: { patient: PatientBed }) {
           ) : (
             <span className="text-xs text-slate-400 bg-slate-50 px-3 py-2 rounded-xl">Voice not supported in this browser</span>
           )}
+          {/* M4-W2 — S5: AI-SOAP companion. Existing voice button appends raw
+              transcript; this one structures into SOAP for the chart. */}
+          <VoiceScribeButton
+            surface="nurse_round"
+            onAccept={(soap) => { setNoteText((t) => (t ? t + '\n\n' : '') + soap); toast.success('AI-SOAP appended to note') }}
+            compact
+          />
           <span className="flex-1" />
           <button
             onClick={handleSave}
