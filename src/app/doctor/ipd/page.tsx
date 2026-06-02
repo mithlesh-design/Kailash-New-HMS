@@ -15,6 +15,8 @@ import { IpdActionModal, type IpdModalKind } from "@/components/doctor/ipd/ipdMo
 import { type IpdAction } from "@/components/doctor/ipd/ActionsMenu"
 import { RoundModal } from "@/components/doctor/ipd/panels"
 import { ClientOnly } from "@/components/ClientOnly"
+import { CompactHeader } from "@/components/ui/CompactHeader"
+import { CompactKPI, CompactKPIStrip } from "@/components/ui/CompactKPI"
 
 const CONDITION_TINT: Record<Condition, string> = {
   Critical: 'bg-red-50 text-red-700 border-red-200', Serious: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -77,12 +79,24 @@ export default function DoctorIpd() {
     setModal({ kind: a as IpdModalKind, id })
   }
 
+  // ── M2: compact KPI tallies (computed from `active`) ──
+  const criticalCount = active.filter((ip) => ip.condition === 'Critical').length
+  const dischargeReady = active.filter((ip) => ip.condition === 'Discharge-ready').length
+
   return (
     <div className="pb-6">
-      <div className="mb-4">
-        <h1 className="text-[24px] font-bold text-slate-900 tracking-tight flex items-center gap-2"><HeartPulse className="h-6 w-6 text-rose-500" /> IPD / Inpatients</h1>
-        <p className="text-[13px] text-slate-500 mt-1">{active.length} admitted · rounds auto-scheduled by acuity (Critical 4h · Stable 12h)</p>
-      </div>
+      {/* M2 — Compact header: title row, KPI strip, single primary action */}
+      <CompactHeader
+        title="IPD / Inpatients"
+        subtitle={`${active.length} admitted · rounds auto-scheduled by acuity (Critical 4h · Stable 12h)`}
+        side={
+          <CompactKPIStrip>
+            <CompactKPI label="Rounds due"      value={due.length}      tone={due.length > 0 ? 'warn' : 'neutral'} />
+            <CompactKPI label="Critical"        value={criticalCount}    tone={criticalCount > 0 ? 'danger' : 'neutral'} />
+            <CompactKPI label="Discharge ready" value={dischargeReady}   tone={dischargeReady > 0 ? 'ok' : 'neutral'} />
+          </CompactKPIStrip>
+        }
+      />
 
       <ClientOnly fallback={<div className="rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-12 flex items-center justify-center"><div className="h-7 w-7 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" role="status" aria-label="Loading inpatients" /></div>}>
       {/* Rounds due */}

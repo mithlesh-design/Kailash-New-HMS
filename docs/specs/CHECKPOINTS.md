@@ -29,6 +29,7 @@ any checkpoint state with `git checkout <tag>` (read-only) or
 | `phase-1-complete` | 2026-06-01 | — | Phase-1 ship & GitHub push | Pre-overhaul snapshot. |
 | `checkpoint/M0-baseline` | 2026-06-01 | `baseline/pre-overhaul` | Preservation contract + regression sweep + baseline screenshots | Contract = [11_Feature_Flow_Inventory_v1_0.docx](11_Feature_Flow_Inventory_v1_0.docx). |
 | `checkpoint/M1-verified` | 2026-06-01 | — | Closures re-verified against src/ + live state; 09 issued | 20/20 Phase-1 closures Verified · 0 Re-opened · 32 Still-open (Phase 2) · 3 Deferred (v2). |
+| `checkpoint/M2-compaction` | 2026-06-02 | — | Compact design system + Command Palette + INTUITIVE pillar | Foundation: design tokens, optimistic helper, CompactHeader/CompactKPI/KbdHint primitives. Global Cmd/Ctrl+K command palette mounted in AppShell. Three canonical surfaces compacted (Admin / Audit Trail / Doctor IPD). 04_UI_UX_Design_Blueprint_v1.1 issued. Regression 54/54. |
 
 ---
 
@@ -95,4 +96,30 @@ git checkout baseline/pre-overhaul         # branch
 ### Restore
 ```
 git checkout checkpoint/M1-verified
+```
+
+---
+
+## M2 — Compact, Elevate & Make Intuitive (2026-06-02)
+
+### What's in this checkpoint
+- All M0 + M1 deliverables (still green).
+- [src/lib/design-tokens.ts](../../src/lib/design-tokens.ts) — single source of truth for tokens.
+- [src/lib/optimistic.ts](../../src/lib/optimistic.ts) — optimistic-UI helper.
+- [src/components/ui/CompactHeader.tsx](../../src/components/ui/CompactHeader.tsx)
+- [src/components/ui/CompactKPI.tsx](../../src/components/ui/CompactKPI.tsx)
+- [src/components/ui/KbdHint.tsx](../../src/components/ui/KbdHint.tsx)
+- [src/components/layout/CommandPalette.tsx](../../src/components/layout/CommandPalette.tsx) — Cmd/Ctrl+K spine.
+- [src/components/layout/AppShell.tsx](../../src/components/layout/AppShell.tsx) — palette + trigger mounted (additive).
+- Three compacted canonical surfaces: `admin/dashboard`, `audit/log`, `doctor/ipd`.
+- [04_UI_UX_Design_Blueprint_v1.1.docx](04_UI_UX_Design_Blueprint_v1_1.docx).
+- [docs/specs/screens/M2/](screens/M2/) — fresh 16 role screenshots + report.
+
+### Pillars in scope
+- **0. PRESERVE** ✅ Regression 54/54 — every M0 contract item still resolves.
+- **1. INTUITIVE** ✅ Command palette + compact tokens + INTUITIVE rules documented in 04 v1.1.
+
+### Restore
+```
+git checkout checkpoint/M2-compaction
 ```

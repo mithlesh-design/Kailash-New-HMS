@@ -19,6 +19,7 @@ import { useInpatientStore } from "@/store/useInpatientStore"
 import { useNotificationStore } from "@/store/useNotificationStore"
 import { Avatar } from "@/components/ui/avatar"
 import { LocaleToggle } from "@/components/ui/LocaleToggle"
+import { CommandPalette, CommandPaletteTrigger } from "@/components/layout/CommandPalette"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
@@ -523,6 +524,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2.5">
+            {/* M2 — Command palette trigger (Cmd/Ctrl+K). Additive next to the existing patient search. */}
+            <CommandPaletteTrigger className="hidden lg:inline-flex" />
+
             {/* Global Search */}
             <div className="relative hidden md:block w-56">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8] z-10" aria-hidden="true" />
@@ -638,6 +642,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </main>
       </div>
+      {/* M2 — Command palette: Cmd/Ctrl+K from anywhere in the app. */}
+      <CommandPalette />
     </div>
   )
 }

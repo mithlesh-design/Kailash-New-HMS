@@ -31,6 +31,7 @@ import { CoverageStrip } from "@/components/admin/CoverageGauge"
 import { SickCallModal } from "@/components/admin/SickCallModal"
 import { SwapRequestModal } from "@/components/admin/SwapRequestModal"
 import { DemoSeedControl } from "@/components/admin/DemoSeedControl"
+import { CompactHeader } from "@/components/ui/CompactHeader"
 import { AlertCircle, ArrowLeftRight, Wallet, ChevronRight } from "lucide-react"
 import { useVendorStore } from "@/store/useVendorStore"
 import { useStatutoryStore } from "@/store/useStatutoryStore"
@@ -235,42 +236,36 @@ export default function AdminDashboard() {
   const auditCompletion = Math.round((auditTasks.filter(t => t.status === 'Completed').length / auditTasks.length) * 100)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
 
-      {/* ── Page Header ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
-      >
-        <div>
-          <NeonBadge variant="blue" dot pulse className="mb-2">
-            <Wifi className="h-3 w-3" /> Live Operations
-          </NeonBadge>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Hospital Analytics</h2>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          {criticalCoverageDepts.length > 0 ? (
+      {/* ── M2 — Compact page header (denser, one-row, primary action emphasised) ── */}
+      <CompactHeader
+        title="Hospital Analytics"
+        subtitle="Live operations · DISHA compliant"
+        badge={
+          criticalCoverageDepts.length > 0 ? (
             <NeonBadge variant="danger" dot pulse>
               <AlertCircle className="h-3 w-3" /> {criticalCoverageDepts.length} coverage alert{criticalCoverageDepts.length > 1 ? 's' : ''}
             </NeonBadge>
           ) : (
             <NeonBadge variant="success" dot>Systems Normal</NeonBadge>
-          )}
-          <NeonBadge variant="teal">
-            <ShieldCheck className="h-3 w-3" /> DISHA Compliant
-          </NeonBadge>
-          <DemoSeedControl />
-          <button onClick={() => setShowSickCall(true)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 cursor-pointer">
-            <AlertCircle className="h-3 w-3" />Sick call
-          </button>
-          <button onClick={() => setShowSwap(true)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 cursor-pointer">
-            <ArrowLeftRight className="h-3 w-3" />Swap shift
-          </button>
-        </div>
-      </motion.div>
+          )
+        }
+        side={
+          <>
+            <NeonBadge variant="blue" dot pulse><Wifi className="h-3 w-3" /> Live</NeonBadge>
+            <DemoSeedControl />
+            <button onClick={() => setShowSickCall(true)}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-50 hover:bg-amber-100 text-amber-700 ring-1 ring-amber-200/70 cursor-pointer">
+              <AlertCircle className="h-3 w-3" />Sick call
+            </button>
+            <button onClick={() => setShowSwap(true)}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 ring-1 ring-slate-200/70 cursor-pointer">
+              <ArrowLeftRight className="h-3 w-3" />Swap shift
+            </button>
+          </>
+        }
+      />
 
       {/* Coverage strip — current-shift gauge per critical dept */}
       <div className="rounded-xl border border-slate-200 bg-white p-4">
