@@ -2,10 +2,16 @@
 
 import { useState } from "react"
 import { useInsuranceStore } from "@/store/useInsuranceStore"
-import { ShieldCheck, IndianRupee, FileText, CheckCircle, AlertTriangle, Sparkles, X, ChevronRight } from "lucide-react"
+import { usePatientStore } from "@/store/usePatientStore"
+import { useBillingStore } from "@/store/useBillingStore"
+import { useInpatientStore } from "@/store/useInpatientStore"
+import { ShieldCheck, IndianRupee, FileText, CheckCircle, AlertTriangle, Sparkles, X, ChevronRight, ArrowRight, Send, Activity, Hourglass, User, ShieldAlert, CheckCircle2 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { motion, AnimatePresence } from "framer-motion"
+import { LiveCashlessMonitor } from "@/components/insurance/LiveCashlessMonitor"
+import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 const INSURERS = [
   'Star Health Insurance', 'HDFC Ergo Health', 'Niva Bupa Health',
@@ -202,6 +208,23 @@ function VerificationPanel() {
 
 export default function InsuranceDashboard() {
   const { totalClaimsValue, pendingApprovals, claims } = useInsuranceStore()
+  const patients = usePatientStore(s => s.patients)
+  const bills = useBillingStore(s => s.bills)
+  const inpatients = useInpatientStore(s => s.inpatients)
+
+  // M13.6 — pipeline counts for the cashless-case lifecycle strip.
+  // Sources: walk-in flag (usePatientStore.insurer), inpatient cashless billing,
+  // and existing claims (mapped to lifecycle stages).
+  const cashlessWalkIns = patients.filter(p => !!p.insurer).length
+  const cashlessInpatients = inpatients.filter(ip => {
+    const b = bills.find(b => b.patientId === ip.patientId)
+    return b?.payerType?.toLowerCase().includes('cashless')
+  }).length
+  const preAuthPending = claims.filter(c => c.status === 'Pending Pre-Auth' || (c.status === 'In Process' && c.submissionStatus !== 'submitted')).length
+  const preAuthApproved = claims.filter(c => c.status === 'Approved' && c.submissionStatus !== 'submitted').length
+  const claimSubmitted = claims.filter(c => c.submissionStatus === 'submitted' && c.status !== 'Approved').length
+  const settled = claims.filter(c => c.status === 'Approved' && (c.approvedAmount ?? 0) > 0 && c.submissionStatus === 'submitted').length
+  const denied = claims.filter(c => c.status === 'Rejected').length
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -210,6 +233,56 @@ export default function InsuranceDashboard() {
           <h1 className="text-2xl font-bold text-slate-900">TPA & Insurance Desk</h1>
           <p className="text-sm text-slate-500">Cashless workflows and AI claim optimization</p>
         </div>
+      </div>
+
+      {/* M13.6 — Cashless claim-lifecycle pipeline strip.
+          Seven stages mirror what an insurance coordinator actually tracks:
+          Cashless registered → Pre-auth pending → Approved → Claim submitted →
+          Settled, plus the two exception tiles (Query / Denied) on the right. */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-teal-600" />Cashless claim lifecycle
+          </h2>
+          <Link href="/insurance/claims" className="text-[11px] font-bold text-teal-700 hover:underline flex items-center gap-0.5">
+            All claims <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 items-stretch">
+          {[
+            { label: 'Cashless',     sub: 'Registered (intake)',  count: cashlessWalkIns + cashlessInpatients, color: 'border-amber-200 bg-amber-50',     icon: User,         fg: 'text-amber-700',   href: '/insurance/dashboard#monitor', cta: 'Monitor' },
+            { label: 'Pre-auth',     sub: 'Pending insurer',      count: preAuthPending,                       color: 'border-orange-200 bg-orange-50',   icon: Hourglass,    fg: 'text-orange-700',  href: '/insurance/preauth',           cta: 'Draft' },
+            { label: 'Approved',     sub: 'In stay · claim soon', count: preAuthApproved,                      color: 'border-blue-200 bg-blue-50',       icon: ShieldCheck,  fg: 'text-blue-700',    href: '/insurance/claims',            cta: 'Submit' },
+            { label: 'Submitted',    sub: 'Awaiting settlement',  count: claimSubmitted,                       color: 'border-violet-200 bg-violet-50',   icon: Send,         fg: 'text-violet-700',  href: '/insurance/claims',            cta: 'Track' },
+            { label: 'Settled',      sub: 'Paid by insurer',      count: settled,                              color: 'border-emerald-200 bg-emerald-50', icon: CheckCircle2, fg: 'text-emerald-700', href: '/insurance/claims',            cta: 'Reconcile' },
+            { label: 'Query',        sub: 'Insurer queries',      count: claims.filter(c => c.aiDenialRisk && c.aiDenialRisk.score >= 70 && c.status === 'In Process').length, color: 'border-red-200 bg-red-50', icon: AlertTriangle, fg: 'text-red-700', href: '/insurance/claims', cta: 'Reply' },
+            { label: 'Denied',       sub: 'Claim rejected',       count: denied,                               color: 'border-slate-200 bg-slate-50',     icon: ShieldAlert,  fg: 'text-slate-600',   href: '/insurance/claims',            cta: 'Appeal' },
+          ].map((s, i, arr) => (
+            <Link key={s.label} href={s.href}
+              className={cn("relative rounded-xl border p-3 hover:shadow-md transition flex flex-col gap-1 cursor-pointer group", s.color)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <s.icon className={cn("h-4 w-4 flex-shrink-0", s.fg)} />
+                  <p className={cn("text-xs font-bold truncate", s.fg)}>{s.label}</p>
+                </div>
+                {i < arr.length - 1 && <ChevronRight className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
+              </div>
+              <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
+              <p className={cn("text-[10px] font-bold mt-1 inline-flex items-center gap-0.5 group-hover:underline", s.fg)}>
+                {s.cta} <ArrowRight className="h-2.5 w-2.5" />
+              </p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* M13.6 — Live cashless monitor.
+          Cross-store aggregation of every cashless case with current stage,
+          aging vs SLA, and the action that should happen next. Anchored at
+          #monitor for the pipeline-strip "Monitor" links. */}
+      <div id="monitor">
+        <LiveCashlessMonitor />
       </div>
 
       {/* Health Card Verification */}
