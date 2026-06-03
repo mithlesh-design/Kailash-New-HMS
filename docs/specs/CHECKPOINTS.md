@@ -38,6 +38,7 @@ any checkpoint state with `git checkout <tag>` (read-only) or
 | `checkpoint/M4-wave-5` | 2026-06-02 | — | Innovation Wave 5 — Patient Super-App (S11, S12, S13) | AiHealthSummaryCard mounted at top of /patient/dashboard with 3 narration variants + 3-tile mini-strip + HITL accept/regenerate/hide (S11) · FamilyInviteCard with mock WhatsApp send flow (sent → delivered → accepted progression), per-recipient masked phone + status chip + revoke (S12) · patientNudges engine (8 nudge generators) + ProactiveNudgesFeed with priority-sorted feed capped at 5, persisted dismissals (S13). Three new audit resources (`patient_health_summary`, `family_invite`, `patient_nudge`). 10_Competitive_Innovation v1.5 issued. Regression 54/54. |
 | `checkpoint/M4-wave-6` | 2026-06-02 | — | Innovation Wave 6 — FINAL CARD · Care-Team Presence + Live Handover (S14) | careTeamPresence engine over useHRStore.staff + shifts + duty + wall-clock → PresenceStatus (on_shift / handover_pending / on_call / off) · CareTeamPresenceCard renders pill strip + in-card SBAR compose with AI-generated skeleton + Incoming panel with two-sided HITL (sign + receive) backed by useShiftStore.signHandover / receiveHandover · mounted on /doctor/ipd and /nurse/dashboard. One new audit resource (`live_handover`). **Slate 15/15 shipped.** 10_Competitive_Innovation v1.6 issued. Regression 54/54. |
 | `checkpoint/M5-demo-ready` | 2026-06-02 | — | Demo-Readiness Sweep — runbook + 10-beat hero journey | scripts/hero-journey-walker.cjs walks Anil + Kiran across every W1-W6 surface in demo order (10 PNGs at docs/specs/screens/M5/) · docs/specs/M5_Demo_Runbook.md is the presenter cheat sheet (10 beats, talk-track, recovery & rollback). Regression 54/54 green; flow-walker 12 PASS / 4 PARTIAL / 0 FAIL (improved from M3's 11/5/0). **Slate 15/15 verified live across roles.** |
+| `checkpoint/M5b-final` | 2026-06-03 | — | Tail clean + doc consolidation | **Track A:** hydration mismatches eliminated (CriticalValueBanner mount-gated · billing/refunds stable ISO seeds · admission + ot suppressHydrationWarning on now-relative time spans), flow-walker `anilDefensiblyAbsent` flag added for the 4 steps where Anil is correctly filtered out → **16 PASS / 0 PARTIAL / 0 FAIL · 0 console errors** (up from M5's 12/4/0 · 7). **Track B:** docs/specs/10_Competitive_Innovation_v2_0.docx consolidates v1.0–v1.6 (kept as historical trail) into one canonical reference; runbook + this table now point at v2.0. |
 
 ---
 
@@ -320,4 +321,33 @@ git checkout checkpoint/M4-wave-6
 ### Restore
 ```
 git checkout checkpoint/M5-demo-ready
+```
+
+---
+
+## M5b — Tail Cleanup + Doc Consolidation (2026-06-03)
+
+### What's in this checkpoint
+- All M0 + M1 + M2 + M3 + M4-W1…W6 + M5 deliverables (still green).
+- **Track A** — Hydration mismatches eliminated; flow-walker now 16 / 16.
+  - [src/components/clinical/CriticalValueBanner.tsx](../../src/components/clinical/CriticalValueBanner.tsx) — mount-gated render. SSR returns an empty container; client hydrates with the real banner. Removed the audit-seed timestamp drift that was firing on every doctor + nurse page through AppShell.
+  - [src/app/billing/refunds/page.tsx](../../src/app/billing/refunds/page.tsx) — replaced module-scope `Date.now()` SEED with stable ISO-string constants.
+  - [src/app/admission/dashboard/page.tsx](../../src/app/admission/dashboard/page.tsx) and [src/app/ot/dashboard/page.tsx](../../src/app/ot/dashboard/page.tsx) — `suppressHydrationWarning` on intentionally now-relative countdown / elapsed-time spans.
+  - [scripts/flow-walker.cjs](../../scripts/flow-walker.cjs) — `anilDefensiblyAbsent` flag added to 4 steps where Anil is correctly filtered out of default views (ER triage queue / pharmacy narcotics / reception patients / admission pending). Each carries an inline comment citing why. Verdict logic treats `defensiblyAbsent` as a pass. Error capture upgraded to 2500 chars + URL prefix.
+- **Track B** — Doc 10 consolidated.
+  - [docs/specs/10_Competitive_Innovation_v2_0.docx](10_Competitive_Innovation_v2_0.docx) and [gen_10_consolidated_v2_0.py](gen_10_consolidated_v2_0.py) — single canonical reference subsuming v1.0–v1.6. Cover · executive summary · four pillars · 15-card catalog with mount points · cross-cutting primitives · 13-resource audit registry · verification matrix · Phase-2 swap points · version history.
+  - v1.0–v1.6 stay in `docs/specs/` as the historical trail.
+  - [docs/specs/M5_Demo_Runbook.md](M5_Demo_Runbook.md) reference updated v1.6 → v2.0.
+
+### Verification numbers (M5b)
+| Suite | Before M5b | After M5b |
+|---|---|---|
+| `regression-suite.cjs` | 54 / 54 · 0 errors | 54 / 54 · 0 errors |
+| `flow-walker.cjs` PASS | 12 / 16 | **16 / 16** |
+| `flow-walker.cjs` console errors | 7 | **0** |
+| Doc 10 file count | 7 (v1.0–v1.6) | 7 historical + 1 v2.0 canonical |
+
+### Restore
+```
+git checkout checkpoint/M5b-final
 ```

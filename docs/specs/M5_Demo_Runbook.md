@@ -126,7 +126,7 @@ If running over screen-share: set viewport to **1500×1100** to match the captur
 
 ## Reference
 
-- **Slate state:** 15 / 15 SHIPPED — [10_Competitive_Innovation_v1_6.docx](10_Competitive_Innovation_v1_6.docx)
+- **Slate state:** 15 / 15 SHIPPED — [10_Competitive_Innovation_v2_0.docx](10_Competitive_Innovation_v2_0.docx) (canonical consolidated; v1.0–v1.6 historical)
 - **Checkpoint registry:** [CHECKPOINTS.md](CHECKPOINTS.md)
 - **Regression suite:** `node scripts/regression-suite.cjs`
 - **Flow walker:** `node scripts/flow-walker.cjs`
