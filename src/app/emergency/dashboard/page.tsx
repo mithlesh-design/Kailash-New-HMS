@@ -5,6 +5,7 @@ import Link from "next/link"
 import {
   Activity, AlertTriangle, Phone, CheckCircle, Clock, Hourglass,
   Sparkles, ArrowRight, Users, ShieldAlert, ClipboardList, PackageCheck, Ambulance,
+  Stethoscope, LogOut, ChevronRight, Bed,
 } from "lucide-react"
 import {
   useERStore, latestVitals,
@@ -46,6 +47,8 @@ export default function ERDashboard() {
     const triaged = active.filter(p => p.phase === 'triaged')
     const inTreatment = active.filter(p => p.phase === 'in_treatment')
     const awaitingDispo = active.filter(p => p.phase === 'awaiting_disposition')
+    const disposedToday = patients.filter(p => p.phase === 'disposed' && p.dispositionAt && new Date(p.dispositionAt).toDateString() === new Date().toDateString())
+    const mlcOpen = active.filter(p => p.trauma && !p.mlc)
 
     const high = active.filter(p => {
       const v = latestVitals(p)
@@ -81,6 +84,12 @@ export default function ERDashboard() {
       kpis: {
         inDept: active.length,
         awaitingTriage: awaitingTriage.length + triaged.length,
+        awaitingTriageOnly: awaitingTriage.length,
+        triagedOnly: triaged.length,
+        inTreatmentCount: inTreatment.length,
+        awaitingDispoCount: awaitingDispo.length,
+        disposedToday: disposedToday.length,
+        mlcOpen: mlcOpen.length,
         high: high.length,
         sepsisSuspected: sepsisSuspected.length,
         traumaActive: traumaActive.length,
@@ -134,6 +143,49 @@ export default function ERDashboard() {
           roles={['emergency', 'doctor', 'nurse']}
           compact
         />
+      </div>
+
+      {/* M13.3 — Door-to-disposition journey strip.
+          Mirrors the actual ER patient journey: arrival → triage → in treatment →
+          disposition decided → patient left. The MLC-pending tile is the safety
+          backstop: trauma cases cannot be disposed without MLC documentation,
+          so it surfaces work that's about to block. */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-red-600" />Door-to-disposition journey
+          </h2>
+          <p className="text-[11px] text-slate-500">
+            Arrival → triage → treatment → disposition → disposed{' · '}
+            <span className="font-bold text-slate-700">Door-to-doctor median {m.dtdMedian}m</span>
+          </p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 items-stretch">
+          {[
+            { label: 'Awaiting triage', sub: 'Just arrived',         count: m.kpis.awaitingTriageOnly, color: 'border-amber-200 bg-amber-50',      icon: Ambulance,    fg: 'text-amber-700',     href: '/emergency/triage', cta: 'Triage' },
+            { label: 'Triaged',         sub: 'Awaiting doctor',      count: m.kpis.triagedOnly,        color: 'border-orange-200 bg-orange-50',    icon: ClipboardList, fg: 'text-orange-700',   href: '/emergency/floor',  cta: 'Claim' },
+            { label: 'In treatment',    sub: 'Active care',          count: m.kpis.inTreatmentCount,   color: 'border-blue-200 bg-blue-50',        icon: Stethoscope,   fg: 'text-blue-700',     href: '/emergency/floor',  cta: 'Continue' },
+            { label: 'Awaiting dispo',  sub: 'Decision pending',     count: m.kpis.awaitingDispoCount, color: 'border-violet-200 bg-violet-50',    icon: Hourglass,     fg: 'text-violet-700',   href: '/emergency/floor',  cta: 'Decide' },
+            { label: 'Disposed',        sub: 'Today',                count: m.kpis.disposedToday,      color: 'border-emerald-200 bg-emerald-50',  icon: LogOut,        fg: 'text-emerald-700',  href: '/emergency/floor',  cta: 'Review' },
+            { label: 'MLC pending',     sub: 'Trauma w/o file',      count: m.kpis.mlcOpen,            color: m.kpis.mlcOpen > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: ShieldAlert, fg: m.kpis.mlcOpen > 0 ? 'text-red-700' : 'text-slate-400', href: '/emergency/floor', cta: 'File MLC' },
+          ].map((s, i, arr) => (
+            <Link key={s.label} href={s.href}
+              className={cn("relative rounded-xl border p-3 hover:shadow-md transition flex flex-col gap-1 cursor-pointer group", s.color)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <s.icon className={cn("h-4 w-4 flex-shrink-0", s.fg)} />
+                  <p className={cn("text-xs font-bold truncate", s.fg)}>{s.label}</p>
+                </div>
+                {i < arr.length - 1 && <ChevronRight className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
+              </div>
+              <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
+              <p className={cn("text-[10px] font-bold mt-1 inline-flex items-center gap-0.5 group-hover:underline", s.fg)}>
+                {s.cta} <ArrowRight className="h-2.5 w-2.5" />
+              </p>
+            </Link>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

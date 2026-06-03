@@ -3,8 +3,10 @@
 import { useMemo, useState } from "react"
 import {
   Activity, Bed, ChevronDown, ChevronRight, Hand, Heart, Thermometer, Wind,
-  ShieldAlert, AlertTriangle, Send, Clock,
+  ShieldAlert, AlertTriangle, Send, Clock, FileWarning, CheckCircle2,
 } from "lucide-react"
+import { AnimatePresence } from "framer-motion"
+import { MLCModal } from "@/components/emergency/MLCModal"
 import {
   useERStore, latestVitals,
   ER_VIKRAM,
@@ -47,6 +49,7 @@ export default function ERFloor() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [draft, setDraft] = useState<Record<string, Vitals>>({})
   const [dispoNote, setDispoNote] = useState<Record<string, string>>({})
+  const [mlcFor, setMlcFor] = useState<ERPatient | null>(null)
 
   const inArea = (p: ERPatient) => (p.phase === 'in_treatment' || p.phase === 'awaiting_disposition') && p.area === area
   const rows = useMemo(
@@ -124,6 +127,12 @@ export default function ERFloor() {
             }}
             onDispoNote={(v) => setDispoNote(prev => ({ ...prev, [p.id]: v }))}
             onDispose={(d) => {
+              // Block disposition on trauma cases without MLC documentation.
+              if (p.trauma && !p.mlc && (d === 'admit_ward' || d === 'admit_icu' || d === 'admit_hdu' || d === 'deceased' || d === 'discharge')) {
+                toast.error('MLC documentation required before disposition on this trauma case')
+                setMlcFor(p)
+                return
+              }
               setDisposition(p.id, d, dispoNote[p.id])
               toast.success(`Disposition: ${DISPOSITIONS.find(x => x.value === d)?.label}`)
             }}
@@ -131,9 +140,16 @@ export default function ERFloor() {
               dispose(p.id)
               toast.success(`${p.name} discharged from ER`)
             }}
+            onOpenMLC={() => setMlcFor(p)}
           />
         ))}
       </div>
+
+      <AnimatePresence>
+        {mlcFor && (
+          <MLCModal patient={mlcFor} filedBy={me.name} onClose={() => setMlcFor(null)} />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -150,6 +166,7 @@ function FloorRow(props: {
   onDispoNote: (v: string) => void
   onDispose: (d: Disposition) => void
   onComplete: () => void
+  onOpenMLC: () => void
 }) {
   const { p, meId, expanded, draft, dispoNote } = props
   const v = latestVitals(p)
@@ -172,6 +189,15 @@ function FloorRow(props: {
             <span className="text-[11px] font-bold text-slate-400">{p.age}{p.gender}</span>
             {p.bedNumber && <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-0.5"><Bed className="h-3 w-3" />{p.bedNumber}</span>}
             {p.trauma && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700">TRAUMA</span>}
+            {p.trauma && (
+              p.mlc
+                ? <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 className="h-2.5 w-2.5" />MLC {p.mlc.mlcNumber}
+                  </span>
+                : <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700 flex items-center gap-1">
+                    <FileWarning className="h-2.5 w-2.5" />MLC pending
+                  </span>
+            )}
             {n && n.band !== 'low' && (
               <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded',
                 n.band === 'high' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700')}>NEWS2 {n.score}</span>
@@ -191,6 +217,13 @@ function FloorRow(props: {
         </button>
 
         <div className="flex-shrink-0 flex items-center gap-2">
+          {p.trauma && (
+            <button onClick={props.onOpenMLC}
+              className={cn("flex items-center gap-1 text-[11px] font-bold px-2.5 py-1.5 rounded-lg cursor-pointer border whitespace-nowrap",
+                p.mlc ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-300')}>
+              <FileWarning className="h-3 w-3" />{p.mlc ? 'MLC filed' : 'File MLC'}
+            </button>
+          )}
           {!p.assignedTo && (
             <button onClick={props.onClaim}
               className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer"

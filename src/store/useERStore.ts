@@ -3,6 +3,8 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { useNotificationStore } from './useNotificationStore'
 import { useAdmissionStore } from './useAdmissionStore'
 import { useAuditStore } from './useAuditStore'
+import { useMortuaryStore } from './useMortuaryStore'
+import { usePatientStore } from './usePatientStore'
 import {
   news2 as calcNEWS2,
   qsofa as calcQSOFA,
@@ -21,6 +23,24 @@ export type Phase = 'awaiting_triage' | 'triaged' | 'in_treatment' | 'awaiting_d
 export type VitalsRecord = Vitals & { at: string; by?: string }
 
 export type ERStaff = { id: string; name: string }
+
+// M13.3 — Medico-Legal Case (MLC) record for police/legal-investigation cases.
+// Documented bedside on trauma / poisoning / assault / suicide-attempt cases.
+export type MLCInjuryType = 'RTA' | 'Assault' | 'Self-harm' | 'Burn' | 'Fall' | 'Poisoning' | 'Other'
+export type MLCAlcoholScreen = 'pending' | 'positive' | 'negative' | 'refused'
+export interface MLCRecord {
+  mlcNumber: string
+  policeStation: string
+  officerName?: string
+  officerBadge?: string
+  injuryType: MLCInjuryType
+  alcoholScreen: MLCAlcoholScreen
+  witnessName?: string
+  witnessPhone?: string
+  notes?: string
+  filedBy: string
+  filedAt: string
+}
 
 export type ERPatient = {
   id: string
@@ -48,6 +68,7 @@ export type ERPatient = {
   callbackLogged?: { calledBy: string; calledAt: string; recipient: string }
   phase: Phase
   mci?: boolean                      // mass-casualty incident flag
+  mlc?: MLCRecord                    // M13.3 — police/legal case file
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -90,6 +111,7 @@ interface ERState {
   setDisposition: (id: string, disposition: Disposition, note?: string) => void
   dispose: (id: string) => void
   logCallback: (id: string, calledBy: string, recipient: string) => void
+  setMLC: (id: string, mlc: Omit<MLCRecord, 'filedAt'>) => void
 }
 
 // ── Roster ────────────────────────────────────────────────────────────────
@@ -187,6 +209,35 @@ const SEED: ERPatient[] = [
     dispositionNote: 'Trop I rising — for urgent PCI · ICU bed booked',
     phase: 'disposed',
   },
+  // M13.3 — 8. RTA trauma case requiring MLC documentation
+  {
+    id: nextId(),
+    patientId: 'PT-30008', name: 'Sundar Bhosle', age: 36, gender: 'M',
+    arrival: 'ambulance', arrivedAt: minsAgo(22),
+    triagedAt: minsAgo(18), doctorClaimAt: minsAgo(15),
+    chiefComplaint: 'RTA · bike + truck · multiple lacerations · query head injury', trauma: true,
+    esi: 2, esiReason: 'Trauma · NEWS2 5 · GCS 14', area: 'TRAUMA',
+    assignedTo: ER_VIKRAM, bedNumber: 'T-1',
+    vitalsHistory: [
+      { rr: 22, spo2: 96, sbp: 108, hr: 112, temp: 36.7, gcs: 14, at: minsAgo(18), by: ER_TRIAGE_NURSE.name },
+    ],
+    phase: 'in_treatment',
+  },
+  // M13.3 — 9. Stab wound trauma needing emergency OT
+  {
+    id: nextId(),
+    patientId: 'PT-30009', name: 'Imran Quraishi', age: 24, gender: 'M',
+    arrival: 'ambulance', arrivedAt: minsAgo(8),
+    triagedAt: minsAgo(5), doctorClaimAt: minsAgo(3),
+    chiefComplaint: 'Penetrating abdominal stab wound · suspected liver lac', trauma: true,
+    esi: 1, esiReason: 'Penetrating trauma · haemodynamic instability', area: 'RESUS',
+    assignedTo: ER_VIKRAM, bedNumber: 'R-2',
+    vitalsHistory: [
+      { rr: 28, spo2: 94, sbp: 86, hr: 132, temp: 36.4, gcs: 15, at: minsAgo(5), by: ER_TRIAGE_NURSE.name },
+    ],
+    phase: 'in_treatment',
+  },
+
   // 6. Awaiting disposition — admit to ward
   {
     id: nextId(),
@@ -269,43 +320,132 @@ export const useERStore = create<ERState>()(persist((set, get) => ({
         : p),
     }))
     const p = get().patients.find(x => x.id === id)
-    if (p) {
-      useNotificationStore.getState().add({
-        type: 'system',
-        priority: disposition === 'admit_icu' ? 'high' : 'medium',
-        title: `ER disposition · ${p.name}`,
-        body: `${dispositionLabel(disposition)}${note ? ` — ${note}` : ''}`,
-        targetRole: disposition === 'admit_ward' || disposition === 'admit_icu' || disposition === 'admit_hdu' ? 'bed_manager' : 'reception',
-        patientName: p.name,
-        channels: ['in_app'],
-      })
-      // For admit_* dispositions, push an AdmissionRequest into the bed-manager queue.
+    if (!p) return
+
+    // ── M13.3 — handoff routing by disposition ─────────────────────────
+    const actorId = p.assignedTo?.id ?? 'ER-DOC'
+    const actorName = p.assignedTo?.name ?? 'ER Doctor'
+
+    if (disposition === 'admit_ward' || disposition === 'admit_icu' || disposition === 'admit_hdu') {
+      // Admit → bed manager. Already existed; preserved.
       const admitMap = { admit_ward: 'General Ward', admit_icu: 'ICU', admit_hdu: 'Semi-Private' } as const
-      if (disposition === 'admit_ward' || disposition === 'admit_icu' || disposition === 'admit_hdu') {
-        const targetWard = admitMap[disposition]
-        useAdmissionStore.getState().requestAdmission({
-          patientId: p.patientId,
-          patientName: p.name,
-          patientAge: p.age,
-          patientGender: p.gender === 'M' ? 'Male' : p.gender === 'F' ? 'Female' : 'Other',
-          diagnosis: p.chiefComplaint,
-          admissionType: targetWard,
-          bedTypePreference: targetWard,
-          reason: `ER handover · ESI ${p.esi ?? '?'} · ${note ?? ''}`.trim(),
-          requestedBy: p.assignedTo?.name ?? 'ER Doctor',
-          department: 'Emergency',
-          triageLevel: p.esi === 1 ? 'Critical' : p.esi === 2 ? 'High' : 'Routine',
-          payerType: 'General',
-        })
-        useAuditStore.getState().log({
-          userId: p.assignedTo?.id ?? 'ER-DOC',
-          userName: p.assignedTo?.name ?? 'ER Doctor',
-          action: 'er_disposition',
-          resource: 'er_patient', resourceId: p.patientId,
-          detail: `${p.name} · handover to bed-manager · ${dispositionLabel(disposition)} (${targetWard})`,
-        })
+      const targetWard = admitMap[disposition]
+      useAdmissionStore.getState().requestAdmission({
+        patientId: p.patientId, patientName: p.name, patientAge: p.age,
+        patientGender: p.gender === 'M' ? 'Male' : p.gender === 'F' ? 'Female' : 'Other',
+        diagnosis: p.chiefComplaint, admissionType: targetWard, bedTypePreference: targetWard,
+        reason: `ER handover · ESI ${p.esi ?? '?'} · ${note ?? ''}`.trim(),
+        requestedBy: actorName, department: 'Emergency',
+        triageLevel: p.esi === 1 ? 'Critical' : p.esi === 2 ? 'High' : 'Routine',
+        payerType: 'General',
+      })
+      useNotificationStore.getState().add({
+        type: 'system', priority: disposition === 'admit_icu' ? 'critical' : 'high',
+        title: `ER admission · ${p.name}`,
+        body: `${dispositionLabel(disposition)} — ESI ${p.esi ?? '?'} · ${p.chiefComplaint}. ${note ?? ''}`.trim(),
+        targetRole: 'bed_manager', patientName: p.name, channels: ['in_app'],
+      })
+      useAuditStore.getState().log({
+        userId: actorId, userName: actorName, action: 'er_disposition',
+        resource: 'er_patient', resourceId: p.patientId,
+        detail: `${p.name} · handover to bed-manager · ${dispositionLabel(disposition)} (${targetWard})`,
+      })
+    } else if (disposition === 'discharge') {
+      // Discharge from ER → close visit, notify reception/billing, return patient to OPD board as done.
+      useNotificationStore.getState().add({
+        type: 'system', priority: 'medium',
+        title: `ER discharge · ${p.name}`,
+        body: `${p.name} discharged from ER · ESI ${p.esi ?? '?'} · ${note ?? p.chiefComplaint}. Billing + take-home Rx to follow.`,
+        targetRole: 'billing', patientName: p.name, channels: ['in_app'],
+      })
+      // If this patient also exists in OPD queue, mark them done.
+      const opdPatient = usePatientStore.getState().patients.find(x => x.id === p.patientId)
+      if (opdPatient) {
+        usePatientStore.getState().updateStatus(p.patientId, 'done')
       }
+      useAuditStore.getState().log({
+        userId: actorId, userName: actorName, action: 'er_disposition',
+        resource: 'er_patient', resourceId: p.patientId,
+        detail: `${p.name} · discharged from ER · ${note ?? ''}`,
+      })
+    } else if (disposition === 'transfer') {
+      // Transfer-out → ambulance/dispatch desk needs to arrange transport.
+      useNotificationStore.getState().add({
+        type: 'system', priority: 'high',
+        title: `ER transfer-out · ${p.name}`,
+        body: `Inter-facility transfer requested for ${p.name} · ${p.chiefComplaint}. Destination + ambulance to be arranged. Note: ${note ?? '—'}`,
+        targetRole: 'ambulance', patientName: p.name, channels: ['in_app'],
+      })
+      useAuditStore.getState().log({
+        userId: actorId, userName: actorName, action: 'er_disposition',
+        resource: 'er_patient', resourceId: p.patientId,
+        detail: `${p.name} · transfer-out requested · ${note ?? ''}`,
+      })
+    } else if (disposition === 'deceased') {
+      // Deceased → mortuary record. MLC flag carried through.
+      const isMLC = p.trauma || !!p.mlc
+      useMortuaryStore.getState().receiveBody({
+        patientId: p.patientId, patientName: p.name, age: p.age,
+        gender: p.gender === 'X' ? 'Other' : p.gender,
+        ward: 'Emergency', bedNumber: p.bedNumber ?? 'ER',
+        timeOfDeath: new Date().toISOString(), certifiedBy: actorName,
+        causeOfDeath: p.trauma ? 'Accidental' : 'Under Investigation',
+        isMLC, mlcNumber: p.mlc?.mlcNumber, policeStation: p.mlc?.policeStation,
+        bodySlot: Math.max(1, useMortuaryStore.getState().availableSlots()),
+        legalClearance: isMLC ? 'mlc' : 'pending',
+        autopsyRequired: isMLC && p.trauma,
+      }, actorName)
+      useNotificationStore.getState().add({
+        type: 'system', priority: 'critical',
+        title: `Deceased in ER · ${p.name}`,
+        body: `${p.name} (${p.age}${p.gender}) declared deceased at ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}. Body transferred to mortuary.${isMLC ? ' MLC clearance pending.' : ''}`,
+        targetRole: 'mortuary', patientName: p.name, channels: ['in_app'],
+      })
+      useNotificationStore.getState().add({
+        type: 'system', priority: 'high',
+        title: `Deceased · ${p.name}`,
+        body: `Death certificate workflow initiated. Family counselling required.${isMLC ? ' MLC documentation in progress.' : ''}`,
+        targetRole: 'admin', patientName: p.name, channels: ['in_app'],
+      })
+      useAuditStore.getState().log({
+        userId: actorId, userName: actorName, action: 'er_disposition',
+        resource: 'er_patient', resourceId: p.patientId,
+        detail: `${p.name} · deceased in ER · cause ${p.trauma ? 'accidental (trauma)' : 'under investigation'}${isMLC ? ' · MLC' : ''}`,
+      })
+    } else if (disposition === 'against_medical_advice') {
+      useNotificationStore.getState().add({
+        type: 'system', priority: 'high',
+        title: `AMA · ${p.name}`,
+        body: `${p.name} signed AMA/DAMA against medical advice · ESI ${p.esi ?? '?'} · ${p.chiefComplaint}. Note: ${note ?? '—'}`,
+        targetRole: 'admin', patientName: p.name, channels: ['in_app'],
+      })
+      useAuditStore.getState().log({
+        userId: actorId, userName: actorName, action: 'er_disposition',
+        resource: 'er_patient', resourceId: p.patientId,
+        detail: `${p.name} · AMA · ${note ?? ''}`,
+      })
     }
+  },
+
+  setMLC: (id, mlc) => {
+    const filedAt = new Date().toISOString()
+    set(s => ({
+      patients: s.patients.map(p => p.id === id ? { ...p, mlc: { ...mlc, filedAt } } : p),
+    }))
+    const p = get().patients.find(x => x.id === id)
+    if (!p) return
+    useNotificationStore.getState().add({
+      type: 'system', priority: 'high',
+      title: `MLC filed · ${p.name}`,
+      body: `MLC ${mlc.mlcNumber} filed (${mlc.injuryType}) · ${mlc.policeStation}${mlc.officerName ? ` · IO ${mlc.officerName}` : ''}. Alcohol screen: ${mlc.alcoholScreen}.`,
+      targetRole: 'audit_officer', patientName: p.name, channels: ['in_app'],
+    })
+    useAuditStore.getState().log({
+      userId: mlc.filedBy.includes('Dr') ? 'ER-DOC' : 'ER-NURSE', userName: mlc.filedBy,
+      action: 'er_disposition',
+      resource: 'er_mlc', resourceId: mlc.mlcNumber,
+      detail: `${p.name} · MLC ${mlc.mlcNumber} · ${mlc.injuryType} · ${mlc.policeStation}`,
+    })
   },
 
   dispose: (id) => set(s => ({
@@ -321,7 +461,7 @@ export const useERStore = create<ERState>()(persist((set, get) => ({
   })),
 }),
   {
-    name: 'kailash-erstore', version: 1,
+    name: 'kailash-erstore', version: 2,
     storage: createJSONStorage(() => localStorage),
     skipHydration: true,
   },

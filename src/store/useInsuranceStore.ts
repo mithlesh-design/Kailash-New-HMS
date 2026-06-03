@@ -174,6 +174,29 @@ const SEED: InsuranceClaim[] = [
       { at: new Date(Date.now() - 12 * 3600000).toISOString(), actor: 'Insurance Desk', label: 'Replied with batch # and BIS cert', kind: 'note' },
     ],
   },
+  // M13.3 — Anil Kumar Verma (IPD post-RTA) — ongoing cashless claim
+  {
+    id: 'CLM-2026-0102', patientId: 'PT-44012', patientName: 'Anil Kumar Verma',
+    policyNumber: 'STAR-HEALTH-FAM-440126', policyHolder: 'Anil Kumar Verma',
+    sumInsured: 700000, available: 510000,
+    provider: 'Star Health', amount: 186400,
+    status: 'In Process', aiProbability: 84,
+    submissionStatus: 'validated',
+    diagnosis: 'Polytrauma post-RTA · ORIF tibia + observation',
+    treatmentSummary: 'RTA · tibial shaft fracture · ORIF with intramedullary nail. Observation for closed head injury. 5-day ward stay.',
+    documents: [
+      { id: 'doc-anil-policy', name: 'Policy copy', status: 'verified', uploadedAt: new Date(Date.now() - 48 * 3600000).toISOString() },
+      { id: 'doc-anil-admission', name: 'Admission summary', status: 'verified', uploadedAt: new Date(Date.now() - 48 * 3600000).toISOString() },
+      { id: 'doc-anil-mlc', name: 'MLC certificate', status: 'verified', uploadedAt: new Date(Date.now() - 40 * 3600000).toISOString() },
+      { id: 'doc-anil-ot', name: 'OT notes', status: 'pending' },
+      { id: 'doc-anil-bill', name: 'Final hospital bill', status: 'pending' },
+    ],
+    timeline: [
+      { at: new Date(Date.now() - 48 * 3600000).toISOString(), actor: 'TPA Desk', label: 'Pre-authorisation requested for ORIF', kind: 'submitted' },
+      { at: new Date(Date.now() - 44 * 3600000).toISOString(), actor: 'Star Health', label: 'Pre-auth approved for surgery + 5-day stay', kind: 'approved' },
+      { at: new Date(Date.now() - 24 * 3600000).toISOString(), actor: 'Insurance Desk', label: 'MLC certificate uploaded', kind: 'document' },
+    ],
+  },
 ]
 
 export const useInsuranceStore = create<InsuranceState>()(persist((set, get) => ({
@@ -257,7 +280,7 @@ export const useInsuranceStore = create<InsuranceState>()(persist((set, get) => 
     })),
 }),
   {
-    name: 'kailash-insurancestore', version: 1,
+    name: 'kailash-insurancestore', version: 2,
     storage: createJSONStorage(() => localStorage),
     skipHydration: true,
   },
