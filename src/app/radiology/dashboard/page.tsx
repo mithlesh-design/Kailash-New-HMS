@@ -5,6 +5,7 @@ import Link from "next/link"
 import {
   ScanLine, Users, AlertTriangle, Phone, CheckCircle, Clock, Hourglass,
   Sparkles, ArrowRight, ShieldCheck, FileText, ClipboardList, PackageCheck,
+  Calendar, UserCheck, Send, Activity, ChevronRight,
 } from "lucide-react"
 import {
   useRadiologyStudiesStore, type RadiologyStudy, type StudyStatus,
@@ -44,6 +45,9 @@ export default function RadiologyOverview() {
   const [callbackTo, setCallbackTo] = useState("")
 
   const m = useMemo(() => {
+    const orderedOnly = studies.filter(s => s.status === "ordered")
+    const scheduledOnly = studies.filter(s => s.status === "scheduled")
+    const arrivedOnly = studies.filter(s => s.status === "arrived")
     const ordered = studies.filter(s => s.status === "ordered" || s.status === "scheduled")
     const onBench = studies.filter(s => s.status === "arrived" || s.status === "acquiring")
     const acquired = studies.filter(s => s.status === "acquired")
@@ -80,10 +84,14 @@ export default function RadiologyOverview() {
     return {
       kpis: {
         ordered: ordered.length,
+        orderedOnly: orderedOnly.length,
+        scheduledOnly: scheduledOnly.length,
+        arrivedOnly: arrivedOnly.length,
         onBench: onBench.length,
         pendingRead: acquired.length + reading.length,
         pendingVerify: reported.length,
         releasedToday: releasedToday.length,
+        critPending: criticalPendingCallback.length,
         tatBreaches: tatBreaches.length,
       },
       pipeline, criticalPendingCallback, reported, techLoad, overOverdue,
@@ -131,6 +139,46 @@ export default function RadiologyOverview() {
             style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" }}>
             <FileText className="h-3.5 w-3.5" />Reading Room
           </Link>
+        </div>
+      </div>
+
+      {/* M13.2 — Order-to-release pipeline.
+          Seven chevron-linked stages mirroring the actual radiology journey.
+          Each stage shows live counts + a direct nav button so the right
+          person can jump straight into their next action. */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-violet-600" />Order-to-release journey
+          </h2>
+          <p className="text-[11px] text-slate-500">Order → schedule → arrival → bench → read → verify → release</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 items-stretch">
+          {[
+            { label: 'Ordered',     sub: 'Needs slot',       count: m.kpis.orderedOnly,    color: 'border-amber-200 bg-amber-50',     icon: ClipboardList, fg: 'text-amber-700',     href: '/radiology/schedule', cta: 'Book slot' },
+            { label: 'Scheduled',   sub: 'Awaiting arrival', count: m.kpis.scheduledOnly,  color: 'border-cyan-200 bg-cyan-50',       icon: Calendar,      fg: 'text-cyan-700',      href: '/radiology/arrival',  cta: 'Check in' },
+            { label: 'Arrived',     sub: 'Ready for scan',   count: m.kpis.arrivedOnly,    color: 'border-blue-200 bg-blue-50',       icon: UserCheck,     fg: 'text-blue-700',      href: '/radiology/bench',    cta: 'Acquire' },
+            { label: 'Acquired',    sub: 'Pending read',     count: m.kpis.pendingRead,    color: 'border-violet-200 bg-violet-50',   icon: ScanLine,      fg: 'text-violet-700',    href: '/radiology/reading',  cta: 'Read' },
+            { label: 'Reported',    sub: 'Pending verify',   count: m.kpis.pendingVerify,  color: 'border-pink-200 bg-pink-50',       icon: ShieldCheck,   fg: 'text-pink-700',      href: '/radiology/verification', cta: 'Verify' },
+            { label: 'Released',    sub: 'Today',            count: m.kpis.releasedToday,  color: 'border-emerald-200 bg-emerald-50', icon: Send,          fg: 'text-emerald-700',   href: '/radiology/inbox',    cta: 'View inbox' },
+            { label: 'Critical CB', sub: 'Awaiting callback',count: m.kpis.critPending,    color: m.kpis.critPending > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: Phone, fg: m.kpis.critPending > 0 ? 'text-red-700' : 'text-slate-400', href: '#critical-callback', cta: 'Log callback' },
+          ].map((s, i, arr) => (
+            <Link key={s.label} href={s.href}
+              className={cn("relative rounded-xl border p-3 hover:shadow-md transition flex flex-col gap-1 cursor-pointer group", s.color)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <s.icon className={cn("h-4 w-4 flex-shrink-0", s.fg)} />
+                  <p className={cn("text-xs font-bold truncate", s.fg)}>{s.label}</p>
+                </div>
+                {i < arr.length - 1 && <ChevronRight className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
+              </div>
+              <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
+              <p className={cn("text-[10px] font-bold mt-1 inline-flex items-center gap-0.5 group-hover:underline", s.fg)}>
+                {s.cta} <ArrowRight className="h-2.5 w-2.5" />
+              </p>
+            </Link>
+          ))}
         </div>
       </div>
 

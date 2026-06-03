@@ -59,6 +59,8 @@ const UNIVERSAL_ROUTES: { label: string; href: string; icon: React.ElementType; 
   { label: "Lab · Pathologist verify", href: "/lab/verify",         icon: ShieldCheck,  roles: ["lab", "admin"] },
   { label: "Pharmacy queue",       href: "/pharmacy/queue",       icon: Pill,        roles: ["pharmacy", "admin"] },
   { label: "Radiology inbox",      href: "/radiology/inbox",      icon: ScanLine,    roles: ["radiology", "admin"] },
+  { label: "Radiology · Scheduling", href: "/radiology/schedule", icon: ScanLine,    roles: ["radiology", "admin"] },
+  { label: "Radiology · Arrival desk", href: "/radiology/arrival", icon: ScanLine,   roles: ["radiology", "admin"] },
   { label: "ER triage",            href: "/emergency/triage",     icon: Activity,    roles: ["emergency", "admin"] },
   { label: "Staff directory",      href: "/admin/users",          icon: Users,       roles: ["admin", "doctor", "nurse", "pharmacy", "lab", "radiology", "emergency", "reception", "bed_manager", "discharge", "ot", "billing", "insurance", "quality", "audit_officer"] },
   { label: "Reception OPD",        href: "/reception/opd",        icon: User,        roles: ["reception", "admin"] },

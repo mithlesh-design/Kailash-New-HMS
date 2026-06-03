@@ -289,6 +289,37 @@ const SEED_STUDIES: RadiologyStudy[] = [
     },
   }),
 
+  // ── M13.2 — Fresh today's work covering ordered/scheduled stages ─────
+  // RS-110: Rajesh Khanna — CT chest, just ordered (no slot yet)
+  seedStudy({
+    id: 'RS-110', patientId: 'PT-20401', patientName: 'Rajesh Khanna', source: 'OPD',
+    doctorName: 'Dr. Rohan Mehta', orderedMinAgo: 7, paymentMode: 'Insurance',
+    code: 'CT_CHEST', clinicalQuestion: 'CKD-III, breathlessness · R/O pulmonary oedema',
+    priority: 'Urgent', status: 'ordered',
+  }),
+  // RS-111: Suresh Pillai — MRI knee, ordered routine
+  seedStudy({
+    id: 'RS-111', patientId: 'PT-20403', patientName: 'Suresh Pillai', source: 'OPD',
+    doctorName: 'Dr. Vikram Rathore', orderedMinAgo: 22, paymentMode: 'Cash',
+    code: 'MRI_SPINE', clinicalQuestion: 'Right knee pain · R/O meniscal tear',
+    status: 'ordered',
+  }),
+  // RS-112: Mohan Iyengar — STAT US KUB, scheduled in 20m, prep counselled
+  seedStudy({
+    id: 'RS-112', patientId: 'PT-20407', patientName: 'Mohan Iyengar', source: 'OPD',
+    doctorName: 'Dr. Priya Nair', orderedMinAgo: 15, paymentMode: 'Cash',
+    code: 'US_ABDO', clinicalQuestion: 'Oliguria · R/O obstructive uropathy',
+    priority: 'Urgent', status: 'scheduled', scheduledFor: minsAhead(20),
+  }),
+  // RS-113: Anil Kumar Verma — CT abdomen with contrast, patient arrived, consent given
+  seedStudy({
+    id: 'RS-113', patientId: 'PT-44012', patientName: 'Anil Kumar Verma', source: 'IPD', wardBed: 'Ward A — 5',
+    doctorName: 'Dr. Vikram Rathore', orderedMinAgo: 50, paymentMode: 'Insurance',
+    code: 'CT_CHEST', clinicalQuestion: 'IPD review · staging CT',
+    status: 'arrived', scheduledFor: minsAgo(10), arrivedAt: minsAgo(2),
+    contrastConsented: true,
+  }),
+
   // RS-108: Sunita Devi — CT Head verified & released
   seedStudy({
     id: 'RS-108', patientId: 'PT-20444', patientName: 'Sunita Devi', source: 'ER',
@@ -453,7 +484,7 @@ export const useRadiologyStudiesStore = create<State>()(persist((set, get) => ({
   })),
 }),
   {
-    name: 'kailash-radiologystudiesstore', version: 1,
+    name: 'kailash-radiologystudiesstore', version: 2,
     storage: createJSONStorage(() => localStorage),
     skipHydration: true,
   },
