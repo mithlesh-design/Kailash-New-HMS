@@ -5,7 +5,7 @@ import Link from "next/link"
 import {
   FlaskConical, Users, AlertTriangle, Phone, CheckCircle, Clock, Hourglass,
   ShieldX, Sparkles, ArrowRight, Microscope, Activity, PackageCheck,
-  ClipboardList,
+  ClipboardList, Droplet, ShieldCheck, Send, ChevronRight,
 } from "lucide-react"
 import { useLabOrdersStore, type LabOrder, type TestRun, type TestStatus } from "@/store/useLabOrdersStore"
 import { useLabQCStore, ANALYZERS } from "@/store/useLabQCStore"
@@ -159,6 +159,45 @@ export default function LabOverview() {
           <Link href="/lab/benches" className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl"
             style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" }}>
             <Microscope className="h-3.5 w-3.5" />Open Benches</Link>
+        </div>
+      </div>
+
+      {/* M13.1 — Sample-to-release pipeline.
+          Five chevron-linked stages mirror the actual lab journey: each stage
+          shows live counts + a direct nav button so any tech can jump straight
+          into their next action. Replaces the cognitive overhead of figuring
+          out "where's my work" from the per-bench grid below. */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-violet-600" />Sample-to-release journey
+          </h2>
+          <p className="text-[11px] text-slate-500">Order → collect → bench → enter → verify → release</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 items-stretch">
+          {[
+            { key: 'phleb', label: 'Phlebotomy', sub: 'Awaiting collection', count: m.kpis.awaiting, color: 'border-amber-200 bg-amber-50', icon: Droplet, fg: 'text-amber-700', href: '/lab/phlebotomy', cta: 'Call patient' },
+            { key: 'bench', label: 'Section bench', sub: 'On bench / in progress', count: m.kpis.onBench, color: 'border-blue-200 bg-blue-50', icon: Microscope, fg: 'text-blue-700', href: '/lab/benches', cta: 'Open benches' },
+            { key: 'verify', label: 'Pathologist', sub: 'Pending verification', count: m.kpis.pendingVerify, color: 'border-violet-200 bg-violet-50', icon: ShieldCheck, fg: 'text-violet-700', href: '/lab/verify', cta: 'Sign off' },
+            { key: 'released', label: 'Released', sub: 'Released today', count: m.kpis.releasedToday, color: 'border-emerald-200 bg-emerald-50', icon: Send, fg: 'text-emerald-700', href: '/lab/inbox', cta: 'View inbox' },
+            { key: 'critical', label: 'Critical callback', sub: 'Awaiting callback', count: m.kpis.critPending, color: m.kpis.critPending > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: Phone, fg: m.kpis.critPending > 0 ? 'text-red-700' : 'text-slate-400', href: '/lab/dashboard#callback', cta: 'Log callback' },
+          ].map((s, i, arr) => (
+            <Link key={s.key} href={s.href}
+              className={cn("relative rounded-xl border p-3 hover:shadow-md transition flex flex-col gap-1 cursor-pointer group", s.color)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <s.icon className={cn("h-4 w-4", s.fg)} />
+                  <p className={cn("text-xs font-bold", s.fg)}>{s.label}</p>
+                </div>
+                {i < arr.length - 1 && <ChevronRight className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
+              </div>
+              <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
+              <p className={cn("text-[10px] font-bold mt-1 inline-flex items-center gap-0.5 group-hover:underline", s.fg)}>
+                {s.cta} <ArrowRight className="h-2.5 w-2.5" />
+              </p>
+            </Link>
+          ))}
         </div>
       </div>
 

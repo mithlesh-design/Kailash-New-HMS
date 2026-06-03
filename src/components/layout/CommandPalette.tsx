@@ -55,6 +55,8 @@ const UNIVERSAL_ROUTES: { label: string; href: string; icon: React.ElementType; 
   { label: "Doctor OPD",           href: "/doctor/dashboard",     icon: Stethoscope, roles: ["doctor"] },
   { label: "Doctor IPD",           href: "/doctor/ipd",           icon: Stethoscope, roles: ["doctor"] },
   { label: "Lab dashboard",        href: "/lab/dashboard",        icon: FlaskConical, roles: ["lab", "admin"] },
+  { label: "Lab · Phlebotomy bench", href: "/lab/phlebotomy",      icon: FlaskConical, roles: ["lab", "admin"] },
+  { label: "Lab · Pathologist verify", href: "/lab/verify",         icon: ShieldCheck,  roles: ["lab", "admin"] },
   { label: "Pharmacy queue",       href: "/pharmacy/queue",       icon: Pill,        roles: ["pharmacy", "admin"] },
   { label: "Radiology inbox",      href: "/radiology/inbox",      icon: ScanLine,    roles: ["radiology", "admin"] },
   { label: "ER triage",            href: "/emergency/triage",     icon: Activity,    roles: ["emergency", "admin"] },

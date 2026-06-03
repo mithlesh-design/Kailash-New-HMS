@@ -406,6 +406,57 @@ const SEED_ORDERS: LabOrder[] = [
         } },
     ],
   }),
+
+  // ── M13.1 — Fresh today's work for the phlebotomy bench demo ──────────
+  // LO-410: Rajesh Khanna — STAT cardiac panel from cards OPD, just ordered
+  buildSeedOrder({
+    id: 'LO-410', patientId: 'PT-20401', patientName: 'Rajesh Khanna', source: 'OPD',
+    doctorName: 'Dr. Rohan Mehta', orderedMinAgo: 6, paymentMode: 'Insurance',
+    collected: false,
+    tests: [
+      { code: 'TROPI', status: 'awaiting_collection' },
+      { code: 'CBC', status: 'awaiting_collection' },
+    ],
+  }),
+  // LO-411: Mohan Iyengar — CKD-IV labs, STAT
+  buildSeedOrder({
+    id: 'LO-411', patientId: 'PT-20407', patientName: 'Mohan Iyengar', source: 'OPD',
+    doctorName: 'Dr. Priya Nair', orderedMinAgo: 4, paymentMode: 'Cash',
+    collected: false,
+    tests: [
+      { code: 'RFT', status: 'awaiting_collection' },
+      { code: 'CBC', status: 'awaiting_collection' },
+    ],
+  }),
+  // LO-412: Anil Kumar Verma — IPD CBC + LFT, just collected, on bench
+  buildSeedOrder({
+    id: 'LO-412', patientId: 'PT-44012', patientName: 'Anil Kumar Verma', source: 'IPD', wardBed: 'Ward A — 5',
+    doctorName: 'Dr. Vikram Rathore', orderedMinAgo: 38, paymentMode: 'Insurance',
+    collected: true, collectedMinAgo: 25, collectedBy: 'Phlebo Saira',
+    tests: [
+      { code: 'CBC', status: 'on_bench' },
+      { code: 'LFT', status: 'on_bench' },
+    ],
+  }),
+  // LO-413: Latha Subramaniam — OPD HbA1c routine, ready for pathologist verify
+  buildSeedOrder({
+    id: 'LO-413', patientId: 'PT-20404', patientName: 'Latha Subramaniam', source: 'OPD',
+    doctorName: 'Dr. Priya Nair', orderedMinAgo: 110, paymentMode: 'UPI',
+    collected: true, collectedMinAgo: 95,
+    tests: [
+      { code: 'HBA1C', status: 'entered', assignedTo: TECH_SHALU, enteredBy: TECH_SHALU,
+        values: { 'HbA1c': 7.4 } },
+    ],
+  }),
+  // LO-414: Vikas Joshi — STAT ECG-equivalent panel, on bench
+  buildSeedOrder({
+    id: 'LO-414', patientId: 'PT-20399', patientName: 'Vikas Joshi', source: 'OPD',
+    doctorName: 'Dr. Rohan Mehta', orderedMinAgo: 18, paymentMode: 'Card',
+    collected: true, collectedMinAgo: 12,
+    tests: [
+      { code: 'LIPID', status: 'on_bench' },
+    ],
+  }),
 ]
 
 // ─── Store ────────────────────────────────────────────────────────────────
@@ -719,7 +770,7 @@ export const useLabOrdersStore = create<State>()(persist((set, get) => ({
   })),
 }),
   {
-    name: 'kailash-labordersstore', version: 1,
+    name: 'kailash-labordersstore', version: 2,
     storage: createJSONStorage(() => localStorage),
     skipHydration: true,
   },
