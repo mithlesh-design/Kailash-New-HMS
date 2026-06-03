@@ -625,7 +625,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             <LocaleToggle />
 
-            <Link href={activeRole === 'patient' ? '/patient/profile' : activeRole === 'reception' ? '/reception/setup' : activeRole === 'doctor' ? '/doctor/settings' : '/admin/analytics'}>
+            <Link href={activeRole === 'patient' ? '/patient/settings' : activeRole === 'reception' ? '/reception/setup' : activeRole === 'doctor' ? '/doctor/settings' : '/admin/analytics'}>
               <button
                 aria-label="Settings"
                 className="p-2 rounded-xl transition-all cursor-pointer"

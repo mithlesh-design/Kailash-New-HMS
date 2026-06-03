@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { Ambulance, MapPin, Navigation, Phone, Clock, CheckCircle, Map, Siren } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 type AmbType = 'BLS' | 'ALS'
 
@@ -70,8 +72,18 @@ export default function AmbulancePage() {
         </div>
 
         <button
-          onClick={() => setActive(true)}
-          className="w-full mt-4 bg-red-600 text-white font-bold text-[15px] rounded-xl py-3 flex items-center justify-center gap-2 active:scale-[0.97] transition-transform shadow-[0_8px_20px_rgba(220,38,38,0.3)]"
+          onClick={() => {
+            setActive(true)
+            notifyAndAuditMany(['ambulance', 'emergency'], {
+              type: 'system', priority: 'critical',
+              title: `Patient requested ambulance (${type})`,
+              body: `Patient (Kiran Patil) requested ${type === 'BLS' ? 'Basic Life Support' : 'Advanced Life Support'} ambulance via portal. Dispatch and notify ER.`,
+              patientName: 'Kiran Patil',
+              audit: { action: 'ambulance_dispatched', resource: 'patient_request', detail: `Patient self-requested ${type} ambulance`, userName: 'Kiran Patil' },
+            })
+            toast.success(`Dispatched · ${type} ambulance + ER notified`)
+          }}
+          className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-bold text-[15px] rounded-xl py-3 flex items-center justify-center gap-2 active:scale-[0.97] transition-transform shadow-[0_8px_20px_rgba(220,38,38,0.3)] cursor-pointer"
         >
           <Ambulance className="h-5 w-5" /> Request now
         </button>

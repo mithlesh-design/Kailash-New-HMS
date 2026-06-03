@@ -2,6 +2,19 @@
 
 import { Pill, ShieldCheck, Clock, RefreshCw, AlertTriangle, CheckCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
+
+function requestReorder(name: string, daysLeft: number) {
+  notifyAndAudit({
+    to: 'pharmacy', type: 'medicines_ready', priority: 'medium',
+    title: `Refill request · ${name}`,
+    body: `Patient (Kiran Patil) requested a refill for ${name}. ~${daysLeft} days remaining. Prep for collection.`,
+    patientName: 'Kiran Patil',
+    audit: { action: 'prescription_create', resource: 'patient_refill', detail: `Patient requested refill for ${name}`, userName: 'Kiran Patil' },
+  })
+  toast.success(`Refill requested for ${name} · pharmacy notified`)
+}
 
 type Med = {
   name: string; purpose: string; dose: string; times: string[]; withFood?: boolean
@@ -58,7 +71,9 @@ export default function MedicationsPage() {
                 {m.refillSoon ? `AI predicts you'll run out in ${m.daysLeft} days` : `${m.daysLeft} days of supply left`}
               </p>
               {m.refillSoon && (
-                <button className="text-[13px] font-semibold text-white bg-blue-600 px-3.5 py-2 rounded-xl flex items-center gap-1.5 active:scale-95 transition-transform">
+                <button
+                  onClick={() => requestReorder(m.name, m.daysLeft)}
+                  className="text-[13px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3.5 py-2 rounded-xl flex items-center gap-1.5 active:scale-95 transition-transform cursor-pointer">
                   <RefreshCw className="h-4 w-4" /> Reorder
                 </button>
               )}

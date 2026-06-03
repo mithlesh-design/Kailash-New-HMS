@@ -7,6 +7,8 @@ import {
   RotateCcw, X, Plus, Stethoscope, IndianRupee, CalendarX2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 // ── Types ────────────────────────────────────────────────────────────
 type Mode = "in_person" | "video"
@@ -283,8 +285,20 @@ export default function ConsultationsPage() {
   const join = () => router.push("/patient/teleconsult")
   // Reschedule opens the booking panel pre-filled for that appointment.
   const reschedule = (id: string) => { setRescheduleId(id); setBooking(true) }
-  const cancel = (id: string) =>
-    setConsults(prev => prev.map(c => (c.id === id ? { ...c, status: "Cancelled" } : c)))
+  const cancel = (id: string) => {
+    const c = consults.find(x => x.id === id)
+    setConsults(prev => prev.map(x => (x.id === id ? { ...x, status: "Cancelled" } : x)))
+    if (c) {
+      notifyAndAuditMany(['reception', 'doctor'], {
+        type: 'appointment', priority: 'medium',
+        title: `Appointment cancelled · ${c.doctor}`,
+        body: `Patient cancelled the ${c.mode === 'video' ? 'video' : 'in-person'} appointment on ${c.date} at ${c.time}.`,
+        patientName: 'Kiran Patil',
+        audit: { action: 'reception_registered', resource: 'appointment', resourceId: c.id, detail: `Patient cancelled appointment with ${c.doctor}`, userName: 'Kiran Patil' },
+      })
+      toast.success(`Cancelled · ${c.doctor}'s desk notified`)
+    }
+  }
 
   const closeBooking = () => { setBooking(false); setRescheduleId(null) }
   const submitBooking = (c: Consult) => {

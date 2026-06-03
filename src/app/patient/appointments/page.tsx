@@ -327,7 +327,17 @@ export default function PatientAppointments() {
                       </div>
                     </div>
                     <button
-                      onClick={() => { cancelAppointment(appt.id); toast.success('Appointment cancelled') }}
+                      onClick={() => {
+                        cancelAppointment(appt.id)
+                        notifyAndAuditMany(['reception', 'doctor'], {
+                          type: 'appointment', priority: 'medium',
+                          title: `Appointment cancelled · ${appt.doctorName}`,
+                          body: `Patient cancelled the appointment with ${appt.doctorName} (${appt.specialty}) on ${appt.date} at ${appt.time}.`,
+                          patientName: 'Kiran Patil',
+                          audit: { action: 'reception_registered', resource: 'appointment', resourceId: appt.id, detail: `Patient cancelled appointment`, userName: 'Kiran Patil' },
+                        })
+                        toast.success('Appointment cancelled · staff notified')
+                      }}
                       className="text-xs font-semibold text-red-500 hover:text-red-700 cursor-pointer px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
                     >
                       Cancel

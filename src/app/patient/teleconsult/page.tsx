@@ -8,6 +8,31 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { usePatientStore } from "@/store/usePatientStore"
 import { usePatientLiveStore } from "@/store/usePatientLiveStore"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
+
+function useWebcam(active: boolean, withAudio: boolean) {
+  const ref = useRef<HTMLVideoElement | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  useEffect(() => {
+    let stream: MediaStream | null = null
+    let cancelled = false
+    async function start() {
+      if (!active || typeof navigator === 'undefined' || !navigator.mediaDevices) { setError('Camera unavailable in this browser'); return }
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: withAudio })
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
+        if (ref.current) { ref.current.srcObject = stream; ref.current.play().catch(() => { /* ignore */ }) }
+        setError(null)
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Camera permission denied')
+      }
+    }
+    start()
+    return () => { cancelled = true; if (stream) stream.getTracks().forEach((t) => t.stop()) }
+  }, [active, withAudio])
+  return { ref, error }
+}
 
 type Phase = 'precall' | 'incall' | 'ended'
 
@@ -48,10 +73,34 @@ export default function TeleconsultPage() {
 
   const mmss = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`
 
+  // Self-view webcam (live during precall + incall). Doctor side stays stubbed.
+  const selfPrecall = useWebcam(phase === 'precall' && cam, mic)
+  const selfIncall  = useWebcam(phase === 'incall'  && cam, mic)
+  const patientName = currentUser?.name ?? 'Patient'
+
+  function joinCall() {
+    setPhase('incall')
+    notifyAndAudit({
+      to: 'doctor', type: 'system', priority: 'high',
+      title: `${patientName} joined the call`,
+      body: `Patient has joined the video room for the consultation with ${doctor}.`,
+      patientName,
+      audit: { action: 'hitl_accept', resource: 'teleconsult', detail: `Patient joined teleconsult with ${doctor}`, userName: patientName },
+    })
+    toast.success(`Joined call · ${doctor} notified`)
+  }
+
   const endCall = () => {
     setPhase('ended')
     // advance the live journey past the call (video mode: in_call -> prescription)
     if (usePatientLiveStore.getState().stage === 'in_call') usePatientLiveStore.getState().advance()
+    notifyAndAudit({
+      to: 'doctor', type: 'system', priority: 'medium',
+      title: `Call ended · ${patientName}`,
+      body: `Patient ended the teleconsult after ${mmss}. Encounter ready for sign-off.`,
+      patientName,
+      audit: { action: 'hitl_modify', resource: 'teleconsult', detail: `Patient ended call (duration ${mmss})`, userName: patientName },
+    })
   }
 
   return (
@@ -62,17 +111,22 @@ export default function TeleconsultPage() {
         <div className="rounded-3xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-5">
           <p className="text-[14px] text-slate-500 mb-4">You&apos;re about to join your call with <b className="text-slate-800">{doctor}</b>. Check your camera &amp; mic first.</p>
           <div className="relative rounded-2xl overflow-hidden bg-slate-900 aspect-video mb-4">
-            {cam ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-900">
+            {cam && !selfPrecall.error ? (
+              <video ref={selfPrecall.ref} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover bg-slate-800" />
+            ) : cam ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-slate-700 to-slate-900 text-center px-4">
                 <div className="h-20 w-20 rounded-full bg-white/15 flex items-center justify-center text-white text-2xl font-bold">{(currentUser?.name ?? 'You').split(' ').map(w => w[0]).join('').slice(0, 2)}</div>
+                <p className="text-white/70 text-[11px]">{selfPrecall.error}</p>
               </div>
-            ) : <div className="absolute inset-0 flex items-center justify-center text-white/50 text-[14px]">Camera off</div>}
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-white/50 text-[14px]">Camera off</div>
+            )}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-              <button onClick={() => setMic(m => !m)} className={cn("h-10 w-10 rounded-full flex items-center justify-center", mic ? "bg-white/20 text-white" : "bg-red-500 text-white")}>{mic ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}</button>
-              <button onClick={() => setCam(c => !c)} className={cn("h-10 w-10 rounded-full flex items-center justify-center", cam ? "bg-white/20 text-white" : "bg-red-500 text-white")}>{cam ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}</button>
+              <button onClick={() => setMic(m => !m)} className={cn("h-10 w-10 rounded-full flex items-center justify-center cursor-pointer", mic ? "bg-white/20 text-white" : "bg-red-500 text-white")}>{mic ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}</button>
+              <button onClick={() => setCam(c => !c)} className={cn("h-10 w-10 rounded-full flex items-center justify-center cursor-pointer", cam ? "bg-white/20 text-white" : "bg-red-500 text-white")}>{cam ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}</button>
             </div>
           </div>
-          <button onClick={() => setPhase('incall')} className="w-full h-13 py-3.5 rounded-2xl font-semibold text-[16px] text-white bg-blue-600 hover:bg-blue-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+          <button onClick={joinCall} className="w-full h-13 py-3.5 rounded-2xl font-semibold text-[16px] text-white bg-blue-600 hover:bg-blue-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
             <Video className="h-5 w-5" /> Join now
           </button>
         </div>
@@ -82,9 +136,15 @@ export default function TeleconsultPage() {
         <div className="rounded-3xl overflow-hidden shadow-[0_1px_4px_rgba(15,23,42,0.06)]">
           <div className="relative aspect-video bg-slate-900">
             <VideoStub name={doctor} />
-            {/* self PiP */}
+            {/* self PiP — uses real webcam when available */}
             <div className="absolute bottom-3 right-3 h-24 w-32 rounded-xl overflow-hidden border-2 border-white/20 bg-gradient-to-br from-slate-600 to-slate-800 flex items-center justify-center">
-              {cam ? <span className="text-white/80 text-[12px] font-semibold">You</span> : <VideoOff className="h-5 w-5 text-white/50" />}
+              {cam && !selfIncall.error ? (
+                <video ref={selfIncall.ref} autoPlay muted playsInline className="w-full h-full object-cover" />
+              ) : cam ? (
+                <span className="text-white/80 text-[12px] font-semibold">You</span>
+              ) : (
+                <VideoOff className="h-5 w-5 text-white/50" />
+              )}
             </div>
             {/* AI scribe + duration */}
             <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-fuchsia-500/90 px-2.5 py-1 rounded-full"><Sparkles className="h-3.5 w-3.5 text-white" /><span className="text-white text-[11px] font-bold">AI scribe noting</span></div>

@@ -12,6 +12,7 @@ import {
 } from "@/store/usePatientOrdersStore"
 import { cn } from "@/lib/utils"
 import { notifyAndAudit } from "@/lib/notifyAndAudit"
+import { PaymentModal } from "@/components/patient/PaymentModal"
 
 function relativeFrom(ts: number | null) {
   if (!ts) return 'just now'
@@ -31,6 +32,7 @@ function TestIcon({ item }: { item: OrderItem }) {
 export default function DoctorOrdersPage() {
   const { items, doctor, received, receivedAt, paid, paidAt, receiveOrders, accept, setQty, skip, payNow } = usePatientOrdersStore()
   const [reasonFor, setReasonFor] = useState<string | null>(null)
+  const [payOpen, setPayOpen] = useState(false)
 
   // A patient reaching this page is post-consult — make sure the orders are present.
   useEffect(() => { receiveOrders() }, [receiveOrders])
@@ -41,8 +43,12 @@ export default function DoctorOrdersPage() {
   const keptCount = acceptedItems(items).length
   const skipped = skippedItems(items)
 
-  const handlePay = () => {
+  const openPay = () => {
     if (total <= 0) { toast.error('Nothing selected to pay for'); return }
+    setPayOpen(true)
+  }
+
+  const handlePay = () => {
     payNow()
     const testCount   = acceptedItems(items).filter(i => i.kind === 'test').length
     const medCount    = acceptedItems(items).filter(i => i.kind === 'medicine').length
@@ -251,13 +257,22 @@ export default function DoctorOrdersPage() {
               <p className="text-[12px] text-slate-300">{keptCount} item{keptCount !== 1 ? 's' : ''} to pay{skipped.length ? ` · ${skipped.length} skipped` : ''}</p>
               <p className="text-[22px] font-bold leading-tight tabular-nums">₹{total}</p>
             </div>
-            <button onClick={handlePay} disabled={total <= 0}
+            <button onClick={openPay} disabled={total <= 0}
               className="bg-blue-600 disabled:bg-white/10 disabled:text-slate-400 text-white font-bold text-[14.5px] rounded-xl px-5 py-3 flex items-center gap-2 active:scale-[0.97] transition shadow-[0_8px_20px_rgba(37,99,235,0.4)]">
               <CreditCard className="h-4.5 w-4.5" /> Pay ₹{total} <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </div>
       )}
+      <PaymentModal
+        open={payOpen}
+        amount={total}
+        purpose="OPD investigation"
+        description={`${keptCount} item${keptCount === 1 ? '' : 's'} from ${doctor}`}
+        patientName="Kiran Patil"
+        onClose={() => setPayOpen(false)}
+        onSuccess={() => { handlePay(); setTimeout(() => setPayOpen(false), 1500) }}
+      />
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react"
 import { usePatientStore } from "@/store/usePatientStore"
 import { useAuditStore } from "@/store/useAuditStore"
 import { useCameraStore } from "@/store/useCameraStore"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 import { Clock, MapPin, Shield, AlertTriangle, CheckCircle, Activity, Camera, Video, VideoOff, Wifi } from "lucide-react"
 
 const CONDITION_CONFIG = {
@@ -135,6 +136,13 @@ export default function FamilyTrackPage({ params }: { params: Promise<{ token: s
       resource: 'patient',
       resourceId: patient.id,
       detail: `Family requested live camera for ${patient.name} in ${wardRoom}`,
+    })
+    notifyAndAudit({
+      to: 'nurse', type: 'system', priority: 'high',
+      title: `Family camera request · ${patient.name}`,
+      body: `Family member is requesting a live camera view of ${patient.name} (${wardRoom}). Approve or decline.`,
+      patientName: patient.name,
+      audit: { action: 'family_camera_requested', resource: 'family_camera_request', resourceId: patient.id, detail: `Family requested camera in ${wardRoom}`, userName: 'Family member' },
     })
   }
 

@@ -7,6 +7,24 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { printableHtml } from "@/lib/fileIO"
+
+function downloadDoc(d: { name: string; category: string; date: string; size: string; amount?: string }) {
+  const html = `
+    <div class="hdr"><div><h1>KAILASH HOSPITAL</h1><h2>${d.name}</h2></div><div style="text-align:right"><b>${d.date}</b></div></div>
+    <p style="font-size:13px"><b>Document type:</b> ${d.category}</p>
+    ${d.amount ? `<p style="font-size:13px"><b>Amount:</b> ${d.amount}</p>` : ''}
+    <p style="font-size:12px;color:#64748b">This is a system-generated demo document.</p>`
+  printableHtml(d.name, html)
+}
+
+function shareDoc(name: string) {
+  const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/patient/downloads?doc=${encodeURIComponent(name)}`
+  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    navigator.clipboard.writeText(link).catch(() => { /* ignore */ })
+  }
+  toast.success(`Share link for ${name} copied to clipboard`)
+}
 
 type Category = 'Lab Reports' | 'Prescriptions' | 'Invoices' | 'Summaries' | 'Insurance'
 
@@ -127,16 +145,16 @@ export default function DownloadsPage() {
 
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     <button
-                      onClick={() => toast.success(`Shared link for ${d.name} copied`)}
+                      onClick={() => shareDoc(d.name)}
                       aria-label={`Share ${d.name}`}
-                      className="h-9 w-9 rounded-xl bg-white border border-slate-200 text-slate-500 flex items-center justify-center hover:text-slate-700 hover:border-slate-300 active:scale-95 transition"
+                      className="h-9 w-9 rounded-xl bg-white border border-slate-200 text-slate-500 flex items-center justify-center hover:text-slate-700 hover:border-slate-300 active:scale-95 transition cursor-pointer"
                     >
                       <Share2 className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => toast.success(`Downloading ${d.name}`)}
+                      onClick={() => downloadDoc(d)}
                       aria-label={`Download ${d.name}`}
-                      className="h-9 px-3 rounded-xl bg-blue-600 text-white text-[13px] font-semibold flex items-center gap-1.5 hover:bg-blue-700 active:scale-95 transition"
+                      className="h-9 px-3 rounded-xl bg-blue-600 text-white text-[13px] font-semibold flex items-center gap-1.5 hover:bg-blue-700 active:scale-95 transition cursor-pointer"
                     >
                       <Download className="h-4 w-4" /> <span className="hidden sm:inline">Download</span>
                     </button>

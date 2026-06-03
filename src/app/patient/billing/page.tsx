@@ -9,6 +9,32 @@ import {
 import { useAuthStore } from "@/store/useAuthStore"
 import { usePatientOrdersStore, acceptedItems, lineTotal, orderTotal } from "@/store/usePatientOrdersStore"
 import { cn } from "@/lib/utils"
+import { printableHtml } from "@/lib/fileIO"
+
+function downloadReceipt(admission: { id: string; date: string; title: string; insurer: string; total: number; covered: number }) {
+  const coPay = admission.total - admission.covered
+  const html = `
+    <div class="hdr"><div><h1>KAILASH HOSPITAL</h1><h2>Tax Invoice · ${admission.id}</h2></div><div style="text-align:right"><b>${admission.date}</b></div></div>
+    <p style="font-size:13px"><b>Patient:</b> Kiran Patil (PT-20394)</p>
+    <p style="font-size:13px"><b>Visit:</b> ${admission.title}</p>
+    <table><thead><tr><th>Description</th><th style="text-align:right">Amount (₹)</th></tr></thead><tbody>
+      <tr><td>Total hospital charges</td><td style="text-align:right">${admission.total.toLocaleString('en-IN')}</td></tr>
+      <tr><td>Insurance covered · ${admission.insurer}</td><td style="text-align:right">- ${admission.covered.toLocaleString('en-IN')}</td></tr>
+      <tr class="total"><td>Patient co-pay (paid)</td><td style="text-align:right">${coPay.toLocaleString('en-IN')}</td></tr>
+    </tbody></table>
+    <p style="font-size:12px;color:#64748b">This is a system-generated demo invoice.</p>`
+  printableHtml(admission.id, html)
+}
+
+function downloadBillReceipt(title: string, total: number, lines: { desc: string; amount: number }[]) {
+  const html = `
+    <div class="hdr"><div><h1>KAILASH HOSPITAL</h1><h2>${title}</h2></div></div>
+    <table><thead><tr><th>Line</th><th style="text-align:right">Amount (₹)</th></tr></thead><tbody>
+      ${lines.map((l) => `<tr><td>${l.desc}</td><td style="text-align:right">${l.amount.toLocaleString('en-IN')}</td></tr>`).join('')}
+      <tr class="total"><td>Total</td><td style="text-align:right">${total.toLocaleString('en-IN')}</td></tr>
+    </tbody></table>`
+  printableHtml(title, html)
+}
 
 const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
@@ -112,7 +138,7 @@ export default function PatientBilling() {
           <p className="text-[11.5px] text-slate-400">{Math.round((ADMISSION.covered / ADMISSION.total) * 100)}% covered by your insurer · {100 - Math.round((ADMISSION.covered / ADMISSION.total) * 100)}% co-pay</p>
         </div>
 
-        <button onClick={() => toast.success('Receipt downloaded')} className="mt-4 w-full bg-slate-100 text-slate-700 font-bold text-[13.5px] rounded-xl py-2.5 flex items-center justify-center gap-2 active:scale-[0.98] transition">
+        <button onClick={() => downloadReceipt(ADMISSION)} className="mt-4 w-full bg-slate-100 text-slate-700 font-bold text-[13.5px] rounded-xl py-2.5 flex items-center justify-center gap-2 active:scale-[0.98] transition cursor-pointer">
           <Download className="h-4 w-4" /> Download receipt & claim documents
         </button>
       </div>
@@ -159,7 +185,7 @@ function BillCard({
       {status === 'paid' ? (
         <div className="mt-3 flex items-center justify-between gap-2">
           <span className="text-[12.5px] text-green-700 flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> {footer ?? 'Payment successful'}</span>
-          <button onClick={() => toast.success('Receipt downloaded')} className="text-[12.5px] font-semibold text-slate-600 flex items-center gap-1.5 hover:text-slate-900"><Download className="h-3.5 w-3.5" /> Receipt</button>
+          <button onClick={() => downloadBillReceipt(title, total, lines)} className="text-[12.5px] font-semibold text-slate-600 flex items-center gap-1.5 hover:text-slate-900 cursor-pointer"><Download className="h-3.5 w-3.5" /> Receipt</button>
         </div>
       ) : (
         <Link href={payHref ?? '#'} className="mt-3 w-full bg-blue-600 text-white font-bold text-[14px] rounded-xl py-2.5 flex items-center justify-center gap-2 active:scale-[0.98] transition">
