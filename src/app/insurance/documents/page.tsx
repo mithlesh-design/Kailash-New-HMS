@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { Upload, CheckCircle, AlertCircle, FileText, X } from "lucide-react"
 import { toast } from "sonner"
+import { uploadFile } from "@/lib/fileIO"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 
 type DocStatus = 'required' | 'uploaded' | 'verified' | 'rejected'
 
@@ -39,7 +41,25 @@ const STATUS_CONFIG: Record<DocStatus, { label: string; color: string; icon: Rea
 export default function InsuranceDocumentsPage() {
   const [docs, setDocs] = useState<RequiredDoc[]>(INITIAL_DOCS)
 
+  // M10-F — real file upload (mock backend). Caller picks a real file via
+  // a hidden <input type="file">. We store the filename + object URL.
+  const handleUpload = async (id: string, file: File) => {
+    const result = await uploadFile(file)
+    setDocs((prev) => prev.map((d) => d.id === id
+      ? { ...d, status: 'uploaded', uploadedFile: result.filename, rejectionReason: undefined }
+      : d
+    ))
+    const doc = docs.find(d => d.id === id)
+    notifyAndAudit({
+      to: 'admin', type: 'system', priority: 'low',
+      title: `Insurance doc uploaded · ${doc?.name ?? id}`,
+      body: `${result.filename} (${Math.round(result.size / 1024)} KB) uploaded for ${doc?.name ?? id}.`,
+      audit: { action: 'insurance_doc_upload', resource: 'insurance_document', resourceId: id, detail: `Uploaded ${result.filename}`, userName: 'Insurance desk' },
+    })
+    toast.success(`Uploaded ${result.filename} · awaiting insurer verification`)
+  }
   const simulateUpload = (id: string) => {
+    // Fallback: simulates a successful upload without picking a file.
     setDocs((prev) => prev.map((d) => d.id === id
       ? { ...d, status: 'uploaded', uploadedFile: `${d.name.toLowerCase().replace(/\s+/g, '_')}_upload.pdf`, rejectionReason: undefined }
       : d
@@ -119,13 +139,12 @@ export default function InsuranceDocumentsPage() {
                 </div>
 
                 {(doc.status === 'required' || doc.status === 'rejected') && (
-                  <button
-                    onClick={() => simulateUpload(doc.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0"
-                  >
+                  <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0 cursor-pointer">
                     <Upload className="h-3.5 w-3.5" />
                     {doc.status === 'rejected' ? 'Re-upload' : 'Upload'}
-                  </button>
+                    <input type="file" className="hidden" accept="application/pdf,image/*"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(doc.id, f); e.currentTarget.value = '' }} />
+                  </label>
                 )}
               </div>
             </div>

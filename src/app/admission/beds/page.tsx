@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { Bed, User, Clock, CheckCircle2, Wrench } from "lucide-react"
 import { useAdmissionStore } from "@/store/useAdmissionStore"
 import { useHousekeepingStore } from "@/store/useHousekeepingStore"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -35,7 +36,13 @@ function BedCard({ bed }: { bed: BedType }) {
       reason: 'Discharge',
       status: 'Pending',
     })
-    toast.success(`Bed ${bed.bedNumber} queued for cleaning`)
+    notifyAndAudit({
+      to: 'housekeeping', type: 'system', priority: 'high',
+      title: `Bed cleaning required · ${bed.bedNumber}`,
+      body: `Bed ${bed.bedNumber} (${bed.ward}) needs turnover. Discharge complete.`,
+      audit: { action: 'housekeeping_bed_turned', resource: 'bed', resourceId: bed.id, detail: `Bed ${bed.bedNumber} → cleaning`, userName: 'Admission desk' },
+    })
+    toast.success(`Bed ${bed.bedNumber} queued for cleaning · housekeeping notified`)
   }
 
   return (
@@ -92,7 +99,16 @@ function BedCard({ bed }: { bed: BedType }) {
         )}
         {bed.status === 'Cleaning' && (
           <button
-            onClick={() => { confirmBedReady(bed.id); toast.success(`Bed ${bed.bedNumber} marked as ready`) }}
+            onClick={() => {
+              confirmBedReady(bed.id)
+              notifyAndAudit({
+                to: 'bed_manager', type: 'system', priority: 'medium',
+                title: `Bed ready · ${bed.bedNumber}`,
+                body: `Bed ${bed.bedNumber} (${bed.ward}) is verified clean and available.`,
+                audit: { action: 'housekeeping_bed_turned', resource: 'bed', resourceId: bed.id, detail: `Bed ready ${bed.bedNumber}`, userName: 'Housekeeping' },
+              })
+              toast.success(`Bed ${bed.bedNumber} marked as ready · admissions notified`)
+            }}
             className="text-[10px] font-semibold px-2 py-1 rounded bg-green-100 text-green-700 border border-green-200 hover:bg-green-200 transition-colors cursor-pointer"
           >
             Mark Ready

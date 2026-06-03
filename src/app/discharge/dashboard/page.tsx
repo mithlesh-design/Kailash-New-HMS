@@ -22,8 +22,25 @@ const PILLAR_CONFIG: Record<ClearancePillar, { label: string; icon: React.Elemen
 
 const PILLARS: ClearancePillar[] = ['doctor', 'nursing', 'pharmacy', 'billing', 'insurance']
 
-const AI_SUMMARY_TEMPLATE = (p: DischargePatient) =>
-  `Patient ${p.patientName} admitted on ${new Date(p.admittedOn).toLocaleDateString('en-IN')} for ${p.diagnosis}. Managed under ${p.attendingDoctor}. Treatment course completed. Patient is clinically stable and fit for discharge. Follow-up advised in 2 weeks. All investigations reviewed. Medications reconciled and discharge prescription prepared. Patient and attendant counselled on red-flag symptoms and medication compliance.`
+const AI_SUMMARY_TEMPLATE = (p: DischargePatient) => {
+  const admittedOn = new Date(p.admittedOn)
+  const days = Math.max(1, Math.round((Date.now() - admittedOn.getTime()) / 86400000))
+  const followUpDays = /surgery|appendect|cardiac|cabg|PCI/i.test(p.diagnosis) ? 7 : 14
+  return [
+    `DISCHARGE SUMMARY · ${p.patientName} (${p.patientId})`,
+    `Admitted: ${admittedOn.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · LOS: ${days} day${days === 1 ? '' : 's'}`,
+    `Attending: ${p.attendingDoctor}`,
+    ``,
+    `1. Diagnosis: ${p.diagnosis}.`,
+    `2. Course: Treatment plan completed without major complications. Vitals stable at discharge.`,
+    `3. Investigations: Latest labs / imaging reviewed and within acceptable range for discharge.`,
+    `4. Medications at discharge: Reconciled prescription (TTO) attached.`,
+    `5. Follow-up: Outpatient review in ${followUpDays} days with ${p.attendingDoctor}.`,
+    `6. Red-flag advice: Patient and attendant counselled on warning signs that need immediate ER attention (fever > 38.5°C, worsening pain, breathlessness, bleeding).`,
+    `7. Activity: Resume routine activities as tolerated. Avoid heavy lifting and driving for ${followUpDays} days.`,
+    `8. Diet: Continue prescribed diet plan; resume normal diet after follow-up.`,
+  ].join('\n')
+}
 
 function ClearancePillarBadge({ pillar, status, onClick }: { pillar: ClearancePillar; status: 'pending' | 'cleared'; onClick: () => void }) {
   const cfg = PILLAR_CONFIG[pillar]
@@ -218,7 +235,26 @@ function PatientCard({ patient }: { patient: DischargePatient }) {
                       <p className="text-xs text-slate-500 mt-0.5">Owner: {blocker.owner}</p>
                     </div>
                     {!blocker.resolvedAt && (
-                      <button onClick={() => { resolveBlocker(patient.patientId, blocker.id); toast.success("Blocker resolved") }} className="ml-2 text-xs font-bold text-green-600 hover:text-green-800 bg-green-50 border border-green-200 px-2 py-1 rounded cursor-pointer">
+                      <button onClick={() => {
+                        resolveBlocker(patient.patientId, blocker.id)
+                        // Notify the owner role of resolution (inferred from owner name).
+                        const ownerLower = blocker.owner.toLowerCase()
+                        const role: 'doctor' | 'pharmacy' | 'billing' | 'insurance' | 'nurse' | 'admin' =
+                          ownerLower.includes('pharmacy') ? 'pharmacy'
+                          : ownerLower.includes('billing') ? 'billing'
+                          : ownerLower.includes('insurance') ? 'insurance'
+                          : ownerLower.includes('nurse') ? 'nurse'
+                          : ownerLower.includes('doctor') ? 'doctor'
+                          : 'admin'
+                        notifyAndAudit({
+                          to: role, type: 'system', priority: 'low',
+                          title: `Blocker resolved · ${patient.patientName}`,
+                          body: `Discharge blocker "${blocker.description}" marked resolved.`,
+                          patientName: patient.patientName,
+                          audit: { action: 'discharge_clearance', resource: 'discharge_blocker', resourceId: blocker.id, detail: `Resolved blocker: ${blocker.description}`, userName: 'Discharge desk' },
+                        })
+                        toast.success(`Blocker resolved · ${blocker.owner} notified`)
+                      }} className="ml-2 text-xs font-bold text-green-600 hover:text-green-800 bg-green-50 border border-green-200 px-2 py-1 rounded cursor-pointer">
                         Resolve
                       </button>
                     )}

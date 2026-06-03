@@ -2,10 +2,13 @@
 
 import { useState } from "react"
 import { CheckCircle, Clock } from "lucide-react"
+import { toast } from "sonner"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 
 type DiscountStatus = 'pending' | 'approved' | 'rejected'
+interface DiscountRequest { id: string; patient: string; billId: string; billAmount: number; discountPct: number; reason: string; requestedBy: string; status: DiscountStatus }
 
-const DISCOUNT_REQUESTS: Array<{ id: string; patient: string; billId: string; billAmount: number; discountPct: number; reason: string; requestedBy: string; status: DiscountStatus }> = [
+const DISCOUNT_REQUESTS: DiscountRequest[] = [
   { id: 'DISC-001', patient: 'Ramu Prasad', billId: 'BILL-2026-0044', billAmount: 28000, discountPct: 20, reason: 'BPL card holder', requestedBy: 'Dr. Priya Menon', status: 'pending' },
   { id: 'DISC-002', patient: 'Lata Bai', billId: 'BILL-2026-0042', billAmount: 12000, discountPct: 10, reason: 'Senior citizen — 10% hospital policy', requestedBy: 'Reception', status: 'approved' },
 ]
@@ -14,7 +17,37 @@ export default function BillingDiscounts() {
   const [requests, setRequests] = useState(DISCOUNT_REQUESTS)
 
   const update = (id: string, status: DiscountStatus) => {
+    const req = requests.find(r => r.id === id)
     setRequests((prev) => prev.map((r) => r.id === id ? { ...r, status } : r))
+    if (!req) return
+    // Audit + notify the requester (and the patient if approved).
+    const discountAmt = Math.round(req.billAmount * req.discountPct / 100)
+    if (status === 'approved') {
+      notifyAndAudit({
+        to: 'billing', type: 'system', priority: 'medium',
+        title: `Discount approved · ${req.patient}`,
+        body: `${req.discountPct}% (₹${discountAmt.toLocaleString('en-IN')}) discount approved on ${req.billId}. Adjust bill accordingly.`,
+        patientName: req.patient,
+        audit: { action: 'finance_invoice_approved', resource: 'discount_request', resourceId: id, detail: `Approved ${req.discountPct}% discount for ${req.patient}`, userName: 'Finance lead' },
+      })
+      notifyAndAudit({
+        to: 'patient', type: 'system', priority: 'low',
+        title: `Good news · discount applied`,
+        body: `A ${req.discountPct}% discount has been applied to your bill ${req.billId}. New net: ₹${(req.billAmount - discountAmt).toLocaleString('en-IN')}.`,
+        patientName: req.patient,
+        audit: { action: 'finance_invoice_approved', resource: 'discount_request', resourceId: id, detail: `Patient-side discount notice`, userName: 'Finance lead' },
+      })
+      toast.success(`Approved · billing + patient notified`)
+    } else {
+      notifyAndAudit({
+        to: 'billing', type: 'system', priority: 'low',
+        title: `Discount rejected · ${req.patient}`,
+        body: `${req.discountPct}% discount on ${req.billId} was not approved.`,
+        patientName: req.patient,
+        audit: { action: 'finance_invoice_received', resource: 'discount_request', resourceId: id, detail: `Rejected ${req.discountPct}% discount for ${req.patient}`, userName: 'Finance lead' },
+      })
+      toast.error(`Rejected · billing notified`)
+    }
   }
 
   return (

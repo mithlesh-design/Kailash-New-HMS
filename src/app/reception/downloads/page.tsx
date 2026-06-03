@@ -4,6 +4,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { Search, FileText, Receipt, ClipboardList, ShieldCheck, Ticket, Download, Printer } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { printableHtml, downloadText } from "@/lib/fileIO"
 
 type Cat = 'Forms' | 'Receipts' | 'Token slips' | 'Reports' | 'Insurance'
 type Doc = { id: string; name: string; cat: Cat; meta: string }
@@ -71,8 +72,10 @@ export default function ReceptionDownloads() {
                     <p className="text-[12px] text-slate-500"><span className={cn("font-semibold px-2 py-0.5 rounded-full mr-1.5", tint)}>{d.cat}</span>{d.meta}</p>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <button onClick={() => toast.success(`Printing ${d.name}`)} aria-label="Print" className="h-9 w-9 rounded-xl bg-white border border-slate-200 text-slate-500 flex items-center justify-center hover:text-slate-700 active:scale-95 transition"><Printer className="h-4 w-4" /></button>
-                    <button onClick={() => toast.success(`Downloading ${d.name}`)} aria-label="Download" className="h-9 px-3 rounded-xl bg-blue-600 text-white text-[13px] font-semibold flex items-center gap-1.5 hover:bg-blue-700 active:scale-95 transition"><Download className="h-4 w-4" /> <span className="hidden sm:inline">Download</span></button>
+                    <button onClick={() => printableHtml(d.name, `<div class="hdr"><div><h1>KAILASH HOSPITAL</h1><h2>${d.name}</h2></div><div style="text-align:right"><b>${new Date().toLocaleDateString('en-IN')}</b></div></div><p style="font-size:13px"><b>Type:</b> ${d.cat}</p><p style="font-size:12px;color:#64748b">This is a system-generated demo document.</p>`)}
+                      aria-label="Print" className="h-9 w-9 rounded-xl bg-white border border-slate-200 text-slate-500 flex items-center justify-center hover:text-slate-700 active:scale-95 transition cursor-pointer"><Printer className="h-4 w-4" /></button>
+                    <button onClick={() => downloadText(`${d.name}.txt`, `Kailash Hospital · ${d.name}\nType: ${d.cat}\nGenerated: ${new Date().toLocaleString('en-IN')}\n\nMeta: ${d.meta}\n\n(Demo download · Phase-1 mock)`)}
+                      aria-label="Download" className="h-9 px-3 rounded-xl bg-blue-600 text-white text-[13px] font-semibold flex items-center gap-1.5 hover:bg-blue-700 active:scale-95 transition cursor-pointer"><Download className="h-4 w-4" /> <span className="hidden sm:inline">Download</span></button>
                   </div>
                 </div>
               )

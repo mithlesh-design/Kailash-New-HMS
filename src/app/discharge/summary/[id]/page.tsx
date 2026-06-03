@@ -6,9 +6,11 @@ import { generateDischargeSummary } from "@/ai-services/discharge-summary"
 import type { DischargeSummary } from "@/ai-services/discharge-summary"
 import type { AiEnvelope } from "@/types/ai"
 import { HitlReviewCard } from "@/components/features/HitlReviewCard"
-import { Loader2, Pill, CalendarCheck, AlertTriangle, Utensils, Activity, Droplets, FlaskConical, ScanLine, TrendingUp, TrendingDown, Minus, User, Languages } from "lucide-react"
+import { Loader2, Pill, CalendarCheck, AlertTriangle, Utensils, Activity, Droplets, FlaskConical, ScanLine, TrendingUp, TrendingDown, Minus, User, Languages, Printer, Download, Pencil } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { printableHtml, downloadText } from "@/lib/fileIO"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 
 type ViewMode = 'clinical' | 'patient' | 'hindi'
 
@@ -234,6 +236,41 @@ export default function DischargeSummaryPage() {
   const [loading, setLoading] = useState(true)
   const [accepted, setAccepted] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('clinical')
+  const [editingFollowUp, setEditingFollowUp] = useState(false)
+  const [addendum, setAddendum] = useState('')
+
+  function printSummary() {
+    if (!envelope) return
+    const d = envelope.data
+    printableHtml(`Discharge summary · ${admissionId}`, `
+      <div class="hdr"><div><h1>KAILASH HOSPITAL</h1><h2>Discharge Summary · ${admissionId}</h2></div><div style="text-align:right"><b>${d.dischargeDate}</b></div></div>
+      <table>
+        <tr><th>Admission</th><td>${d.admissionDate}</td></tr>
+        <tr><th>Discharge</th><td>${d.dischargeDate}</td></tr>
+        <tr><th>Diagnosis</th><td>${d.dischargeDiagnosis}</td></tr>
+        <tr><th>Procedures</th><td>${d.proceduresDone.join(', ')}</td></tr>
+        <tr><th>Condition</th><td>${d.conditionAtDischarge}</td></tr>
+      </table>
+      <h3>Treatment summary</h3><p style="font-size:13px">${d.treatmentSummary}</p>
+      ${d.otNotes ? `<h3>Surgical notes</h3><p style="font-size:13px">${d.otNotes}</p>` : ''}
+      <h3>Discharge medications</h3>
+      <table><thead><tr><th>Drug</th><th>Dose</th><th>Duration</th></tr></thead><tbody>
+        ${d.dischargeMedications.map(m => `<tr><td>${m.name}</td><td>${m.dose}</td><td>${m.duration}</td></tr>`).join('')}
+      </tbody></table>
+      <h3>Follow-up · ${d.followUpDate}</h3>
+      <ul>${d.followUpInstructions.map(f => `<li style="font-size:12px">${f}</li>`).join('')}</ul>
+      <h3>Warning — return immediately if</h3>
+      <ul>${d.warningSymptoms.map(w => `<li style="font-size:12px;color:#dc2626">${w}</li>`).join('')}</ul>
+      <p style="font-size:13px"><b>Diet:</b> ${d.dietAdvice}</p>
+      <p style="font-size:13px"><b>Activity:</b> ${d.activityRestrictions}</p>
+      ${addendum ? `<h3>Attending physician addendum</h3><p style="font-size:13px;background:#fef3c7;padding:10px;border-radius:6px">${addendum}</p>` : ''}
+    `)
+  }
+  function downloadPatientCopy() {
+    if (!envelope) return
+    downloadText(`Discharge_summary_${admissionId}.txt`,
+      envelope.data.patientFriendlySummary + (addendum ? `\n\nAttending physician note: ${addendum}` : ''))
+  }
 
   useEffect(() => {
     generateDischargeSummary(admissionId).then((res) => {
@@ -303,6 +340,42 @@ export default function DischargeSummaryPage() {
           )}
           {viewMode === 'patient' && <PatientView d={envelope.data} lang="en" />}
           {viewMode === 'hindi' && <PatientView d={envelope.data} lang="hi" />}
+
+          {/* Attending-physician addendum (replaces "no edit form" gap) */}
+          <div className="bg-white border shadow-sm rounded-xl p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Pencil className="h-4 w-4 text-amber-500" />
+              <h3 className="text-[13.5px] font-bold text-slate-900">Attending physician addendum</h3>
+              <span className="ml-auto text-[10.5px] text-slate-400">Optional · printed below the summary</span>
+            </div>
+            <textarea value={addendum} onChange={(e) => setAddendum(e.target.value)} rows={3}
+              placeholder="Any clarification or correction the attending physician wants added to the printed handout."
+              className="w-full px-3 py-2 rounded-lg ring-1 ring-slate-200 bg-white text-[13px] focus:outline-none focus:ring-amber-400 resize-none" />
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button onClick={printSummary}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-bold cursor-pointer">
+              <Printer className="h-4 w-4" /> Print summary
+            </button>
+            <button onClick={downloadPatientCopy}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[13px] font-semibold cursor-pointer">
+              <Download className="h-4 w-4" /> Download patient copy
+            </button>
+            <button onClick={() => {
+              notifyAndAudit({
+                to: 'patient', type: 'discharge_ready', priority: 'medium',
+                title: `Discharge summary ready`,
+                body: `Your discharge summary is final. Pick it up from the nurse's station or download from your portal.`,
+                audit: { action: 'admission_discharge', resource: 'discharge_summary', resourceId: admissionId, detail: `Discharge summary ready for handout`, userName: 'Discharge desk' },
+              })
+              toast.success('Patient notified · discharge summary ready')
+            }}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold cursor-pointer">
+              <CalendarCheck className="h-4 w-4" /> Tell patient it&apos;s ready
+            </button>
+          </div>
         </div>
       ) : (
         <HitlReviewCard

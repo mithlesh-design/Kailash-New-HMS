@@ -6,6 +6,7 @@ import { VisibilityHeader, STAT_CARD } from "@/components/reception/VisibilityHe
 import { CreditCard, Wallet, CheckCircle2, AlertTriangle, Search, Receipt, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { printableHtml } from "@/lib/fileIO"
 
 const STATUS_TINT: Record<BillStatus, string> = {
   draft: 'bg-slate-100 text-slate-600', frozen: 'bg-blue-50 text-blue-700', settled: 'bg-green-50 text-green-700', dispute: 'bg-red-50 text-red-600',
@@ -89,8 +90,20 @@ export default function ReceptionBilling() {
               </div>
 
               {b.status !== 'settled' && (
-                <button onClick={() => toast.success(`Receipt for ${b.patientName} ready`, { description: `${b.id} · ₹${due.toLocaleString('en-IN')} due` })}
-                  className="mt-3 text-[12.5px] font-semibold text-blue-600 hover:text-blue-700">Print payment slip →</button>
+                <button onClick={() => {
+                  printableHtml(`Payment slip · ${b.id}`, `
+                    <div class="hdr"><div><h1>KAILASH HOSPITAL</h1><h2>Payment slip · ${b.id}</h2></div><div style="text-align:right"><b>${new Date().toLocaleDateString('en-IN')}</b></div></div>
+                    <p style="font-size:13px"><b>Patient:</b> ${b.patientName}</p>
+                    <p style="font-size:13px"><b>Visit type:</b> ${b.visitType}</p>
+                    <table><thead><tr><th>Line</th><th style="text-align:right">Amount (₹)</th></tr></thead><tbody>
+                      <tr><td>Total billed</td><td style="text-align:right">${b.subtotal.toLocaleString('en-IN')}</td></tr>
+                      <tr><td>Insurance covered</td><td style="text-align:right">- ${b.insuranceCovered.toLocaleString('en-IN')}</td></tr>
+                      <tr><td>Paid so far</td><td style="text-align:right">- ${b.paidAmount.toLocaleString('en-IN')}</td></tr>
+                      <tr class="total"><td>Outstanding due</td><td style="text-align:right">${due.toLocaleString('en-IN')}</td></tr>
+                    </tbody></table>`)
+                  toast.success(`Printing payment slip for ${b.patientName}`)
+                }}
+                  className="mt-3 text-[12.5px] font-semibold text-blue-600 hover:text-blue-700 cursor-pointer">Print payment slip →</button>
               )}
               {b.status === 'settled' && b.receiptNumber && (
                 <p className="mt-3 text-[12px] text-green-700 flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> Settled · receipt {b.receiptNumber}</p>

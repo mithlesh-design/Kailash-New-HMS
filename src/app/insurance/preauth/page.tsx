@@ -7,6 +7,7 @@ import type { AiEnvelope } from "@/types/ai"
 import { HitlReviewCard } from "@/components/features/HitlReviewCard"
 import { Bot, Loader2, ShieldCheck, IndianRupee } from "lucide-react"
 import { toast } from "sonner"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const PENDING_ADMISSIONS = [
   { id: 'ADM-2026-0089', patient: 'Kiran Patil', diagnosis: 'Community Acquired Pneumonia', insurer: 'Star Health' },
@@ -134,9 +135,15 @@ export default function InsurancePreAuthPage() {
           onAccept={() => {
             if (draft.data.admissionId) {
               setSubmitted((prev) => [...prev, draft.data.admissionId])
+              notifyAndAuditMany(['billing', 'patient'], {
+                type: 'system', priority: 'high',
+                title: `Pre-auth submitted · ${draft.data.admissionId}`,
+                body: `Pre-authorisation letter submitted to insurer ${draft.data.insurerId}. Tracking ID: TPA-${Date.now().toString(36).toUpperCase()}.`,
+                audit: { action: 'insurance_claim_submitted', resource: 'preauth', resourceId: draft.data.admissionId, detail: `Pre-auth submitted to ${draft.data.insurerId}`, userName: 'Insurance desk' },
+              })
             }
             setDraft(null)
-            toast.success('Pre-auth letter approved — submitted to insurer portal')
+            toast.success('Pre-auth submitted to insurer · billing + patient notified')
           }}
           onReject={() => {
             setDraft(null)

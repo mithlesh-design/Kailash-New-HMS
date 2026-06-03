@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useOTStore } from "@/store/useOTStore"
-import { Plus, X, Scissors } from "lucide-react"
+import { Plus, X, Scissors, Printer } from "lucide-react"
+import { printableHtml } from "@/lib/fileIO"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { NeonBadge } from "@/components/ui/neon-badge"
@@ -54,6 +55,24 @@ export default function OTSchedulePage() {
       toast.error('Patient name and procedure are required')
       return
     }
+    // M10-D — room + surgeon conflict check. Block if either the requested
+    // room or the requested surgeon is already booked at an overlapping time.
+    const newStart = new Date(form.scheduledTime).getTime()
+    const newEnd = newStart + ((parseInt(form.durationMinutes) || 60) * 60_000)
+    const overlap = procedures.find((p) => {
+      if (p.status === 'Completed' || p.status === 'Recovery') return false
+      const pStart = new Date(p.scheduledTime).getTime()
+      const pEnd = pStart + (p.durationMinutes * 60_000)
+      const sameRoom = p.otRoom === form.otRoom
+      const sameSurgeon = p.surgeon === form.surgeon
+      const overlaps = newStart < pEnd && pStart < newEnd
+      return overlaps && (sameRoom || sameSurgeon)
+    })
+    if (overlap) {
+      const reason = overlap.otRoom === form.otRoom ? `Room ${overlap.otRoom} is booked for ${overlap.procedureName} (${new Date(overlap.scheduledTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })})` :
+        `${overlap.surgeon} is in another case (${overlap.procedureName} at ${new Date(overlap.scheduledTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })})`
+      if (!window.confirm(`Scheduling conflict — ${reason}. Schedule anyway?`)) return
+    }
     scheduleProcedure({
       patientId: form.patientId || `PT-${Date.now()}`,
       patientName: form.patientName,
@@ -99,9 +118,30 @@ export default function OTSchedulePage() {
           <h1 className="text-2xl font-bold text-slate-900">OT Schedule</h1>
           <p className="text-sm text-slate-500 mt-0.5">{procedures.length} procedures today</p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)}>
-          {showForm ? <><X className="h-4 w-4 mr-1.5" /> Cancel</> : <><Plus className="h-4 w-4 mr-1.5" /> Add Procedure</>}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" onClick={() => {
+            printableHtml(`OT Schedule · ${new Date().toLocaleDateString('en-IN')}`, `
+              <div class="hdr"><div><h1>KAILASH HOSPITAL</h1><h2>OT Schedule · ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</h2></div></div>
+              <table><thead><tr><th>Time</th><th>Room</th><th>Patient</th><th>Procedure</th><th>Surgeon</th><th>Anaesthetist</th><th>Status</th></tr></thead><tbody>
+                ${sorted.map(p => `<tr>
+                  <td>${new Date(p.scheduledTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</td>
+                  <td>${p.otRoom}</td>
+                  <td>${p.patientName} (${p.patientAge}y)</td>
+                  <td>${p.procedureName}${p.bloodRequired ? ' · BLOOD' : ''}</td>
+                  <td>${p.surgeon}</td>
+                  <td>${p.anaesthetist}</td>
+                  <td>${p.status}</td>
+                </tr>`).join('')}
+              </tbody></table>
+              <p style="font-size:12px;color:#64748b">${sorted.length} procedure(s) scheduled.</p>
+            `)
+          }}>
+            <Printer className="h-4 w-4 mr-1.5" /> Print OT list
+          </Button>
+          <Button onClick={() => setShowForm(!showForm)}>
+            {showForm ? <><X className="h-4 w-4 mr-1.5" /> Cancel</> : <><Plus className="h-4 w-4 mr-1.5" /> Add Procedure</>}
+          </Button>
+        </div>
       </div>
 
       {/* Add Procedure Form */}

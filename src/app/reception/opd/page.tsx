@@ -112,6 +112,13 @@ export default function OpdQueuePage() {
   const handleWalkIn = async () => {
     if (!form.name.trim()) { toast.error('Enter the patient name'); return }
     if (!/^\d{10}$/.test(form.phone.trim())) { toast.error('Enter a valid 10-digit phone number'); return }
+    // M10-A — light on-shift / availability check against doctor schedule.
+    // doctorsForDept returns the current available roster; if the chosen
+    // doctor isn't in it, confirm before proceeding.
+    const available = doctorsForDept(form.department).map(r => r.doctor)
+    if (form.doctor && available.length > 0 && !available.includes(form.doctor)) {
+      if (!window.confirm(`${form.doctor} doesn't appear on the ${form.department} on-shift roster right now. Continue anyway?`)) return
+    }
     setSubmitting(true)
     await new Promise(r => setTimeout(r, 400))
     addPatient({
