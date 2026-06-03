@@ -9,6 +9,7 @@ import { NeonBadge } from "@/components/ui/neon-badge"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const STATUS_COLOR: Record<string, string> = {
   Scheduled:     'bg-slate-100 text-slate-700 border-slate-200',
@@ -67,7 +68,24 @@ export default function OTSchedulePage() {
       bloodRequired: form.bloodRequired,
       implants: form.implants ? [form.implants] : [],
     })
-    toast.success('Procedure scheduled successfully')
+    // Notify the surgical team — anaesthetist + nurse (OT staff) + blood bank if blood required.
+    notifyAndAuditMany(['ot', 'nurse'], {
+      type: 'ot_confirmed', priority: 'high',
+      title: `OT scheduled · ${form.procedureName}`,
+      body: `${form.patientName} · ${form.procedureName} at ${form.otRoom} on ${form.scheduledTime}. Surgeon: ${form.surgeon}. Anaesthetist: ${form.anaesthetist}.`,
+      patientName: form.patientName,
+      audit: { action: 'ot_who_checklist', resource: 'ot_procedure', resourceId: form.patientId, detail: `Procedure ${form.procedureName} scheduled for ${form.patientName} at ${form.otRoom}`, userName: 'OT desk' },
+    })
+    if (form.bloodRequired) {
+      notifyAndAudit({
+        to: 'blood_bank', type: 'system', priority: 'high',
+        title: `Blood reservation requested`,
+        body: `${form.patientName} · ${form.procedureName} requires blood. Please reserve units for ${form.scheduledTime}.`,
+        patientName: form.patientName,
+        audit: { action: 'blood_issue', resource: 'ot_procedure', resourceId: form.patientId, detail: `Blood reservation requested for ${form.procedureName}`, userName: 'OT desk' },
+      })
+    }
+    toast.success('Procedure scheduled · Anaesthetist + OT nurse notified')
     setForm(emptyForm)
     setShowForm(false)
   }

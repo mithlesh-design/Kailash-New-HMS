@@ -5,6 +5,7 @@ import { VisibilityHeader, STAT_CARD } from "@/components/reception/VisibilityHe
 import { Truck, Activity, CheckCircle2, Wrench, MapPin, Navigation, Fuel, Phone } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 
 const VEHICLE_STATUS: Record<string, { label: string; tint: string; dot: string }> = {
   available:      { label: 'Available',   tint: 'bg-green-50 text-green-700',  dot: 'bg-green-500' },
@@ -39,7 +40,15 @@ export default function ReceptionAmbulance() {
       </div>
       <div className="-mt-2 mb-4">
         <button
-          onClick={() => toast.success('Dispatch request sent to ambulance desk', { description: available > 0 ? `${available} vehicle${available !== 1 ? 's' : ''} available` : 'No vehicles free — desk will prioritise' })}
+          onClick={() => {
+            notifyAndAudit({
+              to: 'ambulance', type: 'system', priority: 'high',
+              title: 'New dispatch request',
+              body: `Reception is requesting an ambulance dispatch. ${available > 0 ? `${available} vehicle${available !== 1 ? 's' : ''} available` : 'No vehicles free — please prioritise.'}`,
+              audit: { action: 'ambulance_dispatched', resource: 'ambulance', detail: 'Reception requested dispatch via ambulance dashboard', userName: 'Reception' },
+            })
+            toast.success('Dispatch request sent to ambulance desk', { description: available > 0 ? `${available} vehicle${available !== 1 ? 's' : ''} available` : 'No vehicles free — desk will prioritise' })
+          }}
           className="flex items-center gap-2 h-10 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[13.5px] font-bold shadow-sm active:scale-[0.98] transition">
           <Phone className="h-4 w-4" /> Request dispatch
         </button>

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import Link from "next/link"
 import { OnShiftTeam } from "@/components/clinical/OnShiftTeam"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 
 const TRIAGE_COLORS: Record<string, string> = {
   Critical: "bg-red-50 border-red-200 text-red-700",
@@ -125,8 +126,19 @@ export default function AdmissionDashboard() {
 
   const handleAssign = (bedId: string) => {
     if (!selectedRequest) return
+    const req = admissionRequests.find(r => r.id === selectedRequest)
+    const bed = beds.find(b => b.id === bedId)
     assignBed(selectedRequest, bedId)
-    toast.success("Bed assigned successfully. Nursing notified.")
+    if (req && bed) {
+      notifyAndAudit({
+        to: 'nurse', type: 'bed_allocated', priority: 'high',
+        title: `New admission · Bed ${bed.bedNumber}`,
+        body: `${req.patientName} assigned to ${bed.ward} · Bed ${bed.bedNumber}. Receive at the ward.`,
+        patientName: req.patientName,
+        audit: { action: 'admission_admit', resource: 'admission', resourceId: req.id, detail: `Bed ${bed.bedNumber} (${bed.ward}) allocated to ${req.patientName}`, userName: 'Bed Manager' },
+      })
+    }
+    toast.success("Bed assigned. Nursing notified.")
     setSelectedRequest(null)
   }
 
@@ -243,7 +255,17 @@ export default function AdmissionDashboard() {
                 <div key={req.id} className="flex items-center justify-between py-1.5 border-b border-green-100 last:border-0">
                   <span className="text-xs text-green-800 font-medium">{req.patientName} → Bed {beds.find(b => b.id === req.assignedBedId)?.bedNumber ?? '—'}</span>
                   <button
-                    onClick={() => { markAdmitted(req.id); toast.success(`${req.patientName} marked as Admitted`) }}
+                    onClick={() => {
+                      markAdmitted(req.id)
+                      notifyAndAudit({
+                        to: 'doctor', type: 'system', priority: 'high',
+                        title: `Patient arrived · ${req.patientName}`,
+                        body: `${req.patientName} (${req.diagnosis}) is now admitted. Review and round when ready.`,
+                        patientName: req.patientName,
+                        audit: { action: 'admission_admit', resource: 'admission', resourceId: req.id, detail: `Patient ${req.patientName} marked as Admitted`, userName: 'Bed Manager' },
+                      })
+                      toast.success(`${req.patientName} marked as Admitted · Doctor notified`)
+                    }}
                     className="flex items-center gap-1 text-[10px] font-bold text-green-700 hover:text-green-900 bg-green-100 hover:bg-green-200 px-2 py-1 rounded-lg transition-colors cursor-pointer"
                   >
                     <UserCheck className="h-3 w-3" /> Mark Arrived

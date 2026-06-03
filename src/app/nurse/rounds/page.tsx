@@ -13,6 +13,7 @@ import { NeonBadge } from "@/components/ui/neon-badge"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import { VoiceScribeButton } from "@/components/clinical/VoiceScribeButton"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 
 // ── Speech Recognition types ──────────────────────────────────────────────────
 type SpeechResultItem = { transcript: string }
@@ -194,12 +195,24 @@ function NotesPanel({ patient }: { patient: PatientBed }) {
       tests: pendingTests.length > 0 ? pendingTests : undefined,
       instructions: pendingInstructions.length > 0 ? pendingInstructions : undefined,
     })
+    // Notify the doctor that rounds are complete + summarise what was added.
+    const parts: string[] = []
+    if (pendingMedicines.length) parts.push(`${pendingMedicines.length} med${pendingMedicines.length === 1 ? '' : 's'} added`)
+    if (pendingTests.length) parts.push(`${pendingTests.length} test${pendingTests.length === 1 ? '' : 's'} requested`)
+    if (pendingInstructions.length) parts.push(`${pendingInstructions.length} instruction${pendingInstructions.length === 1 ? '' : 's'} captured`)
+    notifyAndAudit({
+      to: 'doctor', type: 'system', priority: 'medium',
+      title: `Rounds complete · ${patient.name}`,
+      body: `Nurse rounds saved for ${patient.name} (${patient.bedNumber})${parts.length ? ' — ' + parts.join(', ') : ''}.`,
+      patientName: patient.name,
+      audit: { action: 'nurse_handover', resource: 'rounds_note', resourceId: patient.id, detail: `Rounds note saved for ${patient.name} (${category})`, userName: 'Nurse' },
+    })
     setNoteText('')
     setAiCategory(null)
     setPendingMedicines([])
     setPendingTests([])
     setPendingInstructions([])
-    toast.success('Rounds note saved successfully')
+    toast.success('Rounds note saved · Doctor notified')
   }
 
   const catMeta = aiCategory ? CATEGORY_META[aiCategory] : null

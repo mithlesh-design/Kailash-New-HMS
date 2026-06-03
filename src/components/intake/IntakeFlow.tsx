@@ -6,6 +6,7 @@ import { Activity, ArrowRight } from "lucide-react"
 import { usePatientStore } from "@/store/usePatientStore"
 import { useAuthStore } from "@/store/useAuthStore"
 import { usePatientLiveStore } from "@/store/usePatientLiveStore"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import {
   initialForm, visibleSteps, canContinue, STEP_TITLES, triageScore, suggestDepartments,
@@ -94,6 +95,14 @@ export function IntakeFlow() {
     auth.setUser({ id: newId, name: form.name, role: 'patient' })
     usePatientLiveStore.getState().startVisit(newToken, mode)
 
+    // Notify reception + assigned doctor that a new self-check-in arrived.
+    notifyAndAuditMany(['reception', 'doctor'], {
+      type: 'appointment', priority: triage.level === 'Critical' ? 'critical' : triage.level === 'High' ? 'high' : 'medium',
+      title: `Self check-in · ${form.name}`,
+      body: `${form.name} just checked in via kiosk. Triage: ${triage.level}. ${form.symptoms.length ? 'Symptoms: ' + form.symptoms.join(', ') + '.' : 'No symptoms provided.'} Token #${newToken}.`,
+      patientName: form.name,
+      audit: { action: 'reception_registered', resource: 'patient', resourceId: newId, detail: `Kiosk self-check-in completed · token ${newToken}`, userName: form.name },
+    })
     setToken(newToken); setFamilyToken(fToken); setEstWait(estWaitMins); setSubmitting(false); setCurrent('success')
   }
 

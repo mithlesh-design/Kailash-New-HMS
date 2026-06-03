@@ -6,6 +6,7 @@ import {
   Stethoscope, Pill, Receipt, ShieldCheck, Bed, Plus, User
 } from "lucide-react"
 import { useDischargeStore, type ClearancePillar, type DischargePatient } from "@/store/useDischargeStore"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -72,7 +73,22 @@ function PatientCard({ patient }: { patient: DischargePatient }) {
   const handleIssueExit = () => {
     if (!canExit) { toast.error("All clearances must be done and summary approved first"); return }
     issueExitClearance(patient.patientId)
-    toast.success(`Exit clearance issued for ${patient.patientName}`)
+    // Notify housekeeping to turn the bed + patient that exit is issued.
+    notifyAndAudit({
+      to: 'housekeeping', type: 'system', priority: 'medium',
+      title: `Bed turnover · ${patient.patientName}`,
+      body: `${patient.patientName} has been exit-cleared. Please turn over the bed.`,
+      patientName: patient.patientName,
+      audit: { action: 'exit_clearance_issued', resource: 'discharge', resourceId: patient.patientId, detail: `Exit clearance issued for ${patient.patientName} — housekeeping notified`, userName: 'Discharge desk' },
+    })
+    notifyAndAudit({
+      to: 'patient', type: 'discharge_ready', priority: 'high',
+      title: 'Your exit is cleared',
+      body: 'You may now collect your discharge summary and proceed to the exit. Thank you for choosing Kailash.',
+      patientName: patient.patientName,
+      audit: { action: 'exit_clearance_issued', resource: 'discharge', resourceId: patient.patientId, detail: 'Patient-side exit-cleared notification' },
+    })
+    toast.success(`Exit clearance issued · Housekeeping + Patient notified`)
   }
 
   return (
@@ -144,7 +160,23 @@ function PatientCard({ patient }: { patient: DischargePatient }) {
                       onClick={() => {
                         const newStatus = patient.clearances[pillar] === 'cleared' ? 'pending' : 'cleared'
                         setClearance(patient.patientId, pillar, newStatus)
-                        if (newStatus === 'cleared') toast.success(`${PILLAR_CONFIG[pillar].label} clearance given`)
+                        if (newStatus === 'cleared') {
+                          // Pillar role → notification mapping so the role responsible
+                          // is told their clearance was logged (positive ack).
+                          const PILLAR_ROLE: Record<string, 'doctor' | 'nurse' | 'pharmacy' | 'billing' | 'insurance'> =
+                            { doctor: 'doctor', nursing: 'nurse', pharmacy: 'pharmacy', billing: 'billing', insurance: 'insurance' }
+                          const role = PILLAR_ROLE[pillar]
+                          if (role) {
+                            notifyAndAudit({
+                              to: role, type: 'system', priority: 'low',
+                              title: `${PILLAR_CONFIG[pillar].label} clearance — ${patient.patientName}`,
+                              body: `Your clearance has been logged for ${patient.patientName}. Patient is one step closer to discharge.`,
+                              patientName: patient.patientName,
+                              audit: { action: 'discharge_clearance', resource: 'discharge', resourceId: patient.patientId, detail: `${pillar} clearance cleared`, userName: 'Discharge desk' },
+                            })
+                          }
+                          toast.success(`${PILLAR_CONFIG[pillar].label} clearance given`)
+                        }
                       }}
                     />
                   ))}

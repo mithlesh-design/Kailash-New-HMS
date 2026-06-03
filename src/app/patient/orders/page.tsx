@@ -11,6 +11,7 @@ import {
   SKIP_REASONS, SKIP_REASON_LABEL, type OrderItem,
 } from "@/store/usePatientOrdersStore"
 import { cn } from "@/lib/utils"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 
 function relativeFrom(ts: number | null) {
   if (!ts) return 'just now'
@@ -43,6 +44,27 @@ export default function DoctorOrdersPage() {
   const handlePay = () => {
     if (total <= 0) { toast.error('Nothing selected to pay for'); return }
     payNow()
+    const testCount   = acceptedItems(items).filter(i => i.kind === 'test').length
+    const medCount    = acceptedItems(items).filter(i => i.kind === 'medicine').length
+    // Lab + Pharmacy each get a queue-trigger notification.
+    if (testCount > 0) {
+      notifyAndAudit({
+        to: 'lab', type: 'system', priority: 'medium',
+        title: `New test order paid · Kiran Patil`,
+        body: `${testCount} test${testCount === 1 ? '' : 's'} paid by patient. Specimen collection ready.`,
+        patientName: 'Kiran Patil',
+        audit: { action: 'lab_order', resource: 'patient_order', detail: `Patient paid for ${testCount} tests · prepared for sample collection`, userName: 'Patient' },
+      })
+    }
+    if (medCount > 0) {
+      notifyAndAudit({
+        to: 'pharmacy', type: 'system', priority: 'medium',
+        title: `New Rx paid · Kiran Patil`,
+        body: `${medCount} medicine${medCount === 1 ? '' : 's'} paid by patient. Begin dispense workflow.`,
+        patientName: 'Kiran Patil',
+        audit: { action: 'prescription_create', resource: 'patient_order', detail: `Patient paid for ${medCount} medicines · pharmacy queue triggered`, userName: 'Patient' },
+      })
+    }
     toast.success(`Paid ₹${total} for ${keptCount} item${keptCount !== 1 ? 's' : ''}`, {
       description: 'Tests booked and medicines sent to the pharmacy.',
     })
@@ -51,7 +73,16 @@ export default function DoctorOrdersPage() {
   const handleSkip = (item: OrderItem, reason: typeof SKIP_REASONS[number]['id']) => {
     skip(item.id, reason)
     setReasonFor(null)
-    if (item.important) toast.message(`${doctor} will be notified`, { description: `You skipped ${item.name} — flagged for doctor review.` })
+    if (item.important) {
+      notifyAndAudit({
+        to: 'doctor', type: 'system', priority: 'high',
+        title: `Patient skipped important item · ${item.name}`,
+        body: `Patient (Kiran Patil) skipped ${item.name} (important). Reason: ${SKIP_REASONS.find(r => r.id === reason)?.label ?? reason}.`,
+        patientName: 'Kiran Patil',
+        audit: { action: 'hitl_reject', resource: 'patient_order', resourceId: item.id, detail: `Patient skipped ${item.name} — reason: ${reason}`, userName: 'Patient' },
+      })
+      toast.message(`${doctor} will be notified`, { description: `You skipped ${item.name} — flagged for doctor review.` })
+    }
   }
 
   const ItemRow = ({ item }: { item: OrderItem }) => {

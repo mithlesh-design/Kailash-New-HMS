@@ -13,6 +13,7 @@ import { NeonBadge } from "@/components/ui/neon-badge"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { OcrIntakeCard } from "@/components/reception/OcrIntakeCard"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const COLUMNS: { key: QueueStatus; label: string; color: string }[] = [
   { key: 'waiting',    label: 'Waiting Room',     color: 'border-t-slate-300' },
@@ -249,7 +250,17 @@ export default function OpdQueuePage() {
                           )}
                           <div className="flex items-center gap-1">
                             {canAnnounce && (
-                              <button onClick={() => { sendToEmergency(p.id); toast.error(`${p.name} sent to Emergency — ER notified`, { description: `${p.triageLevel ?? 'Low'} acuity` }) }}
+                              <button onClick={() => {
+                                sendToEmergency(p.id)
+                                notifyAndAuditMany(['emergency', 'doctor', 'bed_manager'], {
+                                  type: 'system', priority: 'critical',
+                                  title: `EMERGENCY · ${p.name}`,
+                                  body: `${p.name} (${p.triageLevel ?? 'High'} acuity) escalated from OPD reception. Triage immediately.`,
+                                  patientName: p.name,
+                                  audit: { action: 'reception_emergency_escalation', resource: 'patient', resourceId: p.id, detail: `Patient ${p.name} escalated to Emergency from reception`, userName: 'Reception' },
+                                })
+                                toast.error(`${p.name} sent to Emergency — ER + Doctor + Bed-Manager notified`, { description: `${p.triageLevel ?? 'Low'} acuity` })
+                              }}
                                 aria-label={`Send ${p.name} to Emergency`} title="Send to Emergency"
                                 className="h-7 w-7 rounded-lg flex items-center justify-center text-red-500 hover:text-white hover:bg-red-500 transition cursor-pointer">
                                 <Ambulance className="h-3.5 w-3.5" />

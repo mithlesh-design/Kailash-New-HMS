@@ -16,6 +16,7 @@ import { useNarcoticsStore } from "@/store/useNarcoticsStore"
 import { usePatientProfileStore } from "@/store/usePatientProfileStore"
 import { useDischargeStore } from "@/store/useDischargeStore"
 import { useNotificationStore } from "@/store/useNotificationStore"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 import { useAuthStore } from "@/store/useAuthStore"
 import { checkRx } from "@/lib/drugSafety"
 import { toast } from "sonner"
@@ -104,7 +105,16 @@ export default function PharmacyQueue() {
 
   const advanceToReady = (rx: PharmacyPrescription) => {
     updateStatus(rx.id, "ready")
-    toast.success(`${rx.patientName} — meds ready · ${["IPD", "ICU", "OT"].includes(srcOf(rx)) ? "ward" : "patient"} notified`)
+    const isWard = ["IPD", "ICU", "OT"].includes(srcOf(rx))
+    notifyAndAudit({
+      to: isWard ? 'nurse' : 'patient',
+      type: 'medicines_ready', priority: 'medium',
+      title: 'Medicines ready for collection',
+      body: `${rx.patientName} — Rx ready at pharmacy. ${isWard ? 'Please collect from ward pharmacy counter.' : 'Please collect from the OPD pharmacy counter.'}`,
+      patientName: rx.patientName,
+      audit: { action: 'drug_dispense', resource: 'prescription', resourceId: rx.id, detail: `Rx for ${rx.patientName} marked ready (${isWard ? 'ward' : 'patient'}-side notification)`, userName: me.name },
+    })
+    toast.success(`${rx.patientName} — meds ready · ${isWard ? "ward" : "patient"} notified`)
   }
 
   const openCollect = (rx: PharmacyPrescription) => {

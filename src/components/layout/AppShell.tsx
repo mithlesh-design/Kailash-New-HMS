@@ -317,6 +317,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const allInpatients = useInpatientStore(s => s.inpatients)
   const notifications = useNotificationStore(s => s.notifications)
   const markNotifRead = useNotificationStore(s => s.markRead)
+  const markAllRead = useNotificationStore(s => s.markAllRead)
+  const dismissNotif = useNotificationStore(s => s.dismiss)
 
   const roleNotifs = notifications.filter(n => activeRole === 'admin' || !n.targetRole || n.targetRole === activeRole)
   const unreadCount = roleNotifs.filter(n => !n.read).length
@@ -582,8 +584,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     className="absolute right-0 top-12 w-72 bg-white rounded-2xl z-50 overflow-hidden"
                     style={{ boxShadow: '0 8px 32px rgba(15,23,42,0.14), 0 2px 8px rgba(15,23,42,0.08)' }}
                   >
-                    <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid rgba(15,23,42,0.05)' }}>
-                      <p className="text-sm font-bold text-[#0F172A]">Notifications{unreadCount > 0 ? ` · ${unreadCount}` : ''}</p>
+                    <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: '1px solid rgba(15,23,42,0.05)' }}>
+                      <p className="text-sm font-bold text-[#0F172A] flex-1">Notifications{unreadCount > 0 ? ` · ${unreadCount}` : ''}</p>
+                      {unreadCount > 0 ? (
+                        <button onClick={() => activeRole && markAllRead(activeRole)} className="text-[10.5px] font-semibold text-blue-600 hover:text-blue-700 px-2 py-1 rounded-md hover:bg-blue-50 cursor-pointer">
+                          Mark all read
+                        </button>
+                      ) : null}
                       <button onClick={() => setNotifOpen(false)} aria-label="Close" className="p-1 rounded-lg hover:bg-slate-100 cursor-pointer">
                         <X className="h-4 w-4 text-slate-400" />
                       </button>
@@ -592,15 +599,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <div className="p-6 text-center text-sm text-[#94A3B8]">All caught up — no new notifications</div>
                     ) : (
                       <div className="max-h-80 overflow-y-auto">
-                        {roleNotifs.slice(0, 8).map(n => (
-                          <button key={n.id} onClick={() => markNotifRead(n.id)}
-                            className={cn("w-full text-left px-4 py-2.5 border-b border-slate-50 last:border-0 hover:bg-slate-50 flex items-start gap-2.5", !n.read && "bg-blue-50/40")}>
+                        {roleNotifs.slice(0, 12).map(n => (
+                          <div key={n.id}
+                            className={cn("w-full text-left px-4 py-2.5 border-b border-slate-50 last:border-0 hover:bg-slate-50 flex items-start gap-2.5 group cursor-pointer", !n.read && "bg-blue-50/40")}
+                            onClick={() => markNotifRead(n.id)}>
                             {!n.read ? <span className={cn("h-2 w-2 rounded-full mt-1.5 flex-shrink-0", n.priority === 'critical' ? "bg-red-500" : n.priority === 'high' ? "bg-orange-500" : "bg-blue-500")} /> : <span className="w-2 flex-shrink-0" />}
-                            <span className="min-w-0">
+                            <span className="min-w-0 flex-1">
                               <span className="block text-[12.5px] font-semibold text-slate-800 truncate">{n.title}</span>
-                              <span className="block text-[11.5px] text-slate-500 truncate">{n.body}</span>
+                              <span className="block text-[11.5px] text-slate-500 line-clamp-2">{n.body}</span>
+                              {n.patientName ? <span className="block text-[10px] font-mono text-slate-400 mt-0.5">{n.patientName}</span> : null}
                             </span>
-                          </button>
+                            <button onClick={(e) => { e.stopPropagation(); dismissNotif(n.id) }}
+                              aria-label="Dismiss"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex-shrink-0">
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
                         ))}
                       </div>
                     )}

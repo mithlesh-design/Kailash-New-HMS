@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Calendar, Clock, Stethoscope, Plus, ChevronLeft, ChevronRight, X, CheckCircle, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { usePatientStore } from "@/store/usePatientStore"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -125,6 +126,13 @@ export default function PatientAppointments() {
       date: selectedDate.toISOString().slice(0, 10),
       time: selectedSlot,
       status: 'upcoming',
+    })
+    notifyAndAuditMany(['reception', 'doctor'], {
+      type: 'appointment', priority: 'medium',
+      title: `New appointment booked`,
+      body: `Patient booked with ${selectedDoctor.name} (${selectedDoctor.specialty}) on ${selectedDate.toLocaleDateString('en-IN')} at ${selectedSlot}.`,
+      patientName: 'Kiran Patil',
+      audit: { action: 'reception_registered', resource: 'appointment', detail: `Patient self-booked appointment with ${selectedDoctor.name} on ${selectedDate.toISOString().slice(0,10)} at ${selectedSlot}`, userName: 'Patient' },
     })
     toast.success(`Appointment booked with ${selectedDoctor.name} on ${selectedDate.toLocaleDateString('en-IN')} at ${selectedSlot}`)
     setMode('list')

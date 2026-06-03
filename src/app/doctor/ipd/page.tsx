@@ -20,6 +20,7 @@ import { CompactKPI, CompactKPIStrip } from "@/components/ui/CompactKPI"
 import { EarlyWarningBanner } from "@/components/clinical/EarlyWarningBanner"
 import { VoiceScribeButton } from "@/components/clinical/VoiceScribeButton"
 import { CareTeamPresenceCard } from "@/components/clinical/CareTeamPresenceCard"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 
 const CONDITION_TINT: Record<Condition, string> = {
   Critical: 'bg-red-50 text-red-700 border-red-200', Serious: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -74,9 +75,19 @@ export default function DoctorIpd() {
     if (a === 'chart') { router.push(`/doctor/ipd/${id}`); return }
     if (a === 'discharge') {
       const ip = byId(id)
-      if (ip && !ip.discharge && ip.stage !== 'discharged') initiateDischarge(id)
+      if (ip && !ip.discharge && ip.stage !== 'discharged') {
+        initiateDischarge(id)
+        // Notify discharge desk so they pick up the case.
+        notifyAndAudit({
+          to: 'discharge', type: 'discharge_initiated', priority: 'high',
+          title: `Discharge initiated · ${ip.name}`,
+          body: `${ip.name} (${ip.ward} · ${ip.bed}) — doctor has started discharge. Begin 5-pillar clearance.`,
+          patientName: ip.name,
+          audit: { action: 'admission_discharge', resource: 'inpatient', resourceId: id, detail: `Doctor initiated discharge for ${ip.name}`, userName: 'Doctor' },
+        })
+      }
       router.push(`/doctor/ipd/${id}`)
-      toast.success('Discharge started — complete clearance in the chart')
+      toast.success('Discharge started · Discharge desk notified')
       return
     }
     setModal({ kind: a as IpdModalKind, id })
