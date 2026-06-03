@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const SEVERITY_COLOR: Record<IncidentSeverity, string> = {
   Low:      'bg-green-50 text-green-700 border-green-200',
@@ -62,14 +63,54 @@ export default function IncidentsPage() {
       correctiveAction: form.correctiveAction || undefined,
       reportedBy: 'Quality Team',
     })
-    toast.success('Incident logged')
+    // M11-G — critical severity auto-escalates to Quality Head + Admin.
+    if (form.severity === 'Critical' || form.severity === 'High') {
+      notifyAndAuditMany(['admin', 'audit_officer'], {
+        type: 'critical_value', priority: form.severity === 'Critical' ? 'critical' : 'high',
+        title: `${form.severity} incident · ${form.ward}`,
+        body: `${form.type} reported by Quality Team: ${form.description.slice(0, 140)}${form.description.length > 140 ? '…' : ''}`,
+        audit: { action: 'incident_reported', resource: 'quality_incident', detail: `${form.severity} severity ${form.type} in ${form.ward}`, userName: 'Quality Team' },
+      })
+      toast.success(`${form.severity} incident logged · Admin + Audit Officer escalated`)
+    } else {
+      toast.success('Incident logged')
+    }
     setForm(emptyForm)
     setShowForm(false)
   }
 
+  // M11-G — pre-fill a CAPA (Corrective + Preventive Action) template
+  // so the resolver doesn't start from a blank box.
+  function capaTemplate(): string {
+    return [
+      'CAPA — Corrective & Preventive Action',
+      '',
+      'Immediate corrective action taken:',
+      '- ',
+      '',
+      'Root cause analysis:',
+      '- ',
+      '',
+      'Preventive action (to avoid recurrence):',
+      '- ',
+      '',
+      'Owner: ',
+      'Review date: ',
+    ].join('\n')
+  }
+
   const handleResolve = (id: string) => {
+    const inc = incidents.find(i => i.id === id)
     resolveIncident(id, resolveNote || 'Resolved')
-    toast.success('Incident marked as resolved')
+    if (inc) {
+      notifyAndAudit({
+        to: 'admin', type: 'system', priority: 'low',
+        title: `Incident resolved · ${inc.ward}`,
+        body: `${inc.type} (${inc.severity}) in ${inc.ward} marked resolved.`,
+        audit: { action: 'incident_resolved', resource: 'quality_incident', resourceId: id, detail: `Resolved: ${resolveNote || 'Resolved'}`, userName: 'Quality Team' },
+      })
+    }
+    toast.success('Incident marked as resolved · admin notified')
     setResolvingId(null)
     setResolveNote('')
   }
@@ -204,16 +245,24 @@ export default function IncidentsPage() {
                         <span className="font-semibold">Action:</span> {incident.correctiveAction}
                       </p>
                     )}
-                    {/* Resolve inline form */}
+                    {/* Resolve inline form with CAPA template */}
                     <AnimatePresence>
                       {resolvingId === incident.id && (
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mt-2">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <button onClick={() => setResolveNote(capaTemplate())}
+                              className="text-[10.5px] font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 px-2 py-0.5 rounded cursor-pointer">
+                              Insert CAPA template
+                            </button>
+                            <span className="text-[10px] text-slate-400">Corrective + preventive action · NABH CQI</span>
+                          </div>
                           <div className="flex gap-2">
-                            <input
+                            <textarea
                               value={resolveNote}
                               onChange={e => setResolveNote(e.target.value)}
-                              placeholder="Corrective action note..."
-                              className="flex-1 rounded-lg border border-green-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-green-500"
+                              placeholder="Corrective action note... or click 'Insert CAPA template'"
+                              rows={resolveNote.includes('\n') ? 8 : 1}
+                              className="flex-1 rounded-lg border border-green-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
                             />
                             <button onClick={() => handleResolve(incident.id)}
                               className="px-3 py-1.5 text-xs font-bold bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">

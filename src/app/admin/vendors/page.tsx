@@ -11,6 +11,8 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { canDo } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { printableHtml } from "@/lib/fileIO"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 import { useDialogs } from "@/components/ui/ConfirmDialog"
 
 const CATEGORY_TINT: Record<VendorCategory, string> = {
@@ -110,7 +112,16 @@ export default function VendorsPage() {
 
   const handleApprove = (id: string) => {
     if (!canWrite) { toast.error("You don't have permission"); return }
+    const inv = invoices.find(i => i.id === id)
     approveInvoice(id, actorName)
+    if (inv) {
+      notifyAndAudit({
+        to: 'admin', type: 'system', priority: 'low',
+        title: `Invoice approved · ${inv.vendorName}`,
+        body: `${inv.invoiceNumber} (${inv.category}) — ₹${(inv.amount + inv.gstAmount).toLocaleString('en-IN')} approved for payment.`,
+        audit: { action: 'finance_invoice_approved', resource: 'vendor_invoice', resourceId: id, detail: `Approved ${inv.invoiceNumber}`, userName: actorName },
+      })
+    }
     toast.success(`Invoice approved for payment`)
   }
 
@@ -120,7 +131,33 @@ export default function VendorsPage() {
     if (!inv) return
     const ref = `NEFT-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000 + 1000)}`
     markPaid(id, ref, actorName)
+    notifyAndAudit({
+      to: 'admin', type: 'system', priority: 'medium',
+      title: `Vendor paid · ${inv.vendorName}`,
+      body: `${inv.invoiceNumber} settled · NEFT ${ref} · ₹${(inv.amount + inv.gstAmount).toLocaleString('en-IN')}.`,
+      audit: { action: 'finance_vendor_paid', resource: 'vendor_invoice', resourceId: id, detail: `Paid via ${ref}`, userName: actorName },
+    })
     toast.success(`${inv.vendorName} paid · ${ref}`)
+  }
+
+  // M11-C — generate an invoice PDF (printable HTML).
+  function downloadInvoicePdf(invId: string) {
+    const inv = invoices.find(i => i.id === invId); if (!inv) return
+    const v = vendors.find(x => x.id === inv.vendorId)
+    printableHtml(`Invoice · ${inv.invoiceNumber}`, `
+      <div class="hdr"><div><h1>KAILASH HOSPITAL</h1><h2>Invoice · ${inv.invoiceNumber}</h2></div><div style="text-align:right"><b>Issued: ${inv.issuedDate}</b><br/>Due: ${inv.dueDate}</div></div>
+      <p style="font-size:13px"><b>Vendor:</b> ${inv.vendorName} (${inv.category})${v?.contactEmail ? ' · ' + v.contactEmail : ''}</p>
+      <table>
+        <thead><tr><th>Line</th><th style="text-align:right">Amount (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>Subtotal</td><td style="text-align:right">${inv.amount.toLocaleString('en-IN')}</td></tr>
+          <tr><td>GST</td><td style="text-align:right">${inv.gstAmount.toLocaleString('en-IN')}</td></tr>
+          <tr class="total"><td>Total payable</td><td style="text-align:right">${(inv.amount + inv.gstAmount).toLocaleString('en-IN')}</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:13px"><b>Status:</b> ${inv.status.toUpperCase()}${inv.paymentRef ? ' · Ref ' + inv.paymentRef : ''}</p>
+      <p style="font-size:11px;color:#64748b">System-generated invoice copy.</p>
+    `)
   }
 
   const handleDispute = async (id: string) => {
@@ -400,6 +437,10 @@ export default function VendorsPage() {
                                 Dispute
                               </button>
                             )}
+                            <button onClick={() => downloadInvoicePdf(i.id)}
+                              title="Download invoice PDF" className="text-[10px] font-bold px-2 py-1 rounded text-slate-600 hover:bg-slate-100 cursor-pointer">
+                              PDF
+                            </button>
                             {i.status === 'paid' && (
                               <span className="text-[10px] text-emerald-700 flex items-center gap-1">
                                 <CheckCircle className="h-3 w-3" />Paid {i.paidDate ? fmtDate(i.paidDate) : ''}

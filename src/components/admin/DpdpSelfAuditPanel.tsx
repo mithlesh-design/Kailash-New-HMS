@@ -9,6 +9,7 @@
  */
 
 import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Sparkles, Check, X, ShieldCheck, ArrowRight, Lock, Eye, Trash2, AlertTriangle, Users } from "lucide-react"
 import { useAuditStore } from "@/store/useAuditStore"
 import { ReasoningChip } from "@/components/clinical/ReasoningChip"
@@ -27,7 +28,16 @@ const TONE_STYLES = {
   danger: { ring: "ring-rose-200/70",    bg: "bg-gradient-to-br from-rose-50/70 to-white",     badge: "bg-rose-100 text-rose-700",       iconWrap: "bg-rose-100 text-rose-700", score: "text-rose-700" },
 } as const
 
+const DPDP_DESTINATION: Record<string, string> = {
+  consent_rate:     '/admin/disha',
+  rtbf_sla:         '/admin/disha',
+  export_audit:     '/audit/log',
+  breach_response:  '/admin/disha',
+  rbac_discipline:  '/audit/log',
+}
+
 export function DpdpSelfAuditPanel({ className }: { className?: string }) {
+  const router  = useRouter()
   const entries = useAuditStore((s) => s.entries)
   const audit    = useAuditStore((s) => s.log)
   const [actioned,  setActioned]  = useState<Record<string, true>>({})
@@ -46,6 +56,8 @@ export function DpdpSelfAuditPanel({ className }: { className?: string }) {
       userId: "user", userName: "DPO",
     })
     setActioned((m) => ({ ...m, [d.id]: true }))
+    const dest = DPDP_DESTINATION[d.id]
+    if (dest) setTimeout(() => router.push(dest), 350)
   }
   function reject(d: DpdpDimension) {
     audit({

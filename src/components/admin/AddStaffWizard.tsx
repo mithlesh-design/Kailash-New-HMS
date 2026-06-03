@@ -13,6 +13,7 @@ import type { Role } from "@/types/roles"
 import { ALL_ROLES } from "@/types/roles"
 import { PERMISSIONS_MATRIX } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 import { toast } from "sonner"
 
 export interface AddStaffWizardProps {
@@ -200,7 +201,22 @@ export function AddStaffWizard({ open, onClose, onCreated }: AddStaffWizardProps
         issuedDate: identity.joiningDate, expiryDate: isoNext(twoYears) }, actorName)
     }
 
-    toast.success(`${input.name} added · ${id}`)
+    // M11-A — wire the login-id persist + send-invite. Mock: store the
+    // login ID and an invite-pending flag against the staff member's notes,
+    // and fire a notification to the new hire (in-app + audit).
+    if (access.loginId.trim()) {
+      const noteLine = `Login ID: ${access.loginId.trim()}${access.sendInvite ? ' · invite pending' : ''}`
+      useHRStore.getState().updateStaff(id, { notes: noteLine }, actorName)
+      if (access.sendInvite) {
+        notifyAndAudit({
+          to: identity.role, type: 'system', priority: 'medium',
+          title: `Welcome to Kailash · login created`,
+          body: `${input.name} — your login ID is "${access.loginId.trim()}". Activation email sent to ${input.email}.`,
+          audit: { action: 'hr_staff_created', resource: 'login_account', resourceId: id, detail: `Login ${access.loginId.trim()} provisioned · invite sent to ${input.email}`, userName: actorName },
+        })
+      }
+    }
+    toast.success(`${input.name} added · ${id}${access.sendInvite ? ' · invite sent' : ''}`)
     if (onCreated) onCreated(id)
 
     // Reset

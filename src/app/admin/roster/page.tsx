@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { canDo } from "@/lib/permissions"
 import { detectAllConflicts, indexConflictsByCell, worstSeverity } from "@/lib/shiftConflicts"
 import { ShiftTemplateModal } from "@/components/admin/ShiftTemplateModal"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -196,11 +197,29 @@ export default function RosterPage() {
                   </p>
                 </div>
                 <div className="flex gap-1.5">
-                  <button onClick={() => { approveLeave(leave.id, actorName); toast.success(`Leave approved for ${leave.staffName}`) }}
+                  <button onClick={() => {
+                      approveLeave(leave.id, actorName)
+                      notifyAndAudit({
+                        to: 'admin', type: 'system', priority: 'low',
+                        title: `Leave approved · ${leave.staffName}`,
+                        body: `Leave for ${leave.staffName} (${leave.fromDate} → ${leave.toDate}) approved. Reason: ${leave.reason}.`,
+                        audit: { action: 'hr_leave_approved', resource: 'leave_request', resourceId: leave.id, detail: `Approved leave for ${leave.staffName}`, userName: actorName },
+                      })
+                      toast.success(`Leave approved for ${leave.staffName} · staff notified`)
+                    }}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold cursor-pointer">
                     <CheckCircle className="h-3 w-3" />Approve
                   </button>
-                  <button onClick={() => { rejectLeave(leave.id, actorName); toast.success(`Leave rejected for ${leave.staffName}`) }}
+                  <button onClick={() => {
+                      rejectLeave(leave.id, actorName)
+                      notifyAndAudit({
+                        to: 'admin', type: 'system', priority: 'low',
+                        title: `Leave rejected · ${leave.staffName}`,
+                        body: `Leave for ${leave.staffName} (${leave.fromDate} → ${leave.toDate}) rejected.`,
+                        audit: { action: 'hr_leave_rejected', resource: 'leave_request', resourceId: leave.id, detail: `Rejected leave for ${leave.staffName}`, userName: actorName },
+                      })
+                      toast.success(`Leave rejected for ${leave.staffName} · staff notified`)
+                    }}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-[11px] font-bold cursor-pointer">
                     <X className="h-3 w-3" />Reject
                   </button>

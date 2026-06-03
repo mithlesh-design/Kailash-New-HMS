@@ -1,6 +1,6 @@
 {
   "label": "M0-baseline",
-  "ranAt": "2026-06-03T08:07:17.338Z",
+  "ranAt": "2026-06-03T08:33:15.612Z",
   "base": "http://localhost:3000",
   "roles": [
     {
@@ -161,7 +161,7 @@
         "anilNews2Hit": true,
         "anilDuplicateBillFlag": true,
         "kiranPresent": true,
-        "auditTotal": 83,
+        "auditTotal": 89,
         "labCount": 4,
         "radCount": 3,
         "rxCount": 4,

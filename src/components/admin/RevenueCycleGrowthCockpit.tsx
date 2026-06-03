@@ -10,6 +10,7 @@
  */
 
 import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Sparkles, Check, X, ArrowRight, IndianRupee, AlertTriangle, BarChart3, Receipt, ShieldCheck } from "lucide-react"
 import { useInsuranceStore } from "@/store/useInsuranceStore"
 import { useBillingStore } from "@/store/useBillingStore"
@@ -34,7 +35,15 @@ const TONE_STYLES = {
 
 const FMT_INR = (n: number) => '₹' + (n >= 100000 ? (n / 100000).toFixed(2) + 'L' : n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n))
 
+const RCM_DESTINATION: Record<string, string> = {
+  denial_risk_heatmap:     '/insurance/dashboard',
+  days_in_ar:              '/insurance/claims',
+  charge_capture_gaps:     '/admin/finance',
+  payer_mix_concentration: '/admin/finance',
+}
+
 export function RevenueCycleGrowthCockpit({ className }: { className?: string }) {
+  const router = useRouter()
   const claims = useInsuranceStore((s) => s.claims)
   const bills   = useBillingStore((s) => s.bills)
   const audit   = useAuditStore((s) => s.log)
@@ -74,6 +83,8 @@ export function RevenueCycleGrowthCockpit({ className }: { className?: string })
       userId: "user", userName: "Finance lead",
     })
     setActioned((m) => ({ ...m, [f.id]: true }))
+    const dest = RCM_DESTINATION[f.id]
+    if (dest) setTimeout(() => router.push(dest), 350)
   }
   function reject(f: GrowthFinding) {
     audit({

@@ -12,6 +12,7 @@
  */
 
 import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Sparkles, TrendingUp, ArrowRight, Check, X, Activity, Bed, ScissorsLineDashed, Users } from "lucide-react"
 import { usePatientStore } from "@/store/usePatientStore"
 import { useInpatientStore } from "@/store/useInpatientStore"
@@ -35,7 +36,17 @@ const TONE_STYLES = {
   danger: { ring: "ring-rose-200/70",    bg: "bg-gradient-to-br from-rose-50/70 to-white",      badge: "bg-rose-100 text-rose-700",       iconWrap: "bg-rose-100 text-rose-700" },
 } as const
 
+// M11-F — each forecaster's "Action" routes to the operational surface
+// where the manager can do something about it.
+const OPS_DESTINATION: Record<string, { route: string; label: string }> = {
+  ed_arrivals_4h:     { route: '/emergency/triage',  label: 'Open ER triage to pre-position staff' },
+  or_utilisation_24h: { route: '/ot/schedule',        label: 'Open OT schedule to pull cases forward / defer' },
+  icu_pressure:       { route: '/admission/beds',     label: 'Open bed map to flag step-down candidates' },
+  staffing_gap:       { route: '/admin/roster',       label: 'Open roster to fill gap with floating pool' },
+}
+
 export function PredictiveOpsCockpit({ className }: { className?: string }) {
+  const router      = useRouter()
   const patients   = usePatientStore((s) => s.patients)
   const inpatients = useInpatientStore((s) => s.inpatients)
   const otCases    = useOTStore((s) => s.procedures)
@@ -61,6 +72,11 @@ export function PredictiveOpsCockpit({ className }: { className?: string }) {
       userId: "user", userName: "Ops manager",
     })
     setActioned((m) => ({ ...m, [p.id]: true }))
+    const dest = OPS_DESTINATION[p.id]
+    if (dest) {
+      // Slight delay so the user sees the "Actioned · audited" chip flip before navigating.
+      setTimeout(() => router.push(dest.route), 350)
+    }
   }
   function reject(p: OpsPrediction) {
     audit({

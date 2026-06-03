@@ -14,6 +14,8 @@ import { canDo } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useDialogs } from "@/components/ui/ConfirmDialog"
+import { printableHtml } from "@/lib/fileIO"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const fmtINR = (n: number) => `₹${Math.round(n).toLocaleString('en-IN')}`
 const fmtDate = (s: string) => new Date(s + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -137,7 +139,35 @@ export default function PayrollPage() {
       resource: 'payroll_period', resourceId: period.id,
       detail: `Payroll locked · ${label} · ${rows.length} staff · gross ${fmtINR(totals.totalGross)} · net ${fmtINR(totals.netPay)}`,
     })
-    toast.success(`Payroll locked for ${label}`)
+    // M11-B — notify Finance + HR that the period is locked.
+    notifyAndAuditMany(['admin', 'audit_officer'], {
+      type: 'system', priority: 'medium',
+      title: `Payroll locked · ${label}`,
+      body: `${rows.length} staff · gross ${fmtINR(totals.totalGross)} · net ${fmtINR(totals.netPay)}. Period frozen — no edits without override.`,
+      audit: { action: 'finance_period_closed', resource: 'payroll_period', resourceId: period.id, detail: `${label} payroll locked`, userName: actorName },
+    })
+    toast.success(`Payroll locked for ${label} · Finance + Audit notified`)
+  }
+
+  // M11-B — generate a per-row payslip PDF (printable HTML window).
+  function downloadPayslip(r: typeof rows[number]) {
+    printableHtml(`Payslip · ${r.staff.name} · ${label}`, `
+      <div class="hdr"><div><h1>KAILASH HOSPITAL</h1><h2>Payslip · ${label}</h2></div><div style="text-align:right"><b>${r.staff.id}</b></div></div>
+      <p style="font-size:13px"><b>Employee:</b> ${r.staff.name} · ${r.staff.designation}</p>
+      <p style="font-size:13px"><b>Department:</b> ${r.staff.department}</p>
+      <table>
+        <thead><tr><th>Line</th><th style="text-align:right">Amount (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>Scheduled hours</td><td style="text-align:right">${r.scheduledHours.toFixed(2)}h</td></tr>
+          <tr><td>Overtime hours</td><td style="text-align:right">${r.overtimeHours.toFixed(2)}h</td></tr>
+          <tr><td>Base pay</td><td style="text-align:right">${Math.round(r.baseGross).toLocaleString('en-IN')}</td></tr>
+          <tr><td>Overtime pay</td><td style="text-align:right">${Math.round(r.overtimePay).toLocaleString('en-IN')}</td></tr>
+          <tr><td>Gross pay</td><td style="text-align:right">${Math.round(r.totalGross).toLocaleString('en-IN')}</td></tr>
+          <tr><td>Deductions (PF/PT/TDS)</td><td style="text-align:right">- ${Math.round(r.deductions).toLocaleString('en-IN')}</td></tr>
+          <tr class="total"><td>Net payable</td><td style="text-align:right">${Math.round(r.netPay).toLocaleString('en-IN')}</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px;color:#64748b">System-generated payslip · ${new Date().toLocaleDateString('en-IN')}</p>`)
   }
 
   const exportCSV = () => {
@@ -252,7 +282,7 @@ export default function PayrollPage() {
         <table className="w-full text-sm">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              {['Staff', 'Dept', 'Hours', 'Base', 'OT', 'Gross', 'Deduction', 'Net'].map(h => (
+              {['Staff', 'Dept', 'Hours', 'Base', 'OT', 'Gross', 'Deduction', 'Net', ''].map(h => (
                 <th key={h} className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-slate-500">{h}</th>
               ))}
             </tr>
@@ -278,6 +308,9 @@ export default function PayrollPage() {
                 <td className="px-4 py-3 text-xs font-bold text-slate-800 tabular-nums">{fmtINR(r.totalGross)}</td>
                 <td className="px-4 py-3 text-xs text-amber-700 tabular-nums">−{fmtINR(r.deductions)}</td>
                 <td className="px-4 py-3 text-xs font-black text-emerald-700 tabular-nums">{fmtINR(r.netPay)}</td>
+                <td className="px-4 py-3 text-right">
+                  <button onClick={() => downloadPayslip(r)} className="text-[10.5px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-1 rounded cursor-pointer">Payslip</button>
+                </td>
               </motion.tr>
             ))}
           </tbody>
