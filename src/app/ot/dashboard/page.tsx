@@ -10,6 +10,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { toast } from "sonner"
 import { OnShiftTeam } from "@/components/clinical/OnShiftTeam"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
+import { useAuthStore } from "@/store/useAuthStore"
+import type { Role } from "@/types/roles"
 
 const REQ_TYPE_ICONS: Record<string, React.ElementType> = {
   radiology: ScanLine, blood: Droplet, pharmacy: Pill, equipment: FlaskConical,
@@ -20,8 +23,13 @@ const REQ_STATUS_COLORS: Record<string, string> = {
   received: 'bg-green-50 text-green-700 border-green-200',
 }
 
+const PREOP_TO_ROLE: Record<'radiology' | 'blood' | 'pharmacy' | 'equipment', Role> = {
+  radiology: 'radiology', blood: 'blood_bank', pharmacy: 'pharmacy', equipment: 'inventory',
+}
+
 function IPDBriefPanel({ proc }: { proc: OTProcedure }) {
   const { addPreOpRequirement } = useOTStore()
+  const currentUser = useAuthStore(s => s.currentUser)
   const [reqType, setReqType] = useState<'radiology' | 'blood' | 'pharmacy' | 'equipment'>('pharmacy')
   const [reqDesc, setReqDesc] = useState('')
   const brief = proc.ipdBrief
@@ -153,6 +161,13 @@ function IPDBriefPanel({ proc }: { proc: OTProcedure }) {
             onClick={() => {
               if (!reqDesc.trim()) return
               addPreOpRequirement(proc.id, { type: reqType, description: reqDesc })
+              notifyAndAudit({
+                to: PREOP_TO_ROLE[reqType], type: 'system', priority: 'high',
+                title: `Pre-op requirement · ${proc.patientName}`,
+                body: `${reqDesc} — needed for ${proc.procedureName} at ${proc.scheduledTime} (${proc.otRoom}). Surgeon: ${proc.surgeon}.`,
+                patientName: proc.patientName,
+                audit: { action: 'ot_clearance_set', resource: 'ot_procedure', resourceId: proc.id, detail: `Pre-op ${reqType} requirement: ${reqDesc}`, userName: currentUser?.name ?? 'OT Coordinator' },
+              })
               toast.success(`Requirement dispatched to ${reqType}`)
               setReqDesc('')
             }}
@@ -188,6 +203,7 @@ const STATUS_NEXT: Partial<Record<string, string>> = {
 
 export default function OTDashboard() {
   const { procedures, otRooms, updateStatus } = useOTStore()
+  const currentUser = useAuthStore(s => s.currentUser)
   const [now, setNow] = useState(Date.now())
   const [expandedBriefId, setExpandedBriefId] = useState<string | null>(null)
 
@@ -380,6 +396,14 @@ export default function OTDashboard() {
                               return
                             }
                             updateStatus(proc.id, next as typeof proc.status)
+                            const priority = next === 'In Progress' ? 'critical' : 'high'
+                            notifyAndAuditMany(['ot', 'doctor', 'nurse'], {
+                              type: 'system', priority,
+                              title: `${proc.id} → ${next} · ${proc.patientName}`,
+                              body: `${proc.procedureName} in ${proc.otRoom} moved to ${next}. Surgeon: ${proc.surgeon}, Anaes: ${proc.anaesthetist}.`,
+                              patientName: proc.patientName,
+                              audit: { action: 'ot_clearance_set', resource: 'ot_procedure', resourceId: proc.id, detail: `OT status ${proc.status} → ${next}`, userName: currentUser?.name ?? 'OT Coordinator' },
+                            })
                             toast.success(`${proc.id} advanced to ${next}`)
                           }}
                           className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition-colors cursor-pointer border border-slate-200"

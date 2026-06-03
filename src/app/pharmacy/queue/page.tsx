@@ -144,7 +144,21 @@ export default function PharmacyQueue() {
     })
     if (srcOf(rx) === "Discharge") {
       setClearance(rx.patientId, "pharmacy", "cleared")
-      addNotification({ type: "discharge_ready", priority: "medium", title: `TTO meds dispensed — ${rx.patientName}`, body: "Take-home medicines dispensed; pharmacy clearance done for discharge.", targetRole: "discharge", patientName: rx.patientName, channels: ["in_app"] })
+      notifyAndAudit({
+        to: 'discharge', type: 'discharge_ready', priority: 'medium',
+        title: `TTO meds dispensed — ${rx.patientName}`,
+        body: `Take-home medicines dispensed to ${who}; pharmacy clearance done. Discharge desk may proceed.`,
+        patientName: rx.patientName,
+        audit: { action: 'drug_dispense', resource: 'prescription', resourceId: rx.id, detail: `TTO dispensed to ${who} · pharmacy clearance set`, userName: me.name },
+      })
+    } else {
+      notifyAndAudit({
+        to: 'discharge', type: 'system', priority: 'low',
+        title: `Rx dispensed · ${rx.patientName}`,
+        body: `${rx.medicines.length} item${rx.medicines.length !== 1 ? 's' : ''} dispensed to ${who} for ${rx.patientName} (${srcOf(rx)}).`,
+        patientName: rx.patientName,
+        audit: { action: 'drug_dispense', resource: 'prescription', resourceId: rx.id, detail: `Rx dispensed to ${who}`, userName: me.name },
+      })
     }
     setCollectingId(null)
     toast.success(`${rx.patientName} — dispensed to ${who} · stock updated`)

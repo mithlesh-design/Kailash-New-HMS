@@ -1,5 +1,5 @@
-"use client"
-import { AppShell } from "@/components/layout/AppShell"
+import { RoleGuard } from "@/components/layout/RoleGuard"
+
 export default function OTLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell>{children}</AppShell>
+  return <RoleGuard allowedRole="ot">{children}</RoleGuard>
 }

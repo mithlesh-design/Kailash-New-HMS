@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { generateIPDCharges, type IPDChargeSuggestion } from "@/ai-services/billing-suggest"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
+import { useAuthStore } from "@/store/useAuthStore"
 
 const TYPE_CONFIG: Record<ChargeType, { label: string; color: string }> = {
   consultation: { label: 'Consultation',  color: 'text-blue-600 bg-blue-50' },
@@ -27,6 +29,8 @@ const CHARGE_TYPES: ChargeType[] = ['consultation', 'lab', 'radiology', 'pharmac
 export default function PatientBillPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { getBillForPatient, getItemsForPatient, freezeBill, applyInsuranceCoverage, recordPayment, addCharge } = useBillingStore()
+  const currentUser = useAuthStore(s => s.currentUser)
+  const actor = currentUser?.name ?? 'Billing Officer'
 
   const bill = getBillForPatient(id)
   const items = getItemsForPatient(id)
@@ -75,12 +79,21 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
   }
 
   const handleAcceptSelected = () => {
-    if (!aiSuggestions) return
+    if (!aiSuggestions || !bill) return
     let count = 0
+    let total = 0
     aiSuggestions.forEach((s, i) => {
       if (rejectedIndexes.has(i)) return
       addCharge({ patientId: id, type: s.type as ChargeType, description: s.description, amount: s.amount, quantity: s.quantity, date: new Date().toISOString(), source: s.source, isNonPayable: s.isNonPayable })
       count++
+      total += s.amount * s.quantity
+    })
+    notifyAndAudit({
+      to: 'audit_officer', type: 'system', priority: 'low',
+      title: `Charges added · ${bill.patientName}`,
+      body: `${count} AI-suggested charge${count !== 1 ? 's' : ''} (₹${total.toLocaleString('en-IN')}) added to bill ${bill.id} by ${actor}.`,
+      patientName: bill.patientName,
+      audit: { action: 'billing_charge', resource: 'bill', resourceId: bill.id, detail: `${count} AI charges added · ₹${total.toLocaleString('en-IN')}`, userName: actor },
     })
     toast.success(`${count} AI-suggested charge${count !== 1 ? 's' : ''} added to bill`)
     setAiSuggestions(null)
@@ -98,6 +111,13 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
     if (!amt || amt <= 0) { toast.error("Enter a valid amount"); return }
     if (amt > outstanding) { toast.error(`Amount exceeds outstanding balance of ₹${outstanding.toLocaleString('en-IN')}`); return }
     recordPayment(bill.id, amt, payMode)
+    notifyAndAuditMany(['patient', 'audit_officer'], {
+      type: 'system', priority: 'medium',
+      title: `Payment received · ₹${amt.toLocaleString('en-IN')} · ${bill.patientName}`,
+      body: `${payMode} payment of ₹${amt.toLocaleString('en-IN')} collected for bill ${bill.id} by ${actor}. Receipt generated.`,
+      patientName: bill.patientName,
+      audit: { action: 'billing_charge', resource: 'bill', resourceId: bill.id, detail: `Payment ₹${amt.toLocaleString('en-IN')} via ${payMode}`, userName: actor },
+    })
     toast.success(`₹${amt.toLocaleString('en-IN')} collected via ${payMode}. Receipt generated.`)
     setPayAmount("")
     setShowPayment(false)
@@ -161,12 +181,33 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
             </button>
           )}
           {bill.status === 'draft' && (
-            <Button variant="secondary" onClick={() => { freezeBill(bill.id); toast.success("Bill frozen — ready for final settlement") }}>
+            <Button variant="secondary" onClick={() => {
+              freezeBill(bill.id)
+              notifyAndAuditMany(['audit_officer', 'admin'], {
+                type: 'system', priority: 'medium',
+                title: `Bill frozen · ${bill.patientName}`,
+                body: `Bill ${bill.id} frozen by ${actor}. No further edits permitted; ready for settlement.`,
+                patientName: bill.patientName,
+                audit: { action: 'billing_charge', resource: 'bill', resourceId: bill.id, detail: `Bill frozen for ${bill.patientName}`, userName: actor },
+              })
+              toast.success("Bill frozen — ready for final settlement")
+            }}>
               Freeze Bill
             </Button>
           )}
           {bill.insuranceCovered === 0 && bill.payerType.toLowerCase().includes('cashless') && (
-            <Button variant="secondary" onClick={() => { applyInsuranceCoverage(bill.id, Math.floor(bill.subtotal * 0.8)); toast.success("Insurance coverage applied") }}>
+            <Button variant="secondary" onClick={() => {
+              const cov = Math.floor(bill.subtotal * 0.8)
+              applyInsuranceCoverage(bill.id, cov)
+              notifyAndAudit({
+                to: 'insurance', type: 'system', priority: 'medium',
+                title: `Insurance coverage applied · ${bill.patientName}`,
+                body: `₹${cov.toLocaleString('en-IN')} (80% of ₹${bill.subtotal.toLocaleString('en-IN')}) applied to bill ${bill.id} by ${actor}.`,
+                patientName: bill.patientName,
+                audit: { action: 'insurance_doc_upload', resource: 'bill', resourceId: bill.id, detail: `Insurance coverage ₹${cov.toLocaleString('en-IN')} applied`, userName: actor },
+              })
+              toast.success("Insurance coverage applied")
+            }}>
               <ShieldCheck className="h-4 w-4 mr-1.5" /> Apply Insurance Coverage
             </Button>
           )}

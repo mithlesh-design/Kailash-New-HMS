@@ -7,6 +7,9 @@ import {
   Clock, Droplet, FileText, ShieldCheck, ChevronRight, Users as UsersIcon,
 } from "lucide-react"
 import { usePatientStore, type Patient, type QueueStatus, type TriageLevel } from "@/store/usePatientStore"
+import { useAuthStore } from "@/store/useAuthStore"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
+import type { Role } from "@/types/roles"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -31,8 +34,13 @@ type Tab = typeof TABS[number]
 
 const initials = (n: string) => n.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
+const NOTIFY_ROLE_BY_NEXT: Partial<Record<QueueStatus, Role>> = {
+  vitals: 'nurse', consulting: 'doctor', pharmacy: 'pharmacy', billing: 'billing',
+}
+
 export default function ReceptionPatients() {
   const { patients, visits, appointments, updateStatus } = usePatientStore()
+  const currentUser = useAuthStore(s => s.currentUser)
   const [tab, setTab] = useState<Tab>('Today')
   const [search, setSearch] = useState('')
   const [dept, setDept] = useState('All')
@@ -86,6 +94,16 @@ export default function ReceptionPatients() {
     const n = NEXT_STATUS[p.queueStatus]
     if (!n) return
     updateStatus(p.id, n.next)
+    const targetRole = NOTIFY_ROLE_BY_NEXT[n.next]
+    if (targetRole) {
+      notifyAndAudit({
+        to: targetRole, type: 'system', priority: 'medium',
+        title: `${p.name} → ${STATUS_LABEL[n.next]}`,
+        body: `${p.name} (${p.id}, token #${p.token}) routed from ${STATUS_LABEL[p.queueStatus]} to ${STATUS_LABEL[n.next]}. Department: ${p.department}.`,
+        patientName: p.name,
+        audit: { action: 'reception_queue_advance', resource: 'patient_queue', resourceId: p.id, detail: `Queue advance ${p.queueStatus} → ${n.next}`, userName: currentUser?.name ?? 'Reception' },
+      })
+    }
     toast.success(`${p.name} → ${STATUS_LABEL[n.next]}`)
   }
 

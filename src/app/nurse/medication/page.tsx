@@ -12,6 +12,8 @@ import { NeonBadge } from "@/components/ui/neon-badge"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
+import { useAuthStore } from "@/store/useAuthStore"
 
 const STATUS_CONFIG: Record<MarStatus, { color: string; icon: React.ElementType; label: string }> = {
   given:     { color: 'text-green-600 bg-green-50',   icon: CheckCircle,   label: 'Given' },
@@ -30,6 +32,7 @@ export default function MedicationMAR() {
   const activeWard = useShiftStore(s => s.activeWard)
   const inpatients = allInpatients.filter(i => activeWard === ALL_WARDS || i.ward === activeWard)
   const administerMed = useInpatientStore(s => s.administerMed)
+  const currentUser = useAuthStore(s => s.currentUser)
   const [activeTab, setActiveTab] = useState<'mar' | 'ipd'>('mar')
   const [admin, setAdmin] = useState<{ slot: MarSlot; ip: Inpatient } | null>(null)
 
@@ -57,14 +60,29 @@ export default function MedicationMAR() {
   const missedCount = rows.filter(r => r.status === 'missed').length
   const dueCount = rows.filter(r => r.status === 'due').length
 
+  const nurseName = currentUser?.name ?? 'Nurse'
   const doAdminister = (note?: string) => {
     if (!admin) return
     administerMed(admin.ip.patientId, { medName: admin.slot.medName, slot: admin.slot.slot, action: 'given', note })
+    notifyAndAudit({
+      to: 'doctor', type: 'system', priority: note ? 'high' : 'low',
+      title: `Med given · ${admin.slot.medName} · ${admin.slot.patientName}`,
+      body: `${admin.slot.medName} ${admin.slot.dose} ${admin.slot.route} administered to ${admin.slot.patientName} (${admin.slot.ward} ${admin.slot.bed}) at ${admin.slot.slot} by ${nurseName}${note ? ` — ${note}` : ''}.`,
+      patientName: admin.slot.patientName,
+      audit: { action: 'nurse_med_administered', resource: 'mar_slot', resourceId: `${admin.ip.patientId}:${admin.slot.medName}:${admin.slot.slot}`, detail: `${admin.slot.medName} given to ${admin.slot.patientName}${note ? ` · ${note}` : ''}`, userName: nurseName },
+    })
     toast.success(`${admin.slot.medName} administered to ${admin.slot.patientName}${note ? ' (override logged)' : ''}`)
   }
   const doHold = (note?: string) => {
     if (!admin) return
     administerMed(admin.ip.patientId, { medName: admin.slot.medName, slot: admin.slot.slot, action: 'held', note })
+    notifyAndAudit({
+      to: 'doctor', type: 'system', priority: 'medium',
+      title: `Med held · ${admin.slot.medName} · ${admin.slot.patientName}`,
+      body: `${admin.slot.medName} held for ${admin.slot.patientName} (${admin.slot.ward} ${admin.slot.bed}) at ${admin.slot.slot} by ${nurseName}${note ? ` — ${note}` : ''}.`,
+      patientName: admin.slot.patientName,
+      audit: { action: 'nurse_med_administered', resource: 'mar_slot', resourceId: `${admin.ip.patientId}:${admin.slot.medName}:${admin.slot.slot}`, detail: `${admin.slot.medName} held for ${admin.slot.patientName}${note ? ` · ${note}` : ''}`, userName: nurseName },
+    })
     toast(`${admin.slot.medName} held for ${admin.slot.patientName}`)
   }
 

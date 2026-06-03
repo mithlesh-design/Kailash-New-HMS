@@ -11,6 +11,7 @@ import {
 } from "@/store/useRadiologyStudiesStore"
 import { RADIOLOGY_CATALOG, TEMPLATE_SECTIONS, type Priority } from "@/lib/radiologyCatalog"
 import { useAuthStore } from "@/store/useAuthStore"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -90,6 +91,13 @@ export default function ReadingRoom() {
                 return
               }
               submitReport(s.id, me)
+              notifyAndAudit({
+                to: 'radiology', type: 'system', priority: s.priority === 'STAT' ? 'high' : 'medium',
+                title: `Verification queue · ${s.name}`,
+                body: `${s.modality} ${s.name} for ${s.patientName} (${s.patientId}) awaiting second-read sign-off. Read by ${me.name}.`,
+                patientName: s.patientName,
+                audit: { action: 'radiology_report_verified', resource: 'radiology_study', resourceId: s.id, detail: `Report submitted for verification`, userName: me.name },
+              })
               toast.success(`${s.name} submitted for verification`)
             }} />
         ))}

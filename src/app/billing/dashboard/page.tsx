@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { toast } from "sonner"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const DAILY_REVENUE = [
   { day: 'Mon', collected: 82000, outstanding: 34000 },
@@ -51,7 +52,15 @@ export default function BillingDashboard() {
   const totalDuplicateValue = duplicates.reduce((s, d) => s + d.alerts.reduce((s2, a) => s2 + a.totalAmount, 0), 0)
 
   const onFreeze = (billId: string, name: string) => {
-    freezeBill(billId, currentUser?.name ?? 'Billing Officer')
+    const actor = currentUser?.name ?? 'Billing Officer'
+    freezeBill(billId, actor)
+    notifyAndAuditMany(['audit_officer', 'admin'], {
+      type: 'system', priority: 'medium',
+      title: `Bill frozen · ${name}`,
+      body: `Bill ${billId} for ${name} frozen by ${actor}. No further edits permitted; ready for settlement.`,
+      patientName: name,
+      audit: { action: 'billing_charge', resource: 'bill', resourceId: billId, detail: `Bill frozen for ${name}`, userName: actor },
+    })
     toast.success(`Bill frozen for ${name} · audit logged`)
   }
 

@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
+import { useAuthStore } from "@/store/useAuthStore"
 
 const STATUS_COLOR: Record<InsuranceClaim['status'], string> = {
   'Pending Pre-Auth': 'warning',
@@ -32,6 +34,13 @@ function ValidationPanel({ claim, onClose }: { claim: InsuranceClaim; onClose: (
   const handleSubmit = () => {
     const ref = `TPA-${claim.provider.toUpperCase().replace(/\s/g,'-')}-${Date.now().toString(36).toUpperCase()}`
     setSubmissionStatus(claim.id, 'submitted', ref)
+    notifyAndAuditMany(['billing', 'patient'], {
+      type: 'system', priority: 'high',
+      title: `Claim submitted · ${claim.id}`,
+      body: `Claim ${claim.id} for ${claim.patientName} (₹${claim.amount.toLocaleString('en-IN')}) submitted to ${claim.provider}. TPA reference: ${ref}.`,
+      patientName: claim.patientName,
+      audit: { action: 'insurance_claim_submitted', resource: 'claim', resourceId: claim.id, detail: `Submitted to ${claim.provider} · ref ${ref}`, userName: 'Insurance Desk' },
+    })
     toast.success(`Claim ${claim.id} submitted to ${claim.provider}. Reference: ${ref}`)
     onClose()
   }
@@ -178,11 +187,20 @@ export default function InsuranceClaimsPage() {
   const [validatingId, setValidatingId] = useState<string | null>(null)
   const [expandedValidationId, setExpandedValidationId] = useState<string | null>(null)
   const [expandedDocsId, setExpandedDocsId] = useState<string | null>(null)
+  const currentUser = useAuthStore(s => s.currentUser)
+  const actor = currentUser?.name ?? 'Insurance Desk'
 
   const handleReviewClose = (action?: 'approve' | 'reject') => {
     if (action && reviewing) {
       const newStatus = action === 'approve' ? 'Approved' : 'Rejected'
-      setStatus(reviewing.id, newStatus, { actor: 'Insurance Desk', approvedAmount: action === 'approve' ? reviewing.amount : undefined })
+      setStatus(reviewing.id, newStatus, { actor, approvedAmount: action === 'approve' ? reviewing.amount : undefined })
+      notifyAndAuditMany(['billing', 'patient'], {
+        type: 'system', priority: action === 'reject' ? 'high' : 'medium',
+        title: `Claim ${newStatus} · ${reviewing.patientName}`,
+        body: `Claim ${reviewing.id} for ${reviewing.patientName} (${reviewing.provider}, ₹${reviewing.amount.toLocaleString('en-IN')}) ${newStatus.toLowerCase()} by ${actor}.`,
+        patientName: reviewing.patientName,
+        audit: { action: 'insurance_claim_submitted', resource: 'claim', resourceId: reviewing.id, detail: `Claim ${newStatus} by ${actor}`, userName: actor },
+      })
       toast.success(`Claim ${reviewing.id} ${newStatus}`)
     }
     setReviewing(null)
@@ -400,7 +418,17 @@ export default function InsuranceClaimsPage() {
                             <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-red-50 text-red-700 ring-1 ring-red-200">Rejected</span>
                           ) : (
                             <button
-                              onClick={() => { uploadDocument(claim.id, d.id); toast.success(`${d.name} uploaded`) }}
+                              onClick={() => {
+                                uploadDocument(claim.id, d.id)
+                                notifyAndAudit({
+                                  to: 'audit_officer', type: 'system', priority: 'low',
+                                  title: `Claim doc uploaded · ${claim.id}`,
+                                  body: `${d.name} uploaded for claim ${claim.id} (${claim.patientName}) by ${actor}.`,
+                                  patientName: claim.patientName,
+                                  audit: { action: 'insurance_doc_upload', resource: 'claim', resourceId: claim.id, detail: `Uploaded: ${d.name}`, userName: actor },
+                                })
+                                toast.success(`${d.name} uploaded`)
+                              }}
                               className="flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-lg cursor-pointer"
                             >
                               <Upload className="h-3 w-3" />Upload

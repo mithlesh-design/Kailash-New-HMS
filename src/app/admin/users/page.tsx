@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useDialogs } from "@/components/ui/ConfirmDialog"
 import { useNotificationStore } from "@/store/useNotificationStore"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const STATUS_TINT: Record<StaffMember['status'], string> = {
   active:      'bg-emerald-100 text-emerald-700',
@@ -241,6 +242,12 @@ export default function StaffManagementPage() {
             if (!values) return
             const ids = Array.from(selected)
             for (const id of ids) deactivateStaff(id, values.reason, actorName)
+            notifyAndAuditMany(['admin', 'audit_officer'], {
+              type: 'system', priority: 'high',
+              title: `${ids.length} staff deactivated`,
+              body: `${actorName} deactivated ${ids.length} staff member${ids.length !== 1 ? 's' : ''}. Reason: ${values.reason}.`,
+              audit: { action: 'hr_staff_deactivated', resource: 'staff', resourceId: ids.join(','), detail: `Bulk deactivate ${ids.length} · reason: ${values.reason}`, userName: actorName },
+            })
             toast.success(`${ids.length} staff deactivated`)
             setSelected(new Set())
           }} className="text-xs font-bold text-amber-700 hover:underline cursor-pointer">Bulk deactivate</button>

@@ -124,6 +124,15 @@ export default function RosterPage() {
   const handleCellChange = (staffId: string, date: string, shift: ShiftType) => {
     if (!canWrite) { toast.error("You don't have permission to edit shifts"); setEditCell(null); return }
     updateShift(staffId, date, shift, actorName)
+    const staff = filteredStaff.find(s => s.id === staffId)
+    if (staff) {
+      notifyAndAudit({
+        to: 'admin', type: 'system', priority: 'low',
+        title: `Shift updated · ${staff.name}`,
+        body: `${staff.name} (${staff.role}, ${staff.department}) shift on ${date} set to ${shift} by ${actorName}.`,
+        audit: { action: 'hr_shift_set', resource: 'roster', resourceId: `${staffId}:${date}`, detail: `Shift ${date} → ${shift}`, userName: actorName },
+      })
+    }
     setEditCell(null)
   }
 

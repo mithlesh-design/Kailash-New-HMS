@@ -10,6 +10,7 @@ import {
 } from "@/store/useRadiologyStudiesStore"
 import { RADIOLOGY_CATALOG, TEMPLATE_SECTIONS, type Priority } from "@/lib/radiologyCatalog"
 import { useAuthStore } from "@/store/useAuthStore"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -58,15 +59,28 @@ export default function Verification() {
             <p className="text-sm font-semibold">No reports pending verification</p>
           </div>
         )}
-        {pending.map(s => (
-          <VerificationRow key={s.id} s={s}
-            expanded={expandedId === s.id}
-            onToggle={() => setExpandedId(id => id === s.id ? null : s.id)}
-            onVerify={() => {
-              verifyAndRelease(s.id, me)
-              toast.success(`${s.name} verified & released · ${s.doctorName} notified`)
-            }} />
-        ))}
+        {pending.map(s => {
+          const isCritical = CRITICAL_RE.test(s.reportSections.impression ?? "") ||
+                             CRITICAL_RE.test(s.reportSections.findings ?? "")
+          return (
+            <VerificationRow key={s.id} s={s}
+              expanded={expandedId === s.id}
+              onToggle={() => setExpandedId(id => id === s.id ? null : s.id)}
+              onVerify={() => {
+                verifyAndRelease(s.id, me)
+                const action = isCritical ? 'radiology_critical_callback' : 'radiology_report_verified'
+                notifyAndAuditMany(['doctor', 'patient'], {
+                  type: isCritical ? 'critical_value' : 'system',
+                  priority: isCritical ? 'critical' : 'medium',
+                  title: `${s.name} verified${isCritical ? ' · CRITICAL' : ''} · ${s.patientName}`,
+                  body: `${s.modality} ${s.name} for ${s.patientName} (${s.patientId}) verified and released by ${me.name}. Ordering doctor: ${s.doctorName}.${isCritical ? ' Critical impression — review immediately.' : ''}`,
+                  patientName: s.patientName,
+                  audit: { action, resource: 'radiology_study', resourceId: s.id, detail: `Verified ${s.modality} ${s.name} for ${s.patientId}${isCritical ? ' (critical)' : ''}`, userName: me.name },
+                })
+                toast.success(`${s.name} verified & released · ${s.doctorName} notified`)
+              }} />
+          )
+        })}
       </div>
     </div>
   )

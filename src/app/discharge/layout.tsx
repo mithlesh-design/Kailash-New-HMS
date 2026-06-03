@@ -1,6 +1,10 @@
-"use client"
-import { AppShell } from "@/components/layout/AppShell"
+import { RoleGuard } from "@/components/layout/RoleGuard"
 import { CopilotLayout } from "@/components/features/CopilotLayout"
+
 export default function DischargeLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell><CopilotLayout role="discharge">{children}</CopilotLayout></AppShell>
+  return (
+    <RoleGuard allowedRole="discharge">
+      <CopilotLayout role="discharge">{children}</CopilotLayout>
+    </RoleGuard>
+  )
 }

@@ -1,6 +1,10 @@
-"use client"
-import { AppShell } from "@/components/layout/AppShell"
+import { RoleGuard } from "@/components/layout/RoleGuard"
 import { CopilotLayout } from "@/components/features/CopilotLayout"
+
 export default function QualityLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell><CopilotLayout role="quality">{children}</CopilotLayout></AppShell>
+  return (
+    <RoleGuard allowedRole="quality">
+      <CopilotLayout role="quality">{children}</CopilotLayout>
+    </RoleGuard>
+  )
 }
