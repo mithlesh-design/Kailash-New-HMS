@@ -13,7 +13,9 @@ import { NeonBadge } from "@/components/ui/neon-badge"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { OcrIntakeCard } from "@/components/reception/OcrIntakeCard"
-import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
+import { useAuthStore } from "@/store/useAuthStore"
+import { Banknote, Smartphone, CreditCard, ShieldCheck } from "lucide-react"
 
 const COLUMNS: { key: QueueStatus; label: string; color: string }[] = [
   { key: 'waiting',    label: 'Waiting Room',     color: 'border-t-slate-300' },
@@ -64,11 +66,34 @@ function suggestTriage(complaint: string): { triage: TriageLevel; department: st
   return { triage: 'Low', department: 'General Medicine', reason: 'No red flags detected — routine.' }
 }
 
-type WalkInForm = { name: string; phone: string; age: string; gender: 'Male' | 'Female' | 'Other'; symptoms: string; department: string; doctor: string; triage: TriageLevel }
-const EMPTY_FORM: WalkInForm = { name: '', phone: '', age: '', gender: 'Male', symptoms: '', department: 'General Medicine', doctor: 'Dr. Priya Nair', triage: 'Low' }
+type PaymentMode = 'Cash' | 'UPI' | 'Card' | 'Insurance'
+type WalkInForm = {
+  name: string; phone: string; age: string; gender: 'Male' | 'Female' | 'Other'
+  symptoms: string; department: string; doctor: string; triage: TriageLevel
+  paymentMode: PaymentMode
+  consultationFee: string       // numeric, kept as string for the input
+  insurer: string               // free-text insurer name when paymentMode === 'Insurance'
+  policyNumber: string          // optional
+}
+
+// Department-default consultation fees (₹). Editable per visit on the form.
+const DEFAULT_FEE_BY_DEPT: Record<string, number> = {
+  'General Medicine': 500, 'Cardiology': 900, 'Orthopaedics': 700, 'Gynaecology': 700,
+  'Paediatrics': 600, 'Dermatology': 500, 'ENT': 500, 'Ophthalmology': 500,
+}
+const feeFor = (dept: string) => DEFAULT_FEE_BY_DEPT[dept] ?? 500
+
+const EMPTY_FORM: WalkInForm = {
+  name: '', phone: '', age: '', gender: 'Male', symptoms: '',
+  department: 'General Medicine', doctor: 'Dr. Priya Nair', triage: 'Low',
+  paymentMode: 'Cash', consultationFee: String(feeFor('General Medicine')),
+  insurer: '', policyNumber: '',
+}
 
 export default function OpdQueuePage() {
   const { patients, updateStatus, addPatient, sendToEmergency } = usePatientStore()
+  const currentUser = useAuthStore(s => s.currentUser)
+  const actorName = currentUser?.name ?? 'Reception'
   const [search, setSearch]       = useState("")
   const [filterTriage, setFilter] = useState<string>("All")
   const [showWalkIn, setShowWalkIn] = useState(false)
@@ -112,26 +137,54 @@ export default function OpdQueuePage() {
   const handleWalkIn = async () => {
     if (!form.name.trim()) { toast.error('Enter the patient name'); return }
     if (!/^\d{10}$/.test(form.phone.trim())) { toast.error('Enter a valid 10-digit phone number'); return }
+    // Cashless requires insurer name.
+    if (form.paymentMode === 'Insurance' && !form.insurer.trim()) {
+      toast.error('Enter the insurance provider for cashless registration')
+      return
+    }
     // M10-A — light on-shift / availability check against doctor schedule.
-    // doctorsForDept returns the current available roster; if the chosen
-    // doctor isn't in it, confirm before proceeding.
     const available = doctorsForDept(form.department).map(r => r.doctor)
     if (form.doctor && available.length > 0 && !available.includes(form.doctor)) {
       if (!window.confirm(`${form.doctor} doesn't appear on the ${form.department} on-shift roster right now. Continue anyway?`)) return
     }
     setSubmitting(true)
     await new Promise(r => setTimeout(r, 400))
+    const name = form.name.trim()
+    const fee = parseInt(form.consultationFee) || feeFor(form.department)
+    const isCashless = form.paymentMode === 'Insurance'
     addPatient({
-      name: form.name.trim(),
-      phone: form.phone.trim(),
+      name, phone: form.phone.trim(),
       age: parseInt(form.age) || 30,
       gender: form.gender,
       symptoms: form.symptoms ? [form.symptoms.trim()] : [],
       department: form.department,
       doctor: form.doctor,
       triageLevel: form.triage,
+      insurer: isCashless ? form.insurer.trim() : undefined,
     })
-    toast.success(`Walk-in registered: ${form.name}`, { description: `${form.triage} · ${form.department} · ${form.doctor}` })
+    // M13.4 — payment side-effects:
+    // (a) Cashless → notify insurance + audit (so the insurance desk picks
+    //     up the case immediately, not on discharge).
+    // (b) Cash/UPI/Card → register the consult fee as collected.
+    if (isCashless) {
+      notifyAndAudit({
+        to: 'insurance', type: 'system', priority: 'high',
+        title: `Cashless walk-in · ${name}`,
+        body: `${name} (${form.triage}) registered as cashless under ${form.insurer.trim()}${form.policyNumber.trim() ? ` · policy ${form.policyNumber.trim()}` : ''}. Estimated consult fee ₹${fee.toLocaleString('en-IN')}. Pre-auth needed if admission likely.`,
+        patientName: name,
+        audit: { action: 'insurance_claim_submitted', resource: 'opd_walkin', detail: `Cashless walk-in registered for ${name} · insurer ${form.insurer.trim()}`, userName: actorName },
+      })
+      toast.success(`Walk-in registered (cashless): ${name}`, { description: `Insurance desk notified · ${form.insurer.trim()}` })
+    } else {
+      notifyAndAudit({
+        to: 'audit_officer', type: 'system', priority: 'low',
+        title: `Walk-in fee collected · ${name}`,
+        body: `${name} registered · ${form.department} · consult fee ₹${fee.toLocaleString('en-IN')} collected via ${form.paymentMode}.`,
+        patientName: name,
+        audit: { action: 'billing_charge', resource: 'opd_walkin', detail: `Consult fee ₹${fee.toLocaleString('en-IN')} via ${form.paymentMode}`, userName: actorName },
+      })
+      toast.success(`Walk-in registered: ${name}`, { description: `₹${fee.toLocaleString('en-IN')} via ${form.paymentMode} · ${form.department}` })
+    }
     setForm(EMPTY_FORM)
     setShowWalkIn(false)
     setSubmitting(false)
@@ -377,7 +430,8 @@ export default function OpdQueuePage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="wi-dept" className="block text-sm font-semibold text-slate-700 mb-1.5">Department</label>
-                    <select id="wi-dept" value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value, doctor: firstDoctorOf(e.target.value) }))}
+                    <select id="wi-dept" value={form.department}
+                      onChange={e => setForm(f => ({ ...f, department: e.target.value, doctor: firstDoctorOf(e.target.value), consultationFee: String(feeFor(e.target.value)) }))}
                       className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
                       {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
@@ -398,6 +452,60 @@ export default function OpdQueuePage() {
                       {TRIAGE_LEVELS.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
+                </div>
+
+                {/* M13.4 — Payment / cashless capture. Insurance route notifies
+                    the insurance desk immediately on save, so they can start
+                    pre-auth before the doctor's consult finishes. */}
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <p className="text-[12px] font-bold uppercase tracking-wide text-slate-600">Consultation fee & payment</p>
+                    <p className="text-[11px] text-slate-500">Default fee for {form.department}: ₹{feeFor(form.department).toLocaleString('en-IN')}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label htmlFor="wi-fee" className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Fee (₹)</label>
+                      <Input id="wi-fee" type="number" min={0} value={form.consultationFee}
+                        onChange={e => setForm(f => ({ ...f, consultationFee: e.target.value }))}
+                        className="h-9 rounded-lg" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Payment mode</label>
+                      <div className="flex gap-1">
+                        {([
+                          { v: 'Cash' as const, Icon: Banknote },
+                          { v: 'UPI' as const, Icon: Smartphone },
+                          { v: 'Card' as const, Icon: CreditCard },
+                          { v: 'Insurance' as const, Icon: ShieldCheck },
+                        ]).map(({ v, Icon }) => (
+                          <button key={v} type="button" onClick={() => setForm(f => ({ ...f, paymentMode: v }))}
+                            className={cn("flex items-center justify-center gap-1 h-9 px-2 flex-1 rounded-lg text-[11px] font-bold transition cursor-pointer border",
+                              form.paymentMode === v ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100')}>
+                            <Icon className="h-3 w-3" />{v}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  {form.paymentMode === 'Insurance' && (
+                    <div className="grid grid-cols-2 gap-3 pt-1 border-t border-slate-200">
+                      <div>
+                        <label htmlFor="wi-insurer" className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Insurer <span className="text-red-500">*</span></label>
+                        <Input id="wi-insurer" placeholder="HDFC Ergo / Star / ICICI Lombard"
+                          value={form.insurer} onChange={e => setForm(f => ({ ...f, insurer: e.target.value }))}
+                          className="h-9 rounded-lg" />
+                      </div>
+                      <div>
+                        <label htmlFor="wi-policy" className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Policy # (optional)</label>
+                        <Input id="wi-policy" placeholder="Policy or member ID"
+                          value={form.policyNumber} onChange={e => setForm(f => ({ ...f, policyNumber: e.target.value }))}
+                          className="h-9 rounded-lg" />
+                      </div>
+                      <p className="col-span-2 text-[10.5px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1">
+                        Insurance desk will be notified on save — they'll start pre-auth in parallel with the consult.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 

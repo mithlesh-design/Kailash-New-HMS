@@ -10,6 +10,7 @@ import { useWhatsAppStore } from "@/store/useWhatsAppStore"
 import {
   Users, Activity, Stethoscope, BedDouble, CreditCard, Calendar,
   UserPlus, ArrowRight, AlertTriangle, MessageSquare, Volume2, Clock, ChevronRight,
+  Pill, CheckCircle2, Hourglass,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -40,6 +41,17 @@ export default function ReceptionDashboard() {
   const waiting = patients.filter(p => p.queueStatus === 'waiting')
   const avgWait = waiting.length ? Math.round(waiting.reduce((s, p) => s + p.estimatedWait, 0) / waiting.length) : 0
   const nowServing = patients.find(p => p.queueStatus === 'consulting')
+
+  // M13.4 — OPD pipeline counts (today only)
+  const todayQueue = todayPatients
+  const pipelineCounts = {
+    waiting:    todayQueue.filter(p => p.queueStatus === 'waiting').length,
+    vitals:     todayQueue.filter(p => p.queueStatus === 'vitals').length,
+    consulting: todayQueue.filter(p => p.queueStatus === 'consulting').length,
+    pharmacy:   todayQueue.filter(p => p.queueStatus === 'pharmacy').length,
+    billing:    todayQueue.filter(p => p.queueStatus === 'billing').length,
+    done:       todayQueue.filter(p => p.queueStatus === 'done').length,
+  }
 
   const upNext = [...patients]
     .filter(p => p.queueStatus === 'waiting' || p.queueStatus === 'vitals')
@@ -83,6 +95,47 @@ export default function ReceptionDashboard() {
         <Link href="/reception/opd" className="flex items-center gap-2 h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13.5px] font-bold shadow-sm active:scale-[0.98] transition">
           <UserPlus className="h-4 w-4" /> Register walk-in
         </Link>
+      </div>
+
+      {/* M13.4 — OPD walk-in journey pipeline.
+          Six chevron-linked stages mirroring how a walk-in patient moves through
+          the hospital today: Waiting room → Vitals → Consulting → Pharmacy →
+          Billing → Done. Each tile is a direct nav button to the right surface. */}
+      <div className={cn(CARD, "p-4")}>
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-blue-600" />OPD walk-in journey
+          </h2>
+          <p className="text-[11px] text-slate-500">
+            {todayPatients.length} patients today · avg wait <span className="font-bold text-slate-700">{avgWait}m</span>
+          </p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 items-stretch">
+          {[
+            { label: 'Waiting',    sub: 'In waiting room',  count: pipelineCounts.waiting,    color: 'border-amber-200 bg-amber-50',     icon: Users,        fg: 'text-amber-700',    href: '/reception/opd',     cta: 'Send to vitals' },
+            { label: 'Vitals',     sub: 'With nurse',       count: pipelineCounts.vitals,     color: 'border-orange-200 bg-orange-50',   icon: Activity,     fg: 'text-orange-700',   href: '/reception/opd',     cta: 'Track' },
+            { label: 'Consulting', sub: 'With doctor',      count: pipelineCounts.consulting, color: 'border-violet-200 bg-violet-50',   icon: Stethoscope,  fg: 'text-violet-700',   href: '/reception/queue',   cta: 'Display board' },
+            { label: 'Pharmacy',   sub: 'Collecting Rx',    count: pipelineCounts.pharmacy,   color: 'border-pink-200 bg-pink-50',       icon: Pill,         fg: 'text-pink-700',     href: '/reception/opd',     cta: 'Track' },
+            { label: 'Billing',    sub: 'Settling fees',    count: pipelineCounts.billing,    color: 'border-rose-200 bg-rose-50',       icon: CreditCard,   fg: 'text-rose-700',     href: '/reception/billing', cta: 'Collect' },
+            { label: 'Done',       sub: 'Completed today',  count: pipelineCounts.done,       color: 'border-emerald-200 bg-emerald-50', icon: CheckCircle2, fg: 'text-emerald-700',  href: '/reception/patients',cta: 'Review' },
+          ].map((s, i, arr) => (
+            <Link key={s.label} href={s.href}
+              className={cn("relative rounded-xl border p-3 hover:shadow-md transition flex flex-col gap-1 cursor-pointer group", s.color)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <s.icon className={cn("h-4 w-4 flex-shrink-0", s.fg)} />
+                  <p className={cn("text-xs font-bold truncate", s.fg)}>{s.label}</p>
+                </div>
+                {i < arr.length - 1 && <ChevronRight className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
+              </div>
+              <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
+              <p className={cn("text-[10px] font-bold mt-1 inline-flex items-center gap-0.5 group-hover:underline", s.fg)}>
+                {s.cta} <ArrowRight className="h-2.5 w-2.5" />
+              </p>
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* KPI tiles */}
