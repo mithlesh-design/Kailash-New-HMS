@@ -57,7 +57,7 @@ const UNIVERSAL_ROUTES: { label: string; href: string; icon: React.ElementType; 
   { label: "Pharmacy queue",       href: "/pharmacy/queue",       icon: Pill,        roles: ["pharmacy", "admin"] },
   { label: "Radiology inbox",      href: "/radiology/inbox",      icon: ScanLine,    roles: ["radiology", "admin"] },
   { label: "ER triage",            href: "/emergency/triage",     icon: Activity,    roles: ["emergency", "admin"] },
-  { label: "Staff directory",      href: "/admin/users",          icon: Users,       roles: ["admin"] },
+  { label: "Staff directory",      href: "/admin/users",          icon: Users,       roles: ["admin", "doctor", "nurse", "pharmacy", "lab", "radiology", "emergency", "reception", "bed_manager", "discharge", "ot", "billing", "insurance", "quality", "audit_officer"] },
   { label: "Reception OPD",        href: "/reception/opd",        icon: User,        roles: ["reception", "admin"] },
   { label: "Discharge desk",       href: "/discharge/dashboard",  icon: LayoutDashboard, roles: ["discharge", "admin"] },
   { label: "OT live",              href: "/ot/dashboard",         icon: Activity,    roles: ["ot", "admin"] },

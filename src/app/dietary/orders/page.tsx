@@ -8,6 +8,7 @@ import { useDietaryStore } from "@/store/useDietaryStore"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useDialogs } from "@/components/ui/ConfirmDialog"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
@@ -50,8 +51,18 @@ export default function DietaryOrdersPage() {
       })
       if (!proceed) return
     }
+    const order = mealOrders.find(o => o.id === orderId)
     serveMeal(orderId, currentUser?.name ?? 'Dietary Tech')
-    toast.success('Meal marked delivered')
+    if (order) {
+      notifyAndAudit({
+        to: 'nurse', type: 'system', priority: 'low',
+        title: `Meal delivered · ${order.patientName}`,
+        body: `${order.mealType} delivered to ${order.patientName} (${order.bedNumber}). Verify intake at next round.`,
+        patientName: order.patientName,
+        audit: { action: 'dietary_meal_served', resource: 'meal_order', resourceId: orderId, detail: `${order.mealType} delivered to ${order.patientName}`, userName: currentUser?.name ?? 'Dietary Tech' },
+      })
+    }
+    toast.success('Meal delivered · nurse notified')
   }
 
   return (

@@ -8,6 +8,7 @@ import { NeonBadge } from "@/components/ui/neon-badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const PRIORITY_STYLE: Record<string, string> = {
   Urgent: "bg-red-50 border-red-200",
@@ -38,13 +39,54 @@ export default function HousekeepingDashboard() {
   }
 
   const handleVerify = (taskId: string, bedId: string) => {
+    const task = tasks.find(t => t.id === taskId)
     verifyTask(taskId, 'Head Nurse')
     confirmBedReady(bedId)
-    toast.success("Bed verified and marked as Available")
+    notifyAndAuditMany(['bed_manager', 'admin'], {
+      type: 'system', priority: 'medium',
+      title: `Bed ready · ${task?.bedNumber ?? bedId}`,
+      body: `Cleaning verified for Bed ${task?.bedNumber ?? bedId} (${task?.ward ?? '—'}). Bed is available for next admission.`,
+      audit: { action: 'housekeeping_bed_turned', resource: 'housekeeping_task', resourceId: taskId, detail: `Bed ${task?.bedNumber ?? bedId} verified ready`, userName: 'Head Nurse' },
+    })
+    toast.success(`Bed ${task?.bedNumber ?? bedId} verified · admissions notified`)
+  }
+
+  // M12-A — SLA timer: any task pending more than 2h without start.
+  const SLA_MIN = 120
+  const isSlaBreached = (task: typeof tasks[number]) => {
+    if (task.status !== 'Pending' && task.status !== 'In Progress') return false
+    const base = new Date(task.requestedAt).getTime()
+    return (Date.now() - base) > SLA_MIN * 60 * 1000
+  }
+  const slaBreachCount = tasks.filter(isSlaBreached).length
+
+  // Bulk reset: mark all pending tasks for next shift (status stays Pending).
+  function bulkResetForNextShift() {
+    const count = tasks.filter(t => t.status === 'Pending').length
+    if (count === 0) { toast(`No pending tasks to reset`); return }
+    notifyAndAudit({
+      to: 'housekeeping', type: 'system', priority: 'low',
+      title: `Pending tasks rolled to next shift`,
+      body: `${count} pending task${count === 1 ? '' : 's'} carried forward to the next shift.`,
+      audit: { action: 'housekeeping_room_cleaned', resource: 'housekeeping_task', detail: `Bulk-reset ${count} pending tasks`, userName: 'Housekeeping lead' },
+    })
+    toast.success(`${count} task${count === 1 ? '' : 's'} carried to next shift`)
   }
 
   return (
     <div className="space-y-6">
+      {/* M12-A header bar — SLA badge + bulk reset */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Housekeeping</h1>
+          <p className="text-sm text-slate-500 mt-0.5">{tasks.length} task{tasks.length === 1 ? '' : 's'} · {slaBreachCount} SLA breach{slaBreachCount === 1 ? '' : 'es'}</p>
+        </div>
+        <button onClick={bulkResetForNextShift}
+          className="text-[11.5px] font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl cursor-pointer">
+          Carry pending to next shift
+        </button>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
@@ -100,6 +142,9 @@ export default function HousekeepingDashboard() {
                         >
                           {task.status}
                         </NeonBadge>
+                        {isSlaBreached(task) && (
+                          <NeonBadge variant="danger" className="text-[10px]">SLA · {Math.round((Date.now() - new Date(task.requestedAt).getTime()) / 60000)}m</NeonBadge>
+                        )}
                       </div>
                       <p className="text-sm text-slate-600 mb-1">{task.reason} clean</p>
                       <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -111,7 +156,17 @@ export default function HousekeepingDashboard() {
                     <div className="flex gap-2">
                       {task.status === 'Pending' && !task.assignedTo && (
                         <select
-                          onChange={e => { if (e.target.value) { assignTask(task.id, e.target.value); toast.info(`Assigned to ${e.target.value}`) } }}
+                          onChange={e => {
+                            if (!e.target.value) return
+                            assignTask(task.id, e.target.value)
+                            notifyAndAudit({
+                              to: 'housekeeping', type: 'system', priority: 'low',
+                              title: `New cleaning task · Bed ${task.bedNumber}`,
+                              body: `${e.target.value} — please clean Bed ${task.bedNumber} (${task.ward}) — ${task.reason}.`,
+                              audit: { action: 'housekeeping_room_cleaned', resource: 'housekeeping_task', resourceId: task.id, detail: `Assigned to ${e.target.value}`, userName: 'Housekeeping lead' },
+                            })
+                            toast.success(`Assigned to ${e.target.value} · notified`)
+                          }}
                           defaultValue=""
                           className="text-xs rounded-lg border border-slate-200 px-2 py-1.5 text-slate-700 bg-white focus:outline-none cursor-pointer"
                         >
@@ -125,9 +180,16 @@ export default function HousekeepingDashboard() {
                         </Button>
                       )}
                       {task.status === 'In Progress' && (
-                        <Button size="sm" variant="secondary" onClick={() => { completeTask(task.id); toast.info("Marked as done — awaiting verification") }}>
-                          Mark Done
-                        </Button>
+                        <label className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md bg-violet-50 hover:bg-violet-100 text-violet-700 text-[11px] font-semibold cursor-pointer border border-violet-200">
+                          📷 Photo + Done
+                          <input type="file" accept="image/*" capture="environment" className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0]
+                              completeTask(task.id)
+                              toast.success(`Bed ${task.bedNumber} marked done${f ? ' · photo attached' : ''}`)
+                              e.currentTarget.value = ''
+                            }} />
+                        </label>
                       )}
                       {task.status === 'Done' && (
                         <Button size="sm" variant="primary" onClick={() => handleVerify(task.id, task.bedId)}>

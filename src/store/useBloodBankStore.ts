@@ -66,6 +66,9 @@ interface BloodBankState {
   issueReservedUnits: (reqId: string, issuedBy: string) => void
   // Legacy single-unit issue (kept for back-compat with any consumer).
   issueUnit: (unitId: string, patientId: string) => void
+  // M12-B — register a freshly-collected unit and discard expired stock.
+  addUnit: (u: Omit<BloodUnit, 'id' | 'status'>) => string
+  discardUnit: (unitId: string, reason: string) => void
 }
 
 const BLOOD_UNITS: BloodUnit[] = [
@@ -191,6 +194,19 @@ export const useBloodBankStore = create<BloodBankState>()(persist((set, get) => 
   issueUnit: (unitId, patientId) =>
     set((state) => ({
       units: state.units.map((u) => u.id === unitId ? { ...u, status: 'issued', issuedTo: patientId } : u),
+    })),
+
+  addUnit: (input) => {
+    const id = `BU-${Date.now()}`
+    set((state) => ({ units: [{ ...input, id, status: 'available' as const }, ...state.units] }))
+    return id
+  },
+
+  discardUnit: (unitId, reason) =>
+    set((state) => ({
+      // Soft-delete: flip to 'expired' so the trail survives. Note reason in donorId field is wrong;
+      // we keep donorId stable and just flip status — auditors get the reason from the audit row.
+      units: state.units.map((u) => u.id === unitId ? { ...u, status: 'expired' as const } : u),
     })),
 }),
   {

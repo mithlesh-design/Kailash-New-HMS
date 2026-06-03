@@ -1,7 +1,8 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Search, Filter, AlertTriangle, ShieldAlert, ChevronDown, ChevronRight, Download } from "lucide-react"
+import { Search, Filter, AlertTriangle, ShieldAlert, ChevronDown, ChevronRight, Download, Printer } from "lucide-react"
+import { printableHtml } from "@/lib/fileIO"
 import { useAuditStore, moduleOf, severityOf } from "@/store/useAuditStore"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -99,6 +100,29 @@ export default function AuditLog() {
     toast.success(`Exported ${filtered.length} audit entries`)
   }
 
+  // M12-D — printable PDF report
+  function exportPDF() {
+    const rows = filtered.slice(0, 200).map(e => `
+      <tr>
+        <td>${new Date(e.timestamp).toLocaleString('en-IN')}</td>
+        <td>${e.userName ?? e.userId ?? '—'}</td>
+        <td>${e.action}</td>
+        <td>${e.resource ?? '—'}${e.resourceId ? '<br><span style="color:#94a3b8">' + e.resourceId + '</span>' : ''}</td>
+        <td>${e.detail ?? '—'}</td>
+      </tr>`).join('')
+    printableHtml(`Audit trail · ${filtered.length} events`, `
+      <div class="hdr">
+        <div><h1>KAILASH HOSPITAL</h1><h2>Audit Trail Report · ${filtered.length} events</h2></div>
+        <div style="text-align:right"><b>${new Date().toLocaleDateString('en-IN')}</b><br><span style="font-size:11px;color:#64748b">Retention policy: ≥ 7 years</span></div>
+      </div>
+      <table>
+        <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Resource</th><th>Detail</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p style="font-size:11px;color:#64748b">${filtered.length > 200 ? `Showing first 200 of ${filtered.length}. Use JSON export for the full set.` : 'Complete event set.'}</p>
+    `)
+  }
+
   return (
     <div className="space-y-3 pt-3">
       {/* M2 — Compact header + KPI strip in one tight row */}
@@ -113,12 +137,24 @@ export default function AuditLog() {
           </CompactKPIStrip>
         }
         primary={
-          <button onClick={exportJSON}
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg cursor-pointer">
-            <Download className="h-3.5 w-3.5" />Export JSON
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button onClick={exportPDF}
+              className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg cursor-pointer">
+              <Printer className="h-3.5 w-3.5" />Print / PDF
+            </button>
+            <button onClick={exportJSON}
+              className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg cursor-pointer">
+              <Download className="h-3.5 w-3.5" />Export JSON
+            </button>
+          </div>
         }
       />
+
+      {/* Retention banner */}
+      <div className="rounded-xl bg-amber-50/70 ring-1 ring-amber-200 px-3 py-2 text-[11.5px] text-amber-800 flex items-center gap-2">
+        <ShieldAlert className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
+        <span><b>Retention policy:</b> audit events are retained for ≥ 7 years per NABH IMS and DPDP §17. Phase-1 mock uses localStorage; Phase-2 will write through to an append-only audit warehouse.</span>
+      </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
