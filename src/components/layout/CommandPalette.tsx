@@ -44,6 +44,7 @@ type CommandItem = {
 
 // Top-level routes that EVERY role can deep-link to from the palette.
 const UNIVERSAL_ROUTES: { label: string; href: string; icon: React.ElementType; roles?: Role[] | "*" }[] = [
+  { label: "Demo settings · reset data", href: "/admin/settings", icon: ShieldCheck, roles: ["admin"] },
   { label: "Audit trail",       href: "/audit/log",            icon: ShieldCheck, roles: ["admin", "audit_officer"] },
   { label: "Compliance cockpit", href: "/admin/compliance",     icon: ShieldCheck, roles: ["admin", "audit_officer", "quality"] },
   { label: "DISHA / DPDP",       href: "/admin/disha",          icon: ShieldCheck, roles: ["admin", "audit_officer"] },
@@ -129,18 +130,10 @@ export function CommandPalette() {
         id: `patient:${p.id}`,
         kind: "patient",
         label: p.name,
-        detail: `${p.id} · ${p.age}y · ${p.department || p.queueStatus || ''}`,
-        keywords: `${p.id} ${p.phone || ''} ${p.department || ''}`,
+        detail: `${p.id} · ${p.age}y · ${p.department || p.queueStatus || ''} · journey →`,
+        keywords: `${p.id} ${p.phone || ''} ${p.department || ''} journey`,
         icon: User,
-        // Route depends on active role — Reception → patient queue row;
-        // Doctor → OPD/IPD; everyone else → /admin/patients
-        go: () => {
-          if (activeRole === "doctor")        router.push("/doctor/ipd")
-          else if (activeRole === "nurse")    router.push("/nurse/dashboard")
-          else if (activeRole === "reception") router.push("/reception/opd")
-          else if (activeRole === "billing")  router.push("/billing/dashboard")
-          else                                 router.push("/admin/patients")
-        },
+        go: () => router.push(`/journey/${p.id}`),
       })
     }
     for (const ip of inpatients ?? []) {
@@ -150,10 +143,10 @@ export function CommandPalette() {
         id: `inpatient:${ip.patientId}`,
         kind: "patient",
         label: ip.name,
-        detail: `${ip.patientId} · ${ip.ward} ${ip.bed} · ${ip.diagnosis}`,
-        keywords: `${ip.patientId} ${ip.ward} ${ip.bed} ${ip.diagnosis}`,
+        detail: `${ip.patientId} · ${ip.ward} ${ip.bed} · ${ip.diagnosis} · journey →`,
+        keywords: `${ip.patientId} ${ip.ward} ${ip.bed} ${ip.diagnosis} journey`,
         icon: User,
-        go: () => router.push(activeRole === "nurse" ? "/nurse/dashboard" : "/doctor/ipd"),
+        go: () => router.push(`/journey/${ip.patientId}`),
       })
     }
 

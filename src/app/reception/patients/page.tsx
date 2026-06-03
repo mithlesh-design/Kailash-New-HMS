@@ -12,6 +12,7 @@ import { notifyAndAudit } from "@/lib/notifyAndAudit"
 import type { Role } from "@/types/roles"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { PatientJourneyTimeline } from "@/components/clinical/PatientJourneyTimeline"
 
 const STATUS_LABEL: Record<QueueStatus, string> = {
   waiting: 'Waiting', vitals: 'Vitals', consulting: 'Consulting', pharmacy: 'Pharmacy', billing: 'Billing', done: 'Completed',
@@ -297,6 +298,15 @@ function PatientDrawer({ patient: p, visits, appointments, onClose, onAnnounce, 
           {p.familyAccessToken ? (
             <p className="text-[12.5px] text-green-700 flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Family link active{p.dishaConsentGiven ? ' · DISHA consent given' : ''}</p>
           ) : <p className="text-[12.5px] text-slate-400">No family tracking link issued</p>}
+        </Section>
+
+        {/* Cross-department journey timeline */}
+        <Section title="Patient journey">
+          <PatientJourneyTimeline patientId={p.id} patientName={p.name} variant="compact" />
+          <a href={`/journey/${p.id}`} target="_blank" rel="noreferrer"
+            className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 hover:underline">
+            Open full journey →
+          </a>
         </Section>
       </div>
 
