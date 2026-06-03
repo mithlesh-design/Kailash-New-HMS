@@ -35,7 +35,17 @@ export function AdministerModal({ slot, allergies, comorbidities, onClose, onAdm
     onAdminister(note)
     onClose()
   }
-  const hold = () => { onHold(holdReason.trim() || undefined); onClose() }
+  const hold = () => {
+    // M9 — NABH-traceability: holding without a reason is no longer allowed.
+    if (holdReason.trim().length < 3) {
+      // Surface a tiny inline complaint via the input's own validity
+      // hint — see id below — instead of toast.
+      const el = typeof document !== 'undefined' ? document.getElementById('hold-reason') as HTMLInputElement | null : null
+      if (el) { el.focus(); el.setCustomValidity('Hold reason required (≥ 3 chars).'); el.reportValidity(); setTimeout(() => el.setCustomValidity(''), 1500) }
+      return
+    }
+    onHold(holdReason.trim()); onClose()
+  }
 
   return (
     <motion.div

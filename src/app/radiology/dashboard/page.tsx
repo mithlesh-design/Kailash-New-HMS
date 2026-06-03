@@ -13,6 +13,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { type Modality } from "@/lib/radiologyCatalog"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const MOD_LABELS: Record<Modality, string> = {
   XR: "X-Ray", CT: "CT", MRI: "MRI", US: "Ultrasound", MAMMO: "Mammo", NM: "Nuclear",
@@ -93,7 +94,27 @@ export default function RadiologyOverview() {
     const recipient = callbackTo.trim() || "ordering doctor"
     logCallback(id, meName, recipient)
     setCallbackId(null); setCallbackTo("")
+    notifyAndAudit({
+      to: 'doctor', type: 'critical_value', priority: 'critical',
+      title: `Critical imaging callback · ${patient}`,
+      body: `Radiology notified ${recipient} of critical finding for ${patient}.`,
+      patientName: patient,
+      audit: { action: 'radiology_critical_callback', resource: 'radiology_study', resourceId: id, detail: `Callback to ${recipient}`, userName: meName },
+    })
     toast.success(`Callback logged for ${patient} to ${recipient} · SLA closed`)
+  }
+
+  // M9-C — TAT escalation: surface stuck studies in a single page.
+  function escalateRadiologyTat() {
+    const overdue = m.kpis.tatBreaches ?? 0
+    if (overdue === 0) { toast(`No TAT breaches right now`); return }
+    notifyAndAuditMany(['doctor', 'admin'], {
+      type: 'system', priority: 'high',
+      title: `${overdue} radiology TAT breach${overdue === 1 ? '' : 'es'}`,
+      body: `${overdue} stud${overdue === 1 ? 'y is' : 'ies are'} past TAT. Pulling on-call radiologist.`,
+      audit: { action: 'radiology_critical_callback', resource: 'radiology_tat', detail: `${overdue} TAT breaches escalated`, userName: meName },
+    })
+    toast.success(`Escalated ${overdue} TAT breach${overdue === 1 ? '' : 'es'} · admin + doctor notified`)
   }
 
   return (
@@ -120,14 +141,19 @@ export default function RadiologyOverview() {
           { label: "Pending read", value: m.kpis.pendingRead, icon: Hourglass, fg: "text-violet-600", bg: "bg-violet-50" },
           { label: "Pending verify", value: m.kpis.pendingVerify, icon: ShieldCheck, fg: "text-pink-600", bg: "bg-pink-50" },
           { label: "Released today", value: m.kpis.releasedToday, icon: PackageCheck, fg: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "TAT breaches", value: m.kpis.tatBreaches, icon: AlertTriangle, fg: "text-orange-600", bg: "bg-orange-50" },
+          { label: "TAT breaches", value: m.kpis.tatBreaches, icon: AlertTriangle, fg: "text-orange-600", bg: "bg-orange-50", action: escalateRadiologyTat, actionLabel: "Escalate" },
         ].map(s => (
           <div key={s.label} className={cn("rounded-xl p-3 flex items-center gap-3", s.bg)}>
             <div className="p-2 rounded-lg bg-white shadow-sm"><s.icon className={cn("h-4 w-4", s.fg)} /></div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 truncate">{s.label}</p>
               <h3 className="text-xl font-bold text-slate-900">{s.value}</h3>
             </div>
+            {s.action && typeof s.value === 'number' && s.value > 0 ? (
+              <button onClick={s.action} className="text-[10.5px] font-bold text-orange-700 bg-white border border-orange-200 rounded-md px-2 py-1 hover:bg-orange-50 cursor-pointer">
+                {s.actionLabel}
+              </button>
+            ) : null}
           </div>
         ))}
       </div>

@@ -8,6 +8,7 @@ import {
   type Branch, type BranchWard,
 } from "@/store/useAdmissionStore"
 import { cn } from "@/lib/utils"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 function tone(available: number, total: number) {
   if (total === 0) return { bar: 'bg-slate-300', text: 'text-slate-400', chip: 'bg-slate-100 text-slate-500' }
@@ -118,8 +119,16 @@ export default function DoctorBeds() {
           })}
         </div>
         {!isCurrent && (
-          <button onClick={() => toast.success(`Bed request sent to ${selected.location}`, { description: 'The branch admissions desk will confirm shortly.' })}
-            className="mt-4 h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-bold flex items-center gap-2 transition active:scale-[0.98]">
+          <button onClick={() => {
+              notifyAndAuditMany(['bed_manager', 'admin'], {
+                type: 'system', priority: 'high',
+                title: `Transfer request to ${selected.location}`,
+                body: `Doctor is requesting a bed at the ${selected.location} branch. Please coordinate with admissions there.`,
+                audit: { action: 'admission_transfer', resource: 'transfer_request', detail: `Transfer requested to ${selected.location}`, userName: 'Doctor' },
+              })
+              toast.success(`Bed request sent to ${selected.location}`, { description: 'Admissions desk and admin notified.' })
+            }}
+            className="mt-4 h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-bold flex items-center gap-2 transition active:scale-[0.98] cursor-pointer">
             <Phone className="h-4 w-4" /> Request transfer to {selected.location}
           </button>
         )}

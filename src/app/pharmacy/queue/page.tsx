@@ -162,12 +162,43 @@ export default function PharmacyQueue() {
   }
   const adviseOutside = (rx: PharmacyPrescription, m: PharmacyMedicine) => {
     setMedicineSupply(rx.id, m.name, "advised_outside")
-    toast(`${m.name} marked advised-outside — visible to doctor & patient`)
+    notifyAndAudit({
+      to: 'patient', type: 'medicines_ready', priority: 'medium',
+      title: `${m.name} — please buy outside`,
+      body: `Hospital pharmacy is out of stock of ${m.name}. Please source from an outside pharmacy — your e-prescription has the brand details.`,
+      patientName: rx.patientName,
+      audit: { action: 'pharmacy_substituted', resource: 'prescription', resourceId: rx.id, detail: `${m.name} advised-outside (out of stock)`, userName: me.name },
+    })
+    notifyAndAudit({
+      to: 'doctor', type: 'system', priority: 'low',
+      title: `Rx fulfilment routed outside · ${rx.patientName}`,
+      body: `${m.name} not in stock — advised outside. Re-prescribe if you need a specific brand.`,
+      patientName: rx.patientName,
+      audit: { action: 'pharmacy_substituted', resource: 'prescription', resourceId: rx.id, detail: `${m.name} advised-outside`, userName: me.name },
+    })
+    toast(`${m.name} advised-outside — doctor + patient notified`)
   }
   const substitute = (rx: PharmacyPrescription, originalName: string, newName: string) => {
+    // M9-E — NABH MOM traceability. Capture the substitution reason before
+    // committing, and notify the prescribing doctor so a second-pair-of-eyes
+    // sees the change.
+    const reason = typeof window !== 'undefined'
+      ? window.prompt(`Substitution reason for ${originalName} → ${newName}\n(e.g. "Out of stock", "Same-API generic")`)
+      : null
+    if (!reason || reason.trim().length < 3) {
+      toast.error('Substitution reason required (≥ 3 chars)')
+      return
+    }
     substituteMedicine(rx.id, originalName, newName, me.name)
     setSubstitutingKey(null)
-    toast.success(`Substituted ${originalName} → ${newName} for ${rx.patientName}`)
+    notifyAndAudit({
+      to: 'doctor', type: 'system', priority: 'high',
+      title: `Rx substitution · ${rx.patientName}`,
+      body: `${originalName} → ${newName} for ${rx.patientName}. Reason: ${reason.trim()}. Approved by ${me.name}.`,
+      patientName: rx.patientName,
+      audit: { action: 'pharmacy_substituted', resource: 'prescription', resourceId: rx.id, detail: `${originalName} → ${newName} · ${reason.trim()}`, userName: me.name },
+    })
+    toast.success(`Substituted ${originalName} → ${newName} · Doctor notified`)
   }
 
   return (

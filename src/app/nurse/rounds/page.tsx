@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import { VoiceScribeButton } from "@/components/clinical/VoiceScribeButton"
 import { notifyAndAudit } from "@/lib/notifyAndAudit"
+import { ClinicalNotesCard } from "@/components/nurse/ClinicalNotesCard"
 
 // ── Speech Recognition types ──────────────────────────────────────────────────
 type SpeechResultItem = { transcript: string }
@@ -369,6 +370,9 @@ function NotesPanel({ patient }: { patient: PatientBed }) {
           )}
         </div>
       </Card>
+
+      {/* M9-B — NABH clinical-note modules: wound care, fall risk, care plan */}
+      <ClinicalNotesCard patientId={patient.id} patientName={patient.name} />
 
       {/* Rounds History */}
       <div>

@@ -16,6 +16,28 @@ import {
 } from "@/lib/erClinical"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
+
+// Vital range validation — flag values outside plausible human ranges.
+const VITAL_RANGES: Record<string, { min: number; max: number; label: string; unit: string }> = {
+  rr:    { min: 5,  max: 60,  label: 'Respiratory rate', unit: '/min' },
+  spo2:  { min: 50, max: 100, label: 'SpO₂',              unit: '%'    },
+  sbp:   { min: 50, max: 260, label: 'Systolic BP',       unit: 'mmHg' },
+  hr:    { min: 25, max: 250, label: 'Heart rate',        unit: 'bpm'  },
+  temp:  { min: 28, max: 43,  label: 'Temperature',       unit: '°C'   },
+  gcs:   { min: 3,  max: 15,  label: 'GCS',               unit: ''     },
+  capRefill: { min: 0, max: 10, label: 'Cap refill', unit: 's' },
+}
+function validateVitals(v: Vitals): string[] {
+  const errs: string[] = []
+  for (const key of ['rr','spo2','sbp','hr','temp','gcs','capRefill'] as const) {
+    const range = VITAL_RANGES[key]
+    const val = v[key]
+    if (!range || typeof val !== 'number') continue
+    if (val < range.min || val > range.max) errs.push(`${range.label} ${val}${range.unit} outside ${range.min}–${range.max}`)
+  }
+  return errs
+}
 
 const ARRIVAL_LABEL: Record<Arrival, string> = {
   walk_in: 'Walk-in', ambulance: 'Ambulance', transfer: 'Transfer',
@@ -54,20 +76,54 @@ export default function TriagePage() {
   const saveVitals = (p: ERPatient) => {
     const v = getDraft(p.id)
     if (Object.keys(v).length === 0) { toast.error('Record at least one vital'); return }
+    const errs = validateVitals(v)
+    if (errs.length > 0) {
+      toast.error(`Out-of-range vital — review before saving`, { description: errs.join(' · ') })
+      return
+    }
     recordVitals(p.id, v, ER_TRIAGE_NURSE.name)
     setVitalsDraft(prev => { const c = { ...prev }; delete c[p.id]; return c })
-    toast.success(`Vitals recorded for ${p.name}`)
+    // NEWS2 auto-alert: high score pages the on-duty doctor + ER physician.
+    const score = news2(v)
+    if (score.band === 'high' || score.score >= 5) {
+      notifyAndAuditMany(['doctor', 'emergency'], {
+        type: 'critical_value', priority: 'critical',
+        title: `NEWS2 ${score.score} · ${p.name}`,
+        body: `${p.name} (${p.id}) — NEWS2 ${score.score} (${score.band}). ${score.trigger}. Review immediately.`,
+        patientName: p.name,
+        audit: { action: 'er_triage', resource: 'er_patient', resourceId: p.id, detail: `NEWS2 ${score.score} (${score.band}) auto-alert · ${score.trigger}`, userName: ER_TRIAGE_NURSE.name },
+      })
+      toast.warning(`NEWS2 ${score.score} (${score.band}) — Doctor + ER physician notified`, { description: score.trigger })
+    } else {
+      toast.success(`Vitals recorded for ${p.name} · NEWS2 ${score.score}`)
+    }
   }
 
   const applyESI = (p: ERPatient, level: ESIBand, reason: string) => {
     setESI(p.id, level, reason)
     const area = suggestArea(level, p.trauma)
     routeToArea(p.id, area)
+    // Notify the treatment-area staff so they know the patient is incoming.
+    notifyAndAudit({
+      to: level <= 2 ? 'doctor' : 'nurse',
+      type: 'system', priority: level <= 2 ? 'critical' : 'high',
+      title: `Patient routed · ${p.name}`,
+      body: `${p.name} (ESI ${level}) routed to ${TREATMENT_AREAS.find(a => a.code === area)?.label}. ${reason}`,
+      patientName: p.name,
+      audit: { action: 'er_triage', resource: 'er_patient', resourceId: p.id, detail: `ESI ${level} · ${area} · ${reason}`, userName: ER_TRIAGE_NURSE.name },
+    })
     toast.success(`${p.name} triaged ESI ${level} → ${TREATMENT_AREAS.find(a => a.code === area)?.label}`)
   }
 
   const submitRegister = () => {
     if (!reg.name || !reg.chiefComplaint) { toast.error('Name and chief complaint required'); return }
+    // Patient dedup — flag if a patient with the same name arrived in the
+    // last 24h. Don't block (could be coincidence) but require confirmation.
+    const since = Date.now() - 24 * 3600 * 1000
+    const possibleDupe = patients.find(p => p.name.trim().toLowerCase() === reg.name.trim().toLowerCase() && new Date(p.arrivedAt).getTime() >= since)
+    if (possibleDupe && !window.confirm(`A patient named "${reg.name}" is already registered today (${possibleDupe.phase}). Register a separate record?`)) {
+      return
+    }
     const age = parseInt(reg.age, 10) || 0
     registerArrival({
       patientId: `PT-${Date.now().toString().slice(-5)}`,
@@ -77,6 +133,38 @@ export default function TriagePage() {
     toast.success(`${reg.name} registered · awaiting triage`)
     setReg({ name: '', age: '', gender: 'M', arrival: 'walk_in', chiefComplaint: '', trauma: false })
     setShowRegister(false)
+  }
+
+  // ── ER quick orders — physician can place lab / Rx / imaging from the bedside.
+  function placeERLab(p: ERPatient) {
+    notifyAndAudit({
+      to: 'lab', type: 'system', priority: p.esi && p.esi <= 2 ? 'critical' : 'high',
+      title: `STAT lab · ${p.name}`,
+      body: `STAT panel ordered from ER for ${p.name} (${p.chiefComplaint}). Collect at bedside.`,
+      patientName: p.name,
+      audit: { action: 'lab_order', resource: 'er_patient', resourceId: p.id, detail: `STAT lab from ER · ${p.chiefComplaint}`, userName: 'ER Physician' },
+    })
+    toast.success(`STAT lab ordered for ${p.name} · Lab notified`)
+  }
+  function placeERImaging(p: ERPatient) {
+    notifyAndAudit({
+      to: 'radiology', type: 'system', priority: 'high',
+      title: `Imaging · ${p.name}`,
+      body: `Imaging requested from ER for ${p.name} (${p.chiefComplaint}). Acquire as soon as patient is stable.`,
+      patientName: p.name,
+      audit: { action: 'radiology_order', resource: 'er_patient', resourceId: p.id, detail: `Imaging from ER · ${p.chiefComplaint}`, userName: 'ER Physician' },
+    })
+    toast.success(`Imaging ordered for ${p.name} · Radiology notified`)
+  }
+  function placeERRx(p: ERPatient) {
+    notifyAndAudit({
+      to: 'pharmacy', type: 'medicines_ready', priority: 'high',
+      title: `ER Rx · ${p.name}`,
+      body: `ER Rx for ${p.name}: emergent protocol meds. Prep at ward pharmacy counter.`,
+      patientName: p.name,
+      audit: { action: 'prescription_create', resource: 'er_patient', resourceId: p.id, detail: `ER Rx for ${p.name}`, userName: 'ER Physician' },
+    })
+    toast.success(`ER Rx sent for ${p.name} · Pharmacy notified`)
   }
 
   return (
@@ -155,6 +243,9 @@ export default function TriagePage() {
             onDraft={(patch) => setDraft(p.id, patch)}
             onSaveVitals={() => saveVitals(p)}
             onApplyESI={(level, reason) => applyESI(p, level, reason)}
+            onOrderLab={() => placeERLab(p)}
+            onOrderImaging={() => placeERImaging(p)}
+            onOrderRx={() => placeERRx(p)}
           />
         ))}
       </div>
@@ -170,6 +261,9 @@ function TriageRow(props: {
   onDraft: (patch: Partial<Vitals>) => void
   onSaveVitals: () => void
   onApplyESI: (level: ESIBand, reason: string) => void
+  onOrderLab: () => void
+  onOrderImaging: () => void
+  onOrderRx: () => void
 }) {
   const { p, expanded, draft } = props
   const mins = minsSince(p.arrivedAt)
@@ -224,7 +318,22 @@ function TriageRow(props: {
               <VitalInput label="Temp" unit="°C" step="0.1" icon={Thermometer} value={draft.temp} onChange={v => props.onDraft({ temp: v })} />
               <VitalInput label="GCS" unit="/15" value={draft.gcs} onChange={v => props.onDraft({ gcs: v })} />
             </div>
-            <div className="flex justify-end mt-2">
+            <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mr-1">Quick orders:</span>
+                <button onClick={props.onOrderLab}
+                  className="text-[11px] font-semibold px-2 py-1 rounded-md bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 cursor-pointer">
+                  STAT lab
+                </button>
+                <button onClick={props.onOrderImaging}
+                  className="text-[11px] font-semibold px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 cursor-pointer">
+                  Imaging
+                </button>
+                <button onClick={props.onOrderRx}
+                  className="text-[11px] font-semibold px-2 py-1 rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 cursor-pointer">
+                  ER Rx
+                </button>
+              </div>
               <button onClick={props.onSaveVitals}
                 className="text-[11px] font-bold text-white px-3 py-1.5 rounded-lg cursor-pointer"
                 style={{ background: 'linear-gradient(135deg,#EF4444,#F97316)' }}>

@@ -13,6 +13,7 @@ import { type Priority } from "@/lib/labCatalog"
 import { useAuthStore } from "@/store/useAuthStore"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 
 const SOURCE_STYLE: Record<LabSource, string> = {
   OPD: "bg-blue-50 text-blue-700 ring-blue-200",
@@ -85,13 +86,37 @@ export default function LabInbox() {
 
   const onRejectConfirm = (o: LabOrder, accession: string) => {
     rejectSpecimen(o.id, accession, rejectReason)
+    // M9-D — auto-create the recollect AND notify the ordering doctor +
+    // phlebotomy that a fresh draw is required.
+    recollectOrder(o.id)
+    notifyAndAudit({
+      to: 'doctor', type: 'system', priority: 'high',
+      title: `Lab specimen rejected · ${o.patientName}`,
+      body: `${accession} rejected — reason: ${rejectReason.replace('_', ' ')}. Recollect order auto-created.`,
+      patientName: o.patientName,
+      audit: { action: 'lab_order', resource: 'lab_specimen', resourceId: accession, detail: `Specimen rejected (${rejectReason}); recollect created`, userName: 'Lab' },
+    })
+    notifyAndAudit({
+      to: 'nurse', type: 'system', priority: 'medium',
+      title: `Recollect · ${o.patientName}`,
+      body: `Re-draw needed for ${o.patientName} (${accession} rejected — ${rejectReason.replace('_', ' ')}).`,
+      patientName: o.patientName,
+      audit: { action: 'lab_order', resource: 'lab_specimen', resourceId: accession, detail: `Recollect requested`, userName: 'Lab' },
+    })
     setRejectingAcc(null)
-    toast(`Specimen ${accession} rejected (${rejectReason.replace("_", " ")}) — recollect requested`)
+    toast.success(`Specimen ${accession} rejected · recollect auto-created · doctor + nurse notified`)
   }
 
   const onRecollect = (o: LabOrder) => {
     recollectOrder(o.id)
-    toast.success(`Recollect requested for ${o.patientName}`)
+    notifyAndAudit({
+      to: 'nurse', type: 'system', priority: 'medium',
+      title: `Recollect · ${o.patientName}`,
+      body: `Lab requesting a fresh draw for ${o.patientName}.`,
+      patientName: o.patientName,
+      audit: { action: 'lab_order', resource: 'lab_order', resourceId: o.id, detail: `Recollect requested manually`, userName: 'Lab' },
+    })
+    toast.success(`Recollect requested for ${o.patientName} · nurse notified`)
   }
 
   return (

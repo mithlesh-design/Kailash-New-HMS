@@ -13,6 +13,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { LAB_CATALOG, type Bench } from "@/lib/labCatalog"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const BENCH_LABELS: Record<Bench, string> = {
   HEMA: "Hematology", BIOCHEM: "Biochemistry", IMMUNO: "Immunology",
@@ -121,7 +122,29 @@ export default function LabOverview() {
     const recipient = callbackTo.trim() || "ordering doctor"
     logCallback(testId, meName, recipient)
     setCallbackId(null); setCallbackTo("")
+    notifyAndAudit({
+      to: 'doctor', type: 'critical_value', priority: 'critical',
+      title: `Critical value callback · ${patient}`,
+      body: `Lab notified ${recipient} of critical result for ${patient}. Read-receipt at bedside.`,
+      patientName: patient,
+      audit: { action: 'lab_critical_callback', resource: 'lab_test', resourceId: testId, detail: `Callback to ${recipient}`, userName: meName },
+    })
     toast.success(`Callback logged for ${patient} to ${recipient} · SLA closed`)
+  }
+
+  // M9-D — TAT escalation: when TAT breach count > 0, fire a single
+  // high-priority notification to the doctor + admin + lab supervisor so
+  // someone owns the cleanup.
+  function escalateTatBreaches() {
+    const overdue = m.kpis.tatBreaches ?? 0
+    if (overdue === 0) { toast(`No TAT breaches right now`); return }
+    notifyAndAuditMany(['doctor', 'admin'], {
+      type: 'system', priority: 'high',
+      title: `${overdue} lab TAT breach${overdue === 1 ? '' : 'es'}`,
+      body: `Lab has ${overdue} test${overdue === 1 ? '' : 's'} past TAT. Pulling on-call lab tech to clear.`,
+      audit: { action: 'lab_critical_callback', resource: 'lab_tat', detail: `${overdue} TAT breaches escalated`, userName: meName },
+    })
+    toast.success(`Escalated ${overdue} TAT breach${overdue === 1 ? '' : 'es'} · admin + doctor notified`)
   }
 
   return (
@@ -146,11 +169,16 @@ export default function LabOverview() {
           { label: "Pending verification", value: m.kpis.pendingVerify, icon: Hourglass, fg: "text-violet-600", bg: "bg-violet-50" },
           { label: "Critical pending callback", value: m.kpis.critPending, icon: Phone, fg: "text-red-600", bg: "bg-red-50" },
           { label: "Released today", value: m.kpis.releasedToday, icon: PackageCheck, fg: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "TAT breaches", value: m.kpis.tatBreaches, icon: AlertTriangle, fg: "text-orange-600", bg: "bg-orange-50" },
+          { label: "TAT breaches", value: m.kpis.tatBreaches, icon: AlertTriangle, fg: "text-orange-600", bg: "bg-orange-50", action: escalateTatBreaches, actionLabel: "Escalate" },
         ].map(s => (
           <div key={s.label} className={cn("rounded-xl p-3 flex items-center gap-3", s.bg)}>
             <div className="p-2 rounded-lg bg-white shadow-sm"><s.icon className={cn("h-4 w-4", s.fg)} /></div>
-            <div className="min-w-0"><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 truncate">{s.label}</p><h3 className="text-xl font-bold text-slate-900">{s.value}</h3></div>
+            <div className="min-w-0 flex-1"><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 truncate">{s.label}</p><h3 className="text-xl font-bold text-slate-900">{s.value}</h3></div>
+            {s.action && typeof s.value === 'number' && s.value > 0 ? (
+              <button onClick={s.action} className="text-[10.5px] font-bold text-orange-700 bg-white border border-orange-200 rounded-md px-2 py-1 hover:bg-orange-50 cursor-pointer">
+                {s.actionLabel}
+              </button>
+            ) : null}
           </div>
         ))}
       </div>
