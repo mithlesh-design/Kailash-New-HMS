@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import type { Bed as BedType } from "@/store/useAdmissionStore"
+import { BedHoverCard } from "@/components/admission/BedHoverCard"
+import { BedFreeingForecast } from "@/components/admission/BedFreeingForecast"
 
 const WARD_ORDER = ['ICU', 'General Ward', 'Semi-Private', 'Private Room', 'Day Care']
 
@@ -48,8 +50,9 @@ function BedCard({ bed }: { bed: BedType }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-      className={cn("rounded-xl border p-3.5 flex flex-col gap-2", style.bg, style.border)}
+      className={cn("group relative rounded-xl border p-3.5 flex flex-col gap-2", style.bg, style.border)}
     >
+      <BedHoverCard bed={bed} side="right" />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-lg font-bold text-slate-900">{bed.bedNumber}</span>
@@ -144,6 +147,10 @@ export default function BedBoardPage() {
 
   return (
     <div className="space-y-6">
+      {/* M13.5 — AI bed-freeing forecast at the top so the bed manager sees
+          incoming capacity before drilling into the per-ward grid below. */}
+      <BedFreeingForecast />
+
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         <div className="bg-white border rounded-xl p-4 text-center">

@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Bed, Clock, AlertCircle, CheckCircle2, X, ChevronRight, Sparkles, FileText, FlaskConical, ScanLine, Pill, ShieldAlert, Info, UserCheck } from "lucide-react"
+import { Bed, Clock, AlertCircle, CheckCircle2, X, ChevronRight, Sparkles, FileText, FlaskConical, ScanLine, Pill, ShieldAlert, Info, UserCheck, BedDouble, Hourglass, Activity, Wrench, ArrowRight } from "lucide-react"
 import { useAdmissionStore, type AdmissionRequest } from "@/store/useAdmissionStore"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,8 @@ import { toast } from "sonner"
 import Link from "next/link"
 import { OnShiftTeam } from "@/components/clinical/OnShiftTeam"
 import { notifyAndAudit } from "@/lib/notifyAndAudit"
+import { BedFreeingForecast } from "@/components/admission/BedFreeingForecast"
+import { BedHoverCard } from "@/components/admission/BedHoverCard"
 
 const TRIAGE_COLORS: Record<string, string> = {
   Critical: "bg-red-50 border-red-200 text-red-700",
@@ -147,8 +149,62 @@ export default function AdmissionDashboard() {
     return mins < 60 ? `${mins}m ago` : `${Math.floor(mins / 60)}h ${mins % 60}m ago`
   }
 
+  // M13.5 — pipeline strip counts. Reservations / cleaning beds frame
+  // the "incoming capacity" half of the bed-manager's mental model;
+  // admission pipeline (pending/assigned/admitted today) frames the demand half.
+  const assignedReqs = admissionRequests.filter(r => r.status === 'Assigned').length
+  const admittedTodayCount = admissionRequests.filter(r => {
+    if (r.status !== 'Admitted') return false
+    return true   // approximate — could be tightened with a timestamp if needed
+  }).length
+
   return (
     <div className="space-y-6">
+      {/* M13.5 — Admission pipeline strip.
+          Six chevron-linked stages mirroring the demand → supply cycle:
+          Pending request → Assigned → Admitted → Occupied → Cleaning → Available. */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <BedDouble className="h-4 w-4 text-indigo-600" />Admission demand & bed capacity
+          </h2>
+          <p className="text-[11px] text-slate-500">
+            Pending → Assigned → Admitted → Occupied → Cleaning → Available
+          </p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 items-stretch">
+          {[
+            { label: 'Pending',   sub: 'Awaiting bed',     count: pending.length,        color: 'border-orange-200 bg-orange-50',   icon: Hourglass,    fg: 'text-orange-700',   href: '/admission/dashboard', cta: 'Assign' },
+            { label: 'Assigned',  sub: 'Awaiting arrival', count: assignedReqs,          color: 'border-amber-200 bg-amber-50',     icon: UserCheck,    fg: 'text-amber-700',    href: '/admission/dashboard', cta: 'Mark arrived' },
+            { label: 'Admitted',  sub: 'Today',            count: admittedTodayCount,    color: 'border-blue-200 bg-blue-50',       icon: CheckCircle2, fg: 'text-blue-700',     href: '/admission/dashboard', cta: 'Review' },
+            { label: 'Occupied',  sub: 'On wards',         count: occupiedBeds.length,   color: 'border-violet-200 bg-violet-50',   icon: Bed,          fg: 'text-violet-700',   href: '/admission/beds',      cta: 'Bed board' },
+            { label: 'Cleaning',  sub: 'Turning over',     count: cleaningBeds.length,   color: 'border-yellow-200 bg-yellow-50',   icon: Wrench,       fg: 'text-yellow-700',   href: '/admission/beds',      cta: 'Track' },
+            { label: 'Available', sub: 'Ready now',        count: availableBeds.length,  color: 'border-emerald-200 bg-emerald-50', icon: Activity,     fg: 'text-emerald-700',  href: '/admission/beds',      cta: 'Allocate' },
+          ].map((s, i, arr) => (
+            <Link key={s.label} href={s.href}
+              className={cn("relative rounded-xl border p-3 hover:shadow-md transition flex flex-col gap-1 cursor-pointer group", s.color)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <s.icon className={cn("h-4 w-4 flex-shrink-0", s.fg)} />
+                  <p className={cn("text-xs font-bold truncate", s.fg)}>{s.label}</p>
+                </div>
+                {i < arr.length - 1 && <ChevronRight className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
+              </div>
+              <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
+              <p className={cn("text-[10px] font-bold mt-1 inline-flex items-center gap-0.5 group-hover:underline", s.fg)}>
+                {s.cta} <ArrowRight className="h-2.5 w-2.5" />
+              </p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* M13.5 — AI bed-freeing forecast — short-term (next 24h) per-ward
+          prediction so the bed manager can see incoming supply before drilling
+          into the pending requests below. */}
+      <BedFreeingForecast />
+
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
