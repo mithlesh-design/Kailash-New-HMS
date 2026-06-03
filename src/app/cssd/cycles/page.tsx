@@ -10,6 +10,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { useCSSDStore, type SterilizationMethod } from "@/store/useCSSDStore"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
 
 const METHOD_TINT: Record<SterilizationMethod, string> = {
   Autoclave: 'bg-rose-50 text-rose-700 ring-rose-200',
@@ -68,16 +69,42 @@ export default function CSSDCyclesPage() {
   }
 
   const onPass = (cycleId: string) => {
+    const cyc = cycles.find(c => c.id === cycleId)
     completeCycle(cycleId, { biPass: true, chemPass: true })
-    toast.success('Cycle passed · instruments returned to ready')
+    if (cyc) {
+      notifyAndAudit({
+        to: 'ot', type: 'system', priority: 'medium',
+        title: `Sterilisation cycle passed · ${cyc.batchNumber}`,
+        body: `${cyc.method} cycle ${cyc.batchNumber} passed. ${cyc.instrumentIds.length} instrument set(s) ready for OT.`,
+        audit: { action: 'cssd_cycle_passed', resource: 'sterilization_cycle', resourceId: cyc.batchNumber, detail: `Cycle passed · OT notified`, userName: 'CSSD' },
+      })
+    }
+    toast.success('Cycle passed · OT notified · instruments returned to ready')
   }
   const onFail = (cycleId: string, reason: 'BI' | 'CHEM') => {
+    const cyc = cycles.find(c => c.id === cycleId)
     if (reason === 'BI') {
       completeCycle(cycleId, { biPass: false, chemPass: true, note: 'Biological indicator negative' })
-      toast.error('Cycle failed — BI negative · instruments re-queued')
+      if (cyc) {
+        notifyAndAuditMany(['admin', 'quality', 'ot'], {
+          type: 'system', priority: 'critical',
+          title: `CSSD batch FAILED · ${cyc.batchNumber}`,
+          body: `${cyc.method} cycle FAILED on BI · ${cyc.instrumentIds.length} instrument set(s) recalled. Re-process required.`,
+          audit: { action: 'cssd_cycle_failed', resource: 'sterilization_cycle', resourceId: cyc.batchNumber, detail: `BI negative — batch recalled`, userName: 'CSSD' },
+        })
+      }
+      toast.error('Cycle failed — BI negative · Admin/Quality/OT notified')
     } else {
       completeCycle(cycleId, { biPass: true, chemPass: false, note: 'Chemical indicator failure' })
-      toast.error('Cycle failed — chemical indicator · instruments re-queued')
+      if (cyc) {
+        notifyAndAuditMany(['admin', 'ot'], {
+          type: 'system', priority: 'high',
+          title: `CSSD batch FAILED · ${cyc.batchNumber}`,
+          body: `${cyc.method} cycle FAILED on chemical indicator · instruments re-queued.`,
+          audit: { action: 'cssd_cycle_failed', resource: 'sterilization_cycle', resourceId: cyc.batchNumber, detail: `Chemical indicator failure`, userName: 'CSSD' },
+        })
+      }
+      toast.error('Cycle failed — chemical indicator · Admin + OT notified')
     }
   }
   const onDelayedBI = (cycleId: string, pass: boolean) => {
