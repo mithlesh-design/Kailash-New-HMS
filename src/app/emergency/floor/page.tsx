@@ -136,7 +136,8 @@ export default function ERFloor() {
               onDraft={(patch) => setDraft(prev => ({ ...prev, [p.id]: { ...(prev[p.id] ?? {}), ...patch } }))}
               onSaveVitals={() => {
                 const v = draft[p.id]
-                if (!v || Object.keys(v).length === 0) { toast.error('Record at least one vital'); return }
+                // M13.10 — vitals optional on the floor too. Empty save = no-op.
+                if (!v || Object.keys(v).length === 0) { return }
                 recordVitals(p.id, v, me.name)
                 setDraft(prev => { const c = { ...prev }; delete c[p.id]; return c })
                 toast.success('Vitals updated')

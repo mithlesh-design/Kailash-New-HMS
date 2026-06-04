@@ -82,7 +82,11 @@ export default function TriagePage() {
 
   const saveVitals = (p: ERPatient) => {
     const v = getDraft(p.id)
-    if (Object.keys(v).length === 0) { toast.error('Record at least one vital'); return }
+    // M13.10 — vitals are OPTIONAL throughout the ER flow. ESI + treatment-
+    // area routing + disposition can all be applied without them. The Save
+    // button is here for convenience; clicking it with nothing entered is a
+    // silent no-op rather than an error.
+    if (Object.keys(v).length === 0) { return }
     const errs = validateVitals(v)
     if (errs.length > 0) {
       toast.error(`Out-of-range vital — review before saving`, { description: errs.join(' · ') })
