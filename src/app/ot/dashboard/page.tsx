@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useOTStore, type OTProcedure } from "@/store/useOTStore"
-import { Clock, CheckCircle, AlertTriangle, ChevronRight, Activity, Pill, Droplets, FlaskConical, ScanLine, Droplet, ShieldAlert, FileText, Plus, Send, ChevronDown, ChevronUp } from "lucide-react"
+import { Clock, CheckCircle, AlertTriangle, ChevronRight, Activity, Pill, Droplets, FlaskConical, ScanLine, Droplet, ShieldAlert, FileText, Plus, Send, ChevronDown, ChevronUp, Calendar, Stethoscope, ClipboardCheck, Heart, Wind, LogOut, ArrowRight, Sparkles } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import { cn } from "@/lib/utils"
@@ -215,7 +215,24 @@ export default function OTDashboard() {
   const inProgress = procedures.filter(p => p.status === 'In Progress')
   const preOp = procedures.filter(p => p.status === 'Pre-Op')
   const scheduled = procedures.filter(p => p.status === 'Scheduled')
+  const recovery = procedures.filter(p => p.status === 'Recovery')
   const completed = procedures.filter(p => p.status === 'Completed')
+
+  // M13.8 — PAC (Pre-Anesthesia Clinic) completion is derived. A scheduled
+  // case is PAC-cleared when ASA + Mallampati + NPO-since are all set on the
+  // anesthesia block. Without these, the case can't safely advance to Pre-Op.
+  const isPACDone = (p: OTProcedure) =>
+    !!p.anesthesia?.asa && !!p.anesthesia?.mallampati && !!p.anesthesia?.npoSince
+  const pacPending = scheduled.filter(p => !isPACDone(p)).length
+  const pacDone = scheduled.filter(isPACDone).length
+
+  // Sign-In / Time-Out / Sign-Out completion counts for the WHO checklist.
+  // (Used in the pipeline strip's WHO sub-tile.)
+  const whoCompleted = (p: OTProcedure, phase: 'sign_in' | 'time_out' | 'sign_out') =>
+    (p.whoChecklist ?? []).filter(i => i.phase === phase).every(i => i.checked)
+  const whoOpen = procedures.filter(p =>
+    p.status === 'Pre-Op' && !whoCompleted(p, 'sign_in')
+  ).length
 
   const getElapsed = (startedAt?: string) =>
     startedAt ? Math.floor((now - new Date(startedAt).getTime()) / 60000) : 0
@@ -245,6 +262,106 @@ export default function OTDashboard() {
             </button>
           </Link>
         </motion.div>
+      )}
+
+      {/* M13.8 — OT patient journey pipeline.
+          Seven stages mirror the WHO surgical safety pathway:
+          Booked → PAC cleared → Pre-op holding → Sign-In/WHO → In progress →
+          Sign-Out → Recovery (PACU) → Ward transferred. Each tile shows the
+          live count + the action it gates. */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-purple-600" />OT patient journey
+          </h2>
+          <p className="text-[11px] text-slate-500">
+            Booking → PAC → Pre-op → WHO Sign-In → In progress → Sign-Out → Recovery → Ward
+          </p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 items-stretch">
+          {[
+            { label: 'Scheduled',    sub: `${pacPending} need PAC`,  count: scheduled.length, color: 'border-amber-200 bg-amber-50',     icon: Calendar,         fg: 'text-amber-700',     href: '/ot/schedule',  cta: 'View schedule' },
+            { label: 'PAC done',     sub: 'ASA · M · NPO set',       count: pacDone,          color: 'border-blue-200 bg-blue-50',       icon: Stethoscope,      fg: 'text-blue-700',      href: '/ot/checklist', cta: 'Open PAC' },
+            { label: 'Pre-op',       sub: `${whoOpen} WHO pending`,  count: preOp.length,     color: 'border-violet-200 bg-violet-50',   icon: ClipboardCheck,   fg: 'text-violet-700',    href: '/ot/checklist', cta: 'Sign-In' },
+            { label: 'In progress',  sub: 'Time-Out → Sign-Out',     count: inProgress.length,color: 'border-pink-200 bg-pink-50',       icon: Heart,            fg: 'text-pink-700',      href: '/ot/checklist', cta: 'Track' },
+            { label: 'Recovery',     sub: 'PACU monitoring',         count: recovery.length,  color: 'border-cyan-200 bg-cyan-50',       icon: Wind,             fg: 'text-cyan-700',      href: '/ot/checklist', cta: 'Debrief' },
+            { label: 'Completed',    sub: 'Ward transfer',           count: completed.length, color: 'border-emerald-200 bg-emerald-50', icon: LogOut,           fg: 'text-emerald-700',   href: '/ot/dashboard', cta: 'Archive' },
+            { label: 'Critical',     sub: 'Open checklist',          count: criticalIncomplete.length, color: criticalIncomplete.length > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: AlertTriangle, fg: criticalIncomplete.length > 0 ? 'text-red-700' : 'text-slate-400', href: '/ot/checklist', cta: 'Resolve' },
+          ].map((s, i, arr) => (
+            <Link key={s.label} href={s.href}
+              className={cn("relative rounded-xl border p-3 hover:shadow-md transition flex flex-col gap-1 cursor-pointer group", s.color)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <s.icon className={cn("h-4 w-4 flex-shrink-0", s.fg)} />
+                  <p className={cn("text-xs font-bold truncate", s.fg)}>{s.label}</p>
+                </div>
+                {i < arr.length - 1 && <ChevronRight className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
+              </div>
+              <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
+              <p className={cn("text-[10px] font-bold mt-1 inline-flex items-center gap-0.5 group-hover:underline", s.fg)}>
+                {s.cta} <ArrowRight className="h-2.5 w-2.5" />
+              </p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* M13.8 — PAC status strip for today's scheduled cases.
+          A scheduled case can't safely advance to Pre-Op without an ASA grade,
+          Mallampati airway grade, and NPO-since time on file. This strip
+          surfaces every case in Scheduled state with PAC completion status
+          and a one-click link into the checklist page to fix it. */}
+      {scheduled.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-blue-600" />Pre-Anesthesia Clinic (PAC) status
+            </h2>
+            <p className="text-[11px] text-slate-500">
+              <b className="text-blue-700">{pacDone}</b> ready · <b className="text-amber-700">{pacPending}</b> needs anesthesia review
+            </p>
+          </div>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {scheduled.map(p => {
+              const done = isPACDone(p)
+              const a = p.anesthesia
+              return (
+                <Link key={p.id} href="/ot/checklist"
+                  className={cn("rounded-lg border p-3 flex items-start gap-2.5 hover:shadow-md transition cursor-pointer group",
+                    done ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50')}>
+                  <div className={cn("h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 border",
+                    done ? 'border-emerald-300 bg-white text-emerald-600' : 'border-amber-300 bg-white text-amber-600')}>
+                    {done ? <CheckCircle className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-900 truncate">
+                      {p.patientName} <span className="text-[11px] font-bold text-slate-400">{p.patientId} · {p.patientAge}y</span>
+                    </p>
+                    <p className="text-xs text-slate-600 truncate">
+                      {p.procedureName} · {p.scheduledTime} · {p.otRoom}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap text-[11px]">
+                      <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.asa ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-400')}>
+                        ASA {a?.asa ?? '—'}
+                      </span>
+                      <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.mallampati ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white border-slate-200 text-slate-400')}>
+                        M {a?.mallampati ?? '—'}
+                      </span>
+                      <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.npoSince ? 'bg-cyan-50 border-cyan-200 text-cyan-700' : 'bg-white border-slate-200 text-slate-400')}>
+                        NPO {a?.npoSince ? new Date(a.npoSince).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                      </span>
+                      <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.technique ? 'bg-pink-50 border-pink-200 text-pink-700' : 'bg-white border-slate-200 text-slate-400')}>
+                        {a?.technique ?? 'technique?'}
+                      </span>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-3 w-3 text-slate-400 group-hover:text-slate-700 flex-shrink-0 mt-1" />
+                </Link>
+              )
+            })}
+          </ul>
+        </div>
       )}
 
       {/* M4.5 — Live OT team */}
