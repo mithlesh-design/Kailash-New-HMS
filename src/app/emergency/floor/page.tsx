@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import {
   Activity, Bed, ChevronDown, ChevronRight, Hand, Heart, Thermometer, Wind,
   ShieldAlert, AlertTriangle, Send, Clock, FileWarning, CheckCircle2,
+  Zap, Droplet, FlaskConical, ScanLine, Pill, Stethoscope,
 } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { MLCModal } from "@/components/emergency/MLCModal"
@@ -17,6 +18,9 @@ import {
   type Vitals, type TreatmentArea,
 } from "@/lib/erClinical"
 import { useAuthStore } from "@/store/useAuthStore"
+import { useLabOrdersStore } from "@/store/useLabOrdersStore"
+import { useRadiologyStudiesStore } from "@/store/useRadiologyStudiesStore"
+import { notifyAndAudit } from "@/lib/notifyAndAudit"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -40,6 +44,10 @@ export default function ERFloor() {
   const claim = useERStore(s => s.claim)
   const setDisposition = useERStore(s => s.setDisposition)
   const dispose = useERStore(s => s.dispose)
+  const addLabOrder = useLabOrdersStore(s => s.addOrder)
+  const addRadOrder = useRadiologyStudiesStore(s => s.addOrder)
+  const labOrders = useLabOrdersStore(s => s.orders)
+  const radStudies = useRadiologyStudiesStore(s => s.studies)
 
   const currentUser = useAuthStore(s => s.currentUser)
   const me = { id: currentUser?.id ?? ER_VIKRAM.id, name: currentUser?.name ?? ER_VIKRAM.name }
@@ -110,39 +118,77 @@ export default function ERFloor() {
             <p className="text-sm font-semibold">No patients in {TREATMENT_AREAS.find(a => a.code === area)?.label}</p>
           </div>
         )}
-        {rows.map(p => (
-          <FloorRow key={p.id} p={p} meId={me.id}
-            expanded={expandedId === p.id}
-            draft={draft[p.id] ?? {}}
-            dispoNote={dispoNote[p.id] ?? ''}
-            onToggle={() => setExpandedId(id => id === p.id ? null : p.id)}
-            onClaim={() => { claim(p.id, me); toast.success(`${p.name} on your counter`) }}
-            onDraft={(patch) => setDraft(prev => ({ ...prev, [p.id]: { ...(prev[p.id] ?? {}), ...patch } }))}
-            onSaveVitals={() => {
-              const v = draft[p.id]
-              if (!v || Object.keys(v).length === 0) { toast.error('Record at least one vital'); return }
-              recordVitals(p.id, v, me.name)
-              setDraft(prev => { const c = { ...prev }; delete c[p.id]; return c })
-              toast.success('Vitals updated')
-            }}
-            onDispoNote={(v) => setDispoNote(prev => ({ ...prev, [p.id]: v }))}
-            onDispose={(d) => {
-              // Block disposition on trauma cases without MLC documentation.
-              if (p.trauma && !p.mlc && (d === 'admit_ward' || d === 'admit_icu' || d === 'admit_hdu' || d === 'deceased' || d === 'discharge')) {
-                toast.error('MLC documentation required before disposition on this trauma case')
-                setMlcFor(p)
-                return
-              }
-              setDisposition(p.id, d, dispoNote[p.id])
-              toast.success(`Disposition: ${DISPOSITIONS.find(x => x.value === d)?.label}`)
-            }}
-            onComplete={() => {
-              dispose(p.id)
-              toast.success(`${p.name} discharged from ER`)
-            }}
-            onOpenMLC={() => setMlcFor(p)}
-          />
-        ))}
+        {rows.map(p => {
+          // M13.10 — cross-store investigation lookup: every lab order
+          // + radiology study belonging to this patient. Surfaced inline
+          // in the row so the doctor doesn't have to navigate away.
+          const patientLabOrders = labOrders.filter(o => o.patientId === p.patientId)
+          const patientRadStudies = radStudies.filter(s => s.patientId === p.patientId)
+          return (
+            <FloorRow key={p.id} p={p} meId={me.id}
+              expanded={expandedId === p.id}
+              draft={draft[p.id] ?? {}}
+              dispoNote={dispoNote[p.id] ?? ''}
+              labOrders={patientLabOrders}
+              radStudies={patientRadStudies}
+              onToggle={() => setExpandedId(id => id === p.id ? null : p.id)}
+              onClaim={() => { claim(p.id, me); toast.success(`${p.name} on your counter`) }}
+              onDraft={(patch) => setDraft(prev => ({ ...prev, [p.id]: { ...(prev[p.id] ?? {}), ...patch } }))}
+              onSaveVitals={() => {
+                const v = draft[p.id]
+                if (!v || Object.keys(v).length === 0) { toast.error('Record at least one vital'); return }
+                recordVitals(p.id, v, me.name)
+                setDraft(prev => { const c = { ...prev }; delete c[p.id]; return c })
+                toast.success('Vitals updated')
+              }}
+              onDispoNote={(v) => setDispoNote(prev => ({ ...prev, [p.id]: v }))}
+              onDispose={(d) => {
+                // Block disposition on trauma cases without MLC documentation.
+                if (p.trauma && !p.mlc && (d === 'admit_ward' || d === 'admit_icu' || d === 'admit_hdu' || d === 'deceased' || d === 'discharge')) {
+                  toast.error('MLC documentation required before disposition on this trauma case')
+                  setMlcFor(p)
+                  return
+                }
+                setDisposition(p.id, d, dispoNote[p.id])
+                toast.success(`Disposition: ${DISPOSITIONS.find(x => x.value === d)?.label}`)
+              }}
+              onComplete={() => {
+                dispose(p.id)
+                toast.success(`${p.name} discharged from ER`)
+              }}
+              onOpenMLC={() => setMlcFor(p)}
+              onPlaceLab={(testCode, label) => {
+                addLabOrder({
+                  patientId: p.patientId, patientName: p.name,
+                  source: 'ER', doctorName: me.name, paymentMode: 'Cash',
+                  testCodes: [testCode],
+                  clinicalNotes: `STAT from ER · ${p.chiefComplaint}`,
+                })
+                toast.success(`${label} ordered · Lab notified`)
+              }}
+              onPlaceRad={(code, label) => {
+                addRadOrder({
+                  patientId: p.patientId, patientName: p.name,
+                  source: 'ER', doctorName: me.name, paymentMode: 'Cash',
+                  code,
+                  clinicalQuestion: p.chiefComplaint,
+                  priority: 'STAT',
+                })
+                toast.success(`${label} ordered · Radiology notified`)
+              }}
+              onPlaceProtocol={(label, role) => {
+                notifyAndAudit({
+                  to: role, type: 'system', priority: 'high',
+                  title: `ER protocol order · ${p.name}`,
+                  body: `${label} for ${p.name} (${p.chiefComplaint}). Bedside in ER ${p.bedNumber ?? p.area ?? ''}.`,
+                  patientName: p.name,
+                  audit: { action: role === 'pharmacy' ? 'prescription_create' : 'er_triage', resource: 'er_patient', resourceId: p.id, detail: `ER protocol: ${label}`, userName: me.name },
+                })
+                toast.success(`${label} · ${role} notified`)
+              }}
+            />
+          )
+        })}
       </div>
 
       <AnimatePresence>
@@ -154,11 +200,35 @@ export default function ERFloor() {
   )
 }
 
+// M13.10 — STAT orders the ER doctor can fire from the bedside, mapped
+// to the test codes the lab/radiology stores already understand. Each
+// entry: label, catalog code, kind (lab/imaging/protocol), target role
+// (for protocol orders the role that gets notified — pharmacy, nurse).
+type ERQuickOrder =
+  | { kind: 'lab';      code: string; label: string; icon: React.ElementType }
+  | { kind: 'imaging';  code: string; label: string; icon: React.ElementType }
+  | { kind: 'protocol'; role: 'pharmacy' | 'nurse'; label: string; icon: React.ElementType }
+
+const ER_QUICK_ORDERS: ERQuickOrder[] = [
+  { kind: 'lab',      code: 'CBC',         label: 'STAT CBC',                icon: FlaskConical },
+  { kind: 'lab',      code: 'TROPI',       label: 'STAT Troponin I',         icon: Heart },
+  { kind: 'lab',      code: 'RFT',         label: 'STAT RFT + electrolytes', icon: FlaskConical },
+  { kind: 'lab',      code: 'CRP',         label: 'STAT CRP',                icon: FlaskConical },
+  { kind: 'imaging',  code: 'XR_CHEST',    label: 'STAT chest X-ray',        icon: ScanLine },
+  { kind: 'imaging',  code: 'CT_HEAD',     label: 'STAT CT Head (non-con)',  icon: ScanLine },
+  { kind: 'imaging',  code: 'US_ABDO',     label: 'STAT USG abdomen (FAST)', icon: ScanLine },
+  { kind: 'protocol', role: 'pharmacy', label: 'IV fluids · RL 500 mL',      icon: Droplet },
+  { kind: 'protocol', role: 'nurse',    label: 'O₂ 4L nasal cannula',         icon: Wind },
+  { kind: 'protocol', role: 'pharmacy', label: 'Loading-dose protocol',       icon: Pill },
+]
+
 function FloorRow(props: {
   p: ERPatient; meId: string
   expanded: boolean
   draft: Vitals
   dispoNote: string
+  labOrders: ReturnType<typeof useLabOrdersStore.getState>['orders']
+  radStudies: ReturnType<typeof useRadiologyStudiesStore.getState>['studies']
   onToggle: () => void
   onClaim: () => void
   onDraft: (patch: Partial<Vitals>) => void
@@ -167,6 +237,9 @@ function FloorRow(props: {
   onDispose: (d: Disposition) => void
   onComplete: () => void
   onOpenMLC: () => void
+  onPlaceLab: (testCode: string, label: string) => void
+  onPlaceRad: (code: string, label: string) => void
+  onPlaceProtocol: (label: string, role: 'pharmacy' | 'nurse') => void
 }) {
   const { p, meId, expanded, draft, dispoNote } = props
   const v = latestVitals(p)
@@ -305,6 +378,92 @@ function FloorRow(props: {
                 <button onClick={props.onSaveVitals}
                   className="text-[11px] font-bold text-white px-3 py-1.5 rounded-lg cursor-pointer"
                   style={{ background: 'linear-gradient(135deg,#EF4444,#F97316)' }}>Save vitals</button>
+              </div>
+            </div>
+          )}
+
+          {/* M13.10 — STAT order rail — only when the doctor has claimed
+              the patient. One click → real lab/radiology order in the
+              respective store + audit row, no page navigation. */}
+          {mine && p.phase !== 'awaiting_disposition' && (
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1">
+                <Zap className="h-3 w-3 text-orange-500" />STAT orders
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
+                {ER_QUICK_ORDERS.map((o) => {
+                  const Icon = o.icon
+                  // Already-ordered indicator — don't disable, but show "ordered" badge
+                  // so the doctor can stack orders intentionally if needed.
+                  const already = o.kind === 'lab'
+                    ? props.labOrders.some(lo => lo.tests.some(t => t.code === o.code && t.status !== 'released'))
+                    : o.kind === 'imaging'
+                    ? props.radStudies.some(s => s.code === o.code && s.status !== 'released' && s.status !== 'verified')
+                    : false
+                  return (
+                    <button key={o.label}
+                      onClick={() => {
+                        if (o.kind === 'lab')      props.onPlaceLab(o.code, o.label)
+                        else if (o.kind === 'imaging') props.onPlaceRad(o.code, o.label)
+                        else                       props.onPlaceProtocol(o.label, o.role)
+                      }}
+                      className={cn("flex items-center gap-1.5 h-9 px-2 rounded-lg border text-[11px] font-bold cursor-pointer transition text-left",
+                        o.kind === 'lab' ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
+                        : o.kind === 'imaging' ? 'bg-violet-50 border-violet-200 text-violet-700 hover:bg-violet-100'
+                        : 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100')}>
+                      <Icon className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{o.label}</span>
+                      {already && <span className="ml-auto text-[9px] font-bold text-emerald-600">✓</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* M13.10 — Live investigations panel — surfaces lab + radiology
+              results from this patient's orders without leaving the row. */}
+          {(props.labOrders.length > 0 || props.radStudies.length > 0) && (
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-2 flex items-center gap-1">
+                <Stethoscope className="h-3 w-3 text-blue-500" />Investigations ({props.labOrders.reduce((n, o) => n + o.tests.length, 0) + props.radStudies.length})
+              </p>
+              <div className="space-y-1">
+                {props.labOrders.flatMap(o => o.tests).slice(0, 6).map(t => {
+                  const status = t.status
+                  const crit = t.analytes.some(a => a.flag === 'CH' || a.flag === 'CL')
+                  const flagged = t.analytes.filter(a => a.flag !== 'N').length
+                  return (
+                    <div key={t.id} className="flex items-center gap-2 text-[11px] py-1 px-2 rounded bg-white ring-1 ring-slate-200">
+                      <FlaskConical className="h-2.5 w-2.5 text-amber-600 flex-shrink-0" />
+                      <span className="font-bold text-slate-900 truncate flex-1">{t.name}</span>
+                      <span className={cn("text-[9.5px] font-bold uppercase px-1.5 py-0.5 rounded",
+                        status === 'released'   ? (crit ? 'bg-red-100 text-red-700' : flagged > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')
+                        : status === 'verified' ? 'bg-blue-100 text-blue-700'
+                        : status === 'entered'  ? 'bg-violet-100 text-violet-700'
+                        : status === 'in_progress' || status === 'on_bench' ? 'bg-cyan-100 text-cyan-700'
+                        : 'bg-slate-100 text-slate-500')}>
+                        {status.replace('_', ' ')}
+                      </span>
+                      {crit && <span className="text-[9.5px] font-bold text-red-700">CRITICAL</span>}
+                    </div>
+                  )
+                })}
+                {props.radStudies.slice(0, 4).map(s => (
+                  <div key={s.id} className="flex items-center gap-2 text-[11px] py-1 px-2 rounded bg-white ring-1 ring-slate-200">
+                    <ScanLine className="h-2.5 w-2.5 text-violet-600 flex-shrink-0" />
+                    <span className="font-bold text-slate-900 truncate flex-1">{s.modality} {s.name}</span>
+                    <span className={cn("text-[9.5px] font-bold uppercase px-1.5 py-0.5 rounded",
+                      s.status === 'released' ? 'bg-emerald-100 text-emerald-700'
+                      : s.status === 'verified' ? 'bg-blue-100 text-blue-700'
+                      : s.status === 'reported' ? 'bg-violet-100 text-violet-700'
+                      : s.status === 'acquired' ? 'bg-cyan-100 text-cyan-700'
+                      : s.status === 'acquiring' || s.status === 'arrived' ? 'bg-amber-100 text-amber-700'
+                      : 'bg-slate-100 text-slate-500')}>
+                      {s.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}

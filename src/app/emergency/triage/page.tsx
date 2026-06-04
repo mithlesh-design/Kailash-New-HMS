@@ -62,7 +62,14 @@ export default function TriagePage() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [vitalsDraft, setVitalsDraft] = useState<Record<string, Vitals>>({})
   const [showRegister, setShowRegister] = useState(false)
-  const [reg, setReg] = useState({ name: '', age: '', gender: 'M' as 'M' | 'F' | 'X', arrival: 'walk_in' as Arrival, chiefComplaint: '', trauma: false })
+  const [reg, setReg] = useState({
+    name: '', age: '', gender: 'M' as 'M' | 'F' | 'X',
+    arrival: 'walk_in' as Arrival,
+    chiefComplaint: '', trauma: false,
+    phone: '', attendantName: '', attendantPhone: '',
+    unconscious: false,
+    insurer: '', policyNumber: '',
+  })
 
   const { awaiting, triaged } = useMemo(() => ({
     awaiting: patients.filter(p => p.phase === 'awaiting_triage'),
@@ -116,22 +123,45 @@ export default function TriagePage() {
   }
 
   const submitRegister = () => {
-    if (!reg.name || !reg.chiefComplaint) { toast.error('Name and chief complaint required'); return }
+    // M13.10 — name + chief complaint required UNLESS unconscious case
+    // (NABH ACC.4.1 deferred-registration path).
+    if (!reg.chiefComplaint.trim()) { toast.error('Chief complaint required'); return }
+    if (!reg.unconscious && !reg.name.trim()) { toast.error('Name required (or tick Unconscious for deferred registration)'); return }
+    if (reg.insurer && !reg.insurer.trim()) { toast.error('Enter the insurer name for cashless arrival'); return }
     // Patient dedup — flag if a patient with the same name arrived in the
-    // last 24h. Don't block (could be coincidence) but require confirmation.
-    const since = Date.now() - 24 * 3600 * 1000
-    const possibleDupe = patients.find(p => p.name.trim().toLowerCase() === reg.name.trim().toLowerCase() && new Date(p.arrivedAt).getTime() >= since)
-    if (possibleDupe && !window.confirm(`A patient named "${reg.name}" is already registered today (${possibleDupe.phase}). Register a separate record?`)) {
-      return
+    // last 24h. Skip for unconscious (no name to compare).
+    if (reg.name.trim()) {
+      const since = Date.now() - 24 * 3600 * 1000
+      const possibleDupe = patients.find(p => p.name.trim().toLowerCase() === reg.name.trim().toLowerCase() && new Date(p.arrivedAt).getTime() >= since)
+      if (possibleDupe && !window.confirm(`A patient named "${reg.name}" is already registered today (${possibleDupe.phase}). Register a separate record?`)) {
+        return
+      }
     }
     const age = parseInt(reg.age, 10) || 0
     registerArrival({
-      patientId: `PT-${Date.now().toString().slice(-5)}`,
-      name: reg.name, age, gender: reg.gender,
-      arrival: reg.arrival, chiefComplaint: reg.chiefComplaint, trauma: reg.trauma,
+      name: reg.name.trim() || undefined,
+      age: age || undefined,
+      gender: reg.gender,
+      arrival: reg.arrival, chiefComplaint: reg.chiefComplaint.trim(), trauma: reg.trauma,
+      phone: reg.phone.trim() || undefined,
+      attendantName: reg.attendantName.trim() || undefined,
+      attendantPhone: reg.attendantPhone.trim() || undefined,
+      unconscious: reg.unconscious,
+      insurer: reg.insurer.trim() || undefined,
+      policyNumber: reg.policyNumber.trim() || undefined,
     })
-    toast.success(`${reg.name} registered · awaiting triage`)
-    setReg({ name: '', age: '', gender: 'M', arrival: 'walk_in', chiefComplaint: '', trauma: false })
+    const who = reg.name.trim() || 'Unidentified patient'
+    const extras: string[] = []
+    if (reg.attendantPhone) extras.push('SMS sent to attendant')
+    if (reg.insurer) extras.push(`insurance desk notified (${reg.insurer})`)
+    if (reg.unconscious) extras.push('temp UHID — deferred registration')
+    toast.success(`${who} registered · awaiting triage${extras.length ? ' · ' + extras.join(' · ') : ''}`)
+    setReg({
+      name: '', age: '', gender: 'M', arrival: 'walk_in',
+      chiefComplaint: '', trauma: false,
+      phone: '', attendantName: '', attendantPhone: '',
+      unconscious: false, insurer: '', policyNumber: '',
+    })
     setShowRegister(false)
   }
 
@@ -191,31 +221,90 @@ export default function TriagePage() {
       </div>
 
       {showRegister && (
-        <div className="rounded-xl bg-white ring-1 ring-slate-200 p-3 space-y-2">
-          <div className="grid grid-cols-1 sm:grid-cols-6 gap-2 text-xs">
-            <input value={reg.name} onChange={e => setReg(r => ({ ...r, name: e.target.value }))} placeholder="Name *"
-              className="sm:col-span-2 h-8 px-2 rounded-md border border-slate-200" />
-            <input value={reg.age} onChange={e => setReg(r => ({ ...r, age: e.target.value }))} placeholder="Age" type="number"
-              className="h-8 px-2 rounded-md border border-slate-200" />
-            <select value={reg.gender} onChange={e => setReg(r => ({ ...r, gender: e.target.value as 'M' | 'F' | 'X' }))}
-              className="h-8 px-2 rounded-md border border-slate-200">
-              <option value="M">M</option><option value="F">F</option><option value="X">X</option>
-            </select>
-            <select value={reg.arrival} onChange={e => setReg(r => ({ ...r, arrival: e.target.value as Arrival }))}
-              className="h-8 px-2 rounded-md border border-slate-200">
-              <option value="walk_in">Walk-in</option><option value="ambulance">Ambulance</option><option value="transfer">Transfer</option>
-            </select>
-            <label className="flex items-center gap-1 text-[11px] font-semibold">
-              <input type="checkbox" checked={reg.trauma} onChange={e => setReg(r => ({ ...r, trauma: e.target.checked }))} /> Trauma
+        <div className="rounded-xl bg-white ring-1 ring-slate-200 p-4 space-y-3">
+          {/* M13.10 — Two-mode registration:
+              · Standard: name + age + gender + contact + chief complaint
+              · Unconscious / unidentified: deferred-registration (NABH ACC.4.1)
+                — UHID becomes ER-TEMP-XXXXX, SMS deferred until ID captured. */}
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-600">Register ER arrival</p>
+            <label className={cn("flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-lg border cursor-pointer transition",
+              reg.unconscious ? 'bg-red-50 border-red-300 text-red-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50')}>
+              <input type="checkbox" checked={reg.unconscious}
+                onChange={e => setReg(r => ({ ...r, unconscious: e.target.checked }))}
+                className="h-3 w-3" />
+              Unconscious / unidentified (deferred registration)
             </label>
           </div>
-          <input value={reg.chiefComplaint} onChange={e => setReg(r => ({ ...r, chiefComplaint: e.target.value }))} placeholder="Chief complaint *"
-            className="w-full h-8 px-2 text-xs rounded-md border border-slate-200" />
+
+          {/* Identity row */}
+          <div className="grid grid-cols-1 sm:grid-cols-6 gap-2 text-xs">
+            <input value={reg.name} onChange={e => setReg(r => ({ ...r, name: e.target.value }))}
+              placeholder={reg.unconscious ? 'Name (optional)' : 'Name *'}
+              className="sm:col-span-2 h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200" />
+            <input value={reg.age} onChange={e => setReg(r => ({ ...r, age: e.target.value }))}
+              placeholder="Age" type="number"
+              className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200" />
+            <select value={reg.gender} onChange={e => setReg(r => ({ ...r, gender: e.target.value as 'M' | 'F' | 'X' }))}
+              className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200">
+              <option value="M">Male</option><option value="F">Female</option><option value="X">Other</option>
+            </select>
+            <select value={reg.arrival} onChange={e => setReg(r => ({ ...r, arrival: e.target.value as Arrival }))}
+              className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200">
+              <option value="walk_in">Walk-in</option>
+              <option value="ambulance">108 Ambulance</option>
+              <option value="transfer">Transfer-in</option>
+            </select>
+            <label className="flex items-center gap-1.5 text-[11px] font-semibold px-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
+              <input type="checkbox" checked={reg.trauma} onChange={e => setReg(r => ({ ...r, trauma: e.target.checked }))} className="h-3 w-3" />
+              <span>Trauma</span>
+            </label>
+          </div>
+
+          {/* Contact row — required for SMS-link to attendant */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <input value={reg.phone} onChange={e => setReg(r => ({ ...r, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+              placeholder="Patient phone (10-digit)"
+              className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200" />
+            <input value={reg.attendantName} onChange={e => setReg(r => ({ ...r, attendantName: e.target.value }))}
+              placeholder="Attendant name"
+              className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200" />
+            <input value={reg.attendantPhone} onChange={e => setReg(r => ({ ...r, attendantPhone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+              placeholder="Attendant phone (SMS target)"
+              className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200" />
+          </div>
+
+          {/* Insurance row — optional, fires cashless notify */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <input value={reg.insurer} onChange={e => setReg(r => ({ ...r, insurer: e.target.value }))}
+              placeholder="Insurer (cashless) — leave empty for cash"
+              className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200" />
+            <input value={reg.policyNumber} onChange={e => setReg(r => ({ ...r, policyNumber: e.target.value }))}
+              placeholder="Policy # (optional)"
+              className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200" />
+          </div>
+
+          {/* Chief complaint */}
+          <input value={reg.chiefComplaint} onChange={e => setReg(r => ({ ...r, chiefComplaint: e.target.value }))}
+            placeholder="Chief complaint * — e.g. Sudden chest pain radiating to left arm"
+            className="w-full h-9 px-2.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200" />
+
+          {/* What will happen on save — explicit so the user knows */}
+          <div className="rounded-md bg-slate-50 border border-slate-200 p-2 text-[10.5px] text-slate-600 space-y-0.5">
+            <p className="font-bold text-slate-700">On save, the system will:</p>
+            <p>· Generate {reg.unconscious || !reg.name.trim() ? <span className="font-bold text-amber-700">ER-TEMP-XXXXX</span> : <span className="font-bold text-emerald-700">PT-XXXXX</span>} UHID + create patient profile</p>
+            {reg.attendantPhone && !reg.unconscious && <p>· Send SMS-link to attendant <span className="font-mono">+91 {reg.attendantPhone}</span> for live status updates</p>}
+            {reg.insurer && <p>· Page <b>{reg.insurer}</b> insurance desk for pre-auth (cashless)</p>}
+            <p>· Add to triage queue · ER physician on-call paged if ESI 1/2 on triage</p>
+          </div>
+
           <div className="flex justify-end gap-2">
-            <button onClick={() => setShowRegister(false)} className="text-xs font-semibold text-slate-500 hover:text-slate-700 cursor-pointer">Cancel</button>
+            <button onClick={() => setShowRegister(false)} className="text-xs font-semibold text-slate-500 hover:text-slate-700 cursor-pointer px-3 py-1.5">Cancel</button>
             <button onClick={submitRegister}
-              className="text-xs font-bold text-white px-3 py-1.5 rounded-lg cursor-pointer"
-              style={{ background: 'linear-gradient(135deg,#EF4444,#F97316)' }}>Add to triage queue</button>
+              className="text-xs font-bold text-white px-4 py-1.5 rounded-lg cursor-pointer"
+              style={{ background: 'linear-gradient(135deg,#EF4444,#F97316)' }}>
+              Register · create UHID · send SMS
+            </button>
           </div>
         </div>
       )}

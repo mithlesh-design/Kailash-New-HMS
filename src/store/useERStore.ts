@@ -100,8 +100,20 @@ interface ERState {
   mciActive: boolean
   toggleMCI: () => void
   registerArrival: (input: {
-    patientId: string; name: string; age: number; gender: 'M' | 'F' | 'X'
+    // M13.10 — extended to capture the full arrival registration in one go:
+    // patient identity (or unconscious flag), attendant contact for SMS-link,
+    // cashless insurance flag for immediate insurance-desk handoff.
+    patientId?: string                    // optional — auto-generated if not supplied
+    name?: string                         // optional when unconscious
+    age?: number                          // optional when unconscious / age-unknown
+    gender?: 'M' | 'F' | 'X'
     arrival: Arrival; chiefComplaint: string; trauma?: boolean
+    phone?: string                        // patient's phone (if conscious)
+    attendantName?: string                // accompanying person (parent/spouse/friend)
+    attendantPhone?: string               // attendant's phone — primary SMS target
+    unconscious?: boolean                 // forces ER-TEMP UHID, defers SMS until ID
+    insurer?: string                      // if non-empty → fires cashless notification
+    policyNumber?: string
   }) => string
   recordVitals: (id: string, v: Vitals, by: string) => void
   setESI: (id: string, esi: ESIBand, reason: string) => void
@@ -267,21 +279,94 @@ export const useERStore = create<ERState>()(persist((set, get) => ({
 
   registerArrival: (input) => {
     const id = nextId()
+    const arrivedAt = new Date().toISOString()
+    // M13.10 — UHID strategy:
+    // - Conscious arrival with name → permanent UHID PT-NNNNN
+    // - Unconscious / unidentified → temporary ER-TEMP-NNNNN (becomes UHID
+    //   once attendant arrives or ID is found — NABH ACC.4.1 deferred reg)
+    const isTemp = !!input.unconscious || !input.name
+    const uhid = input.patientId ?? (isTemp
+      ? `ER-TEMP-${Date.now().toString().slice(-5)}`
+      : `PT-${30100 + Math.floor(Math.random() * 800)}`)
+    const displayName = input.name ?? (input.gender === 'F' ? 'Unidentified female' : input.gender === 'M' ? 'Unidentified male' : 'Unidentified patient')
+    const age = input.age ?? 0
+    const gender = input.gender ?? 'X'
+
     set(s => ({
       patients: [{
         id,
-        patientId: input.patientId,
-        name: input.name,
-        age: input.age,
-        gender: input.gender,
+        patientId: uhid,
+        name: displayName,
+        age,
+        gender,
         arrival: input.arrival,
-        arrivedAt: new Date().toISOString(),
+        arrivedAt,
         chiefComplaint: input.chiefComplaint,
         trauma: !!input.trauma,
         vitalsHistory: [],
         phase: 'awaiting_triage',
       }, ...s.patients],
     }))
+
+    // ── M13.10 cross-store side-effects ────────────────────────────────
+    // (a) Create / link a usePatientStore profile so the UHID is visible
+    //     across the hospital (OPD board, lab orders, journey timeline,
+    //     billing, insurance). For temp IDs this is still created — the
+    //     name is updated when ID is captured later.
+    if (!isTemp || input.name) {
+      const existing = usePatientStore.getState().patients.find(p => p.id === uhid)
+      if (!existing) {
+        usePatientStore.getState().addPatient({
+          id: uhid,
+          name: displayName,
+          age,
+          gender: gender === 'M' ? 'Male' : gender === 'F' ? 'Female' : 'Other',
+          phone: input.phone ?? input.attendantPhone ?? '0000000000',
+          symptoms: [input.chiefComplaint],
+          department: 'Emergency',
+          doctor: 'ER on-call',
+          triageLevel: 'High',
+          insurer: input.insurer,
+        })
+      }
+    }
+
+    // (b) SMS-link mock to attendant — primary, since attendant is often
+    //     more reachable than the patient. If unconscious / no attendant
+    //     phone, defer until ID captured.
+    const smsTarget = input.attendantPhone || input.phone
+    if (smsTarget && !isTemp) {
+      useNotificationStore.getState().add({
+        type: 'system', priority: 'medium',
+        title: `Welcome to Kailash · UHID ${uhid}`,
+        body: `${displayName} registered at Emergency · ${new Date(arrivedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}. View live status: kailash.in/p/${uhid.toLowerCase()}. SMS sent to ${smsTarget}.`,
+        targetRole: 'patient',
+        patientName: displayName,
+        patientPhone: smsTarget,
+        channels: ['in_app', 'sms'],
+      })
+    }
+
+    // (c) Cashless walk-in → insurance desk picks up immediately so they
+    //     can start pre-auth in parallel with the doctor evaluation.
+    if (input.insurer) {
+      useNotificationStore.getState().add({
+        type: 'system', priority: 'high',
+        title: `Cashless ER arrival · ${displayName}`,
+        body: `${displayName} (${uhid}) arrived at Emergency as cashless under ${input.insurer}${input.policyNumber ? ` · policy ${input.policyNumber}` : ''}. Pre-auth likely if admission triggered. Chief complaint: ${input.chiefComplaint}.`,
+        targetRole: 'insurance',
+        patientName: displayName,
+        channels: ['in_app'],
+      })
+    }
+
+    // (d) Audit row for the arrival itself.
+    useAuditStore.getState().log({
+      userId: 'ER-DESK', userName: 'ER Registration',
+      action: 'reception_registered',
+      resource: 'er_patient', resourceId: uhid,
+      detail: `${displayName} arrived ${input.arrival}${input.trauma ? ' · trauma' : ''}${isTemp ? ' · deferred-registration (unconscious)' : ''}${input.insurer ? ` · cashless (${input.insurer})` : ''}`,
+    })
     return id
   },
 
