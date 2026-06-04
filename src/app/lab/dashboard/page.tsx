@@ -177,7 +177,7 @@ export default function LabOverview() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 items-stretch">
           {[
             { key: 'phleb', label: 'Phlebotomy', sub: 'Awaiting collection', count: m.kpis.awaiting, color: 'border-amber-200 bg-amber-50', icon: Droplet, fg: 'text-amber-700', href: '/lab/phlebotomy', cta: 'Call patient' },
-            { key: 'bench', label: 'Section bench', sub: 'On bench / in progress', count: m.kpis.onBench, color: 'border-blue-200 bg-blue-50', icon: Microscope, fg: 'text-blue-700', href: '/lab/benches', cta: 'Open benches' },
+            { key: 'analyzer', label: 'Analyzer feed', sub: 'On bench → auto-run', count: m.kpis.onBench, color: 'border-blue-200 bg-blue-50', icon: Microscope, fg: 'text-blue-700', href: '/lab/analyzer-feed', cta: 'Push results' },
             { key: 'verify', label: 'Pathologist', sub: 'Pending verification', count: m.kpis.pendingVerify, color: 'border-violet-200 bg-violet-50', icon: ShieldCheck, fg: 'text-violet-700', href: '/lab/verify', cta: 'Sign off' },
             { key: 'released', label: 'Released', sub: 'Released today', count: m.kpis.releasedToday, color: 'border-emerald-200 bg-emerald-50', icon: Send, fg: 'text-emerald-700', href: '/lab/inbox', cta: 'View inbox' },
             { key: 'critical', label: 'Critical callback', sub: 'Awaiting callback', count: m.kpis.critPending, color: m.kpis.critPending > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: Phone, fg: m.kpis.critPending > 0 ? 'text-red-700' : 'text-slate-400', href: '/lab/dashboard#callback', cta: 'Log callback' },

@@ -146,6 +146,57 @@ function filledAnalytes(code: string, values: Record<string, number | string>): 
   })
 }
 
+// M13.9 — Deterministic plausible value generator for analyzer auto-feed.
+// Uses a stable hash of testId + analyte name + bucket so the same test
+// always pushes the same simulated result (matches how analyzers' QC
+// would behave on real samples — same patient + same prep → same range).
+// 80% within reference / 15% mildly out (H or L) / 5% critical.
+function hashStr(s: string): number {
+  let h = 2166136261
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return Math.abs(h)
+}
+
+export function generateAnalyzerValue(testCode: string, spec: AnalyteSpec, idx: number): number | string {
+  const h = hashStr(`${testCode}:${spec.analyte}:${idx}`)
+  // Bucket selection — drives whether result is normal / mild abnormal / critical.
+  const bucket = h % 20  // 0-19
+  const refLow = spec.refLow ?? 0
+  const refHigh = spec.refHigh ?? (refLow * 2 || 100)
+  const refMid = (refLow + refHigh) / 2
+  const refWidth = (refHigh - refLow) || 1
+
+  // Sub-position within band — adds variety while staying deterministic.
+  const t = ((h >> 5) % 1000) / 1000
+
+  let raw: number
+  if (bucket < 16) {
+    // 80% — normal, scattered across reference range
+    raw = refLow + t * refWidth
+  } else if (bucket < 18 && spec.critLow != null) {
+    // 10% — high range (1-1.5× refHigh) toward critical
+    raw = refHigh + t * (refHigh - refMid) * 0.5
+  } else if (bucket < 19 && spec.critHigh != null) {
+    // 5% — critical-high
+    raw = (spec.critHigh ?? refHigh) + t * Math.max(1, refWidth * 0.2)
+  } else if (spec.critLow != null) {
+    // 5% — critical-low
+    raw = (spec.critLow ?? refLow) - t * Math.max(1, refWidth * 0.2)
+  } else {
+    raw = refLow + t * refWidth
+  }
+
+  // Round per scale of reference — pH-like ranges get 1 decimal,
+  // counts get integers, mg/dL get 1 decimal.
+  if (refHigh >= 1000) return Math.round(raw)
+  if (refHigh >= 100)  return Math.round(raw)
+  if (refHigh >= 10)   return Math.round(raw * 10) / 10
+  return Math.round(raw * 100) / 100
+}
+
 // ─── State ────────────────────────────────────────────────────────────────
 
 interface State {
@@ -172,6 +223,11 @@ interface State {
   verifyTest: (testId: string, verifiedBy: LabTech) => void
   releaseTest: (testId: string) => void
   rejectTest: (testId: string, reason: RejectReason) => void
+  // M13.9 — analyzer auto-feed. Simulates the modern lab workflow where
+  // barcoded samples are loaded onto analyzers and the analyzer pushes
+  // results back over HL7/ASTM (no human typing). Generates realistic
+  // values within reference / occasionally flagged ranges + audit row.
+  analyzerAutoFeed: (testId: string) => void
   microAdvance: (testId: string, patch: Partial<MicrobioResult>) => void
   microRelease: (testId: string, verifiedBy: LabTech) => void
   logCallback: (testId: string, calledBy: string, recipient: string) => void
@@ -662,6 +718,58 @@ export const useLabOrdersStore = create<State>()(persist((set, get) => ({
       // Reflex auto-trigger — any rule matches land on the incharge's reflex queue
       const reflexMatches = evaluateReflex(t, parentOrder.patientName)
       for (const m of reflexMatches) get().pushReflex(m)
+    }
+  },
+
+  // M13.9 — Analyzer auto-feed.
+  // Simulates HL7/ASTM push from a Sysmex / Roche / Abbott / Beckman analyzer.
+  // For any on-bench analyzer-feedable test, generates plausible analyte
+  // values (80% within reference, 15% mildly out, 5% critical), computes
+  // flags, sets status → 'entered', and stamps `enteredBy` with the
+  // analyzer name so pathologists can tell "auto" from "manual".
+  analyzerAutoFeed: (testId) => {
+    let order: LabOrder | undefined
+    let result: TestRun | undefined
+    set(s => ({
+      orders: s.orders.map(o => {
+        const t = o.tests.find(x => x.id === testId)
+        if (!t || t.status !== 'on_bench' && t.status !== 'collected') return o
+        const cat = LAB_CATALOG[t.code]
+        if (!cat || cat.micro || cat.bench === 'HISTO') return o   // manual-only
+        order = o
+        const analyzerName = (cat as { analyzer?: string }).analyzer ?? 'Auto-analyzer'
+        const enteredBy: LabTech = { id: 'ANLZ', name: analyzerName }
+        const newAnalytes: AnalyteResult[] = cat.analytes.map((spec, idx) => {
+          const value = generateAnalyzerValue(t.code, spec, idx)
+          return {
+            analyte: spec.analyte,
+            value,
+            unit: spec.unit,
+            refLow: spec.refLow,
+            refHigh: spec.refHigh,
+            critLow: spec.critLow,
+            critHigh: spec.critHigh,
+            flag: computeFlag(value, spec),
+          }
+        })
+        const updated: TestRun = {
+          ...t,
+          status: 'entered',
+          assignedTo: enteredBy,
+          enteredBy,
+          analytes: newAnalytes,
+        }
+        result = updated
+        return { ...o, tests: o.tests.map(x => x.id === testId ? updated : x) }
+      }),
+    }))
+    if (order && result) {
+      useAuditStore.getState().log({
+        userId: 'ANLZ', userName: result.enteredBy?.name ?? 'Auto-analyzer',
+        action: 'lab_order',
+        resource: 'lab_test', resourceId: result.id,
+        detail: `${result.name} auto-fed by ${result.enteredBy?.name} · ${result.analytes.filter(a => a.flag !== 'N').length} flag(s) · awaiting pathologist verification`,
+      })
     }
   },
 
