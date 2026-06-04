@@ -11,6 +11,8 @@ import { NeonBadge } from "@/components/ui/neon-badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { DischargeClearanceBoard } from "@/components/discharge/DischargeClearanceBoard"
+import { LogOut, ChevronRight as ChevronRightIcon } from "lucide-react"
 
 const PILLAR_CONFIG: Record<ClearancePillar, { label: string; icon: React.ElementType; color: string }> = {
   doctor:    { label: 'Doctor',    icon: Stethoscope, color: 'text-blue-500' },
@@ -200,6 +202,12 @@ function PatientCard({ patient }: { patient: DischargePatient }) {
                 </div>
               </div>
 
+              {/* M13.7 — 9-step canonical clearance board.
+                  Replaces the cognitive overhead of "which pillar = which step"
+                  with an explicit numbered checklist, dependency hints, and
+                  per-step Mark-cleared action that fires notifyAndAudit. */}
+              <DischargeClearanceBoard patient={patient} actorName="Discharge Coordinator" />
+
               {/* Blockers */}
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -364,8 +372,62 @@ export default function DischargeDashboard() {
   )
   const clearancesTotal = today.length * 5
 
+  // M13.7 — pipeline counts for the 4-stage strip.
+  // Steps cleared per patient (out of 9 canonical steps) drives the
+  // "Clearing" vs "Ready" classification.
+  const stepsCleared = (p: DischargePatient) => {
+    let n = 1 // order always cleared
+    if (p.summaryDrafted) n++
+    if (p.summaryApproved) n++
+    if (p.clearances.pharmacy === 'cleared') n++
+    if (p.clearances.nursing === 'cleared') n++
+    if (p.clearances.insurance === 'cleared') n++
+    if (p.clearances.billing === 'cleared') n++
+    if (p.clearances.doctor === 'cleared') n++
+    if (p.exitClearanceIssued) n++
+    return n
+  }
+  const initiated = today.filter(p => stepsCleared(p) <= 2).length
+  const clearing  = today.filter(p => stepsCleared(p) > 2 && stepsCleared(p) < 8).length
+  const ready     = today.filter(p => stepsCleared(p) === 8 && !p.exitClearanceIssued).length
+
   return (
     <div className="space-y-6">
+      {/* M13.7 — Discharge pipeline strip.
+          Four stages mirror how an inpatient becomes a "discharged today":
+          Order issued → Clearing pillars → Ready (8/9 cleared, awaiting exit) →
+          Exit issued. Blockers tile flags anything stuck. */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <LogOut className="h-4 w-4 text-emerald-600" />Discharge pipeline (9-step clearance)
+          </h2>
+          <p className="text-[11px] text-slate-500">{today.length} in flight · {cleared.length} exits today</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 items-stretch">
+          {[
+            { label: 'Initiated',  sub: 'Order + draft',    count: initiated,      color: 'border-blue-200 bg-blue-50',     icon: FileText,     fg: 'text-blue-700',     cta: 'Draft summary' },
+            { label: 'Clearing',   sub: 'Pillars in flight',count: clearing,       color: 'border-amber-200 bg-amber-50',   icon: Clock,        fg: 'text-amber-700',    cta: 'Track' },
+            { label: 'Ready',      sub: '8/9 cleared',      count: ready,          color: 'border-violet-200 bg-violet-50', icon: CheckCircle2, fg: 'text-violet-700',   cta: 'Issue exit' },
+            { label: 'Exit issued',sub: 'Today',            count: cleared.length, color: 'border-emerald-200 bg-emerald-50', icon: LogOut,    fg: 'text-emerald-700',  cta: 'Archive' },
+            { label: 'Blockers',   sub: 'Stuck steps',      count: blockerCount,   color: blockerCount > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: AlertCircle, fg: blockerCount > 0 ? 'text-red-700' : 'text-slate-400', cta: 'Resolve' },
+          ].map((s, i, arr) => (
+            <div key={s.label}
+              className={cn("relative rounded-xl border p-3 flex flex-col gap-1", s.color)}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <s.icon className={cn("h-4 w-4 flex-shrink-0", s.fg)} />
+                  <p className={cn("text-xs font-bold truncate", s.fg)}>{s.label}</p>
+                </div>
+                {i < arr.length - 1 && <ChevronRightIcon className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
+              </div>
+              <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Header stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
