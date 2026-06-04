@@ -9,6 +9,7 @@ import { ipdInsights } from "@/lib/earlyWarning"
 import {
   OverviewTab, TimelineTab, RoundsTab, MedsTab, OrdersTab, ProcedureTab, ReferralsTab, DischargeTab, DietBadge,
 } from "@/components/doctor/ipd/chart"
+import { ERHandoverPanel } from "@/components/doctor/ipd/ERHandoverPanel"
 import { cn } from "@/lib/utils"
 
 const TABS = ['Overview', 'Timeline', 'Rounds', 'Medications', 'Orders & Results', 'Procedure', 'Referrals', 'Discharge'] as const
@@ -76,6 +77,12 @@ export default function InpatientChart() {
           </div>
         </div>
         <div className="mt-4"><DietBadge ip={ip} /></div>
+
+        {/* M13.11 — ER handover summary on the chart sidebar. Self-hides
+            when patient didn't come through ER (admit-from-OPD path). */}
+        <div className="mt-4">
+          <ERHandoverPanel patientId={ip.patientId} />
+        </div>
       </aside>
 
       {/* Tabbed chart */}

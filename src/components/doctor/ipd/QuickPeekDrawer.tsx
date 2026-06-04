@@ -6,6 +6,7 @@ import { lastRound, nextRound, type Inpatient } from "@/store/useInpatientStore"
 import { CONDITION_TINT, STAGE_LABEL, fmtTime } from "@/lib/ipdFormat"
 import { dueChip } from "./InpatientRow"
 import { cn } from "@/lib/utils"
+import { ERHandoverPanel } from "./ERHandoverPanel"
 
 // Light "glance" drawer — the deep dive lives on the full-page chart.
 export function QuickPeekDrawer({ ip, onClose, onRound, onOpenChart, aiInsight }: {
@@ -57,6 +58,12 @@ export function QuickPeekDrawer({ ip, onClose, onRound, onOpenChart, aiInsight }
               {last.vitals && <p className="text-[11px] text-slate-400 mt-1">BP {last.vitals.bp} · {last.vitals.pulse} · {last.vitals.temp} · SpO₂ {last.vitals.spo2}</p>}
             </div>
           )}
+
+          {/* M13.11 — ER handover summary. Renders only when this inpatient
+              has an ER record (came in through Emergency). Surfaces arrival
+              vitals, ESI, treatment area, MLC if trauma, every order fired
+              from ER + result status, and the disposition note. */}
+          <ERHandoverPanel patientId={ip.patientId} />
 
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-xl bg-slate-50 p-3">

@@ -6,19 +6,23 @@ import { QrCode, ExternalLink, Share2 } from "lucide-react"
 import { usePatientStore } from "@/store/usePatientStore"
 import { useAuthStore } from "@/store/useAuthStore"
 
-const DEMO_TOKEN = 'demo-family-token-meera-001'
-
 export function FamilyTrackingCard() {
   const router = useRouter()
   const currentUser = useAuthStore(s => s.currentUser)
   const patients = usePatientStore(s => s.patients)
   const me = patients.find(p => p.id === currentUser?.id)
-  const token = me?.familyAccessToken ?? DEMO_TOKEN
-  const url = typeof window !== 'undefined' ? `${window.location.origin}/family-track/${token}` : ''
+  // M13.11 — Public WhatsApp-style page; same URL we SMS to the attendant
+  // at ER registration (kailash.in/p/<uhid>). No token required, no medical
+  // data leaked — just live progress + critical-event surfacing.
+  const uhid = me?.id ?? currentUser?.id ?? 'PT-20394'
+  const url = typeof window !== 'undefined' ? `${window.location.origin}/p/${uhid}` : `/p/${uhid}`
 
   const share = () => {
-    if (navigator.share) navigator.share({ title: 'My live status', url })
-    else navigator.clipboard?.writeText(url)
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({ title: 'My live status', text: 'Track me at Kailash Healthcare', url })
+    } else if (typeof navigator !== 'undefined') {
+      navigator.clipboard?.writeText(url)
+    }
   }
 
   return (
@@ -37,9 +41,10 @@ export function FamilyTrackingCard() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[12.5px] text-slate-500 mb-2">They&apos;ll see your ward, condition &amp; wait time — and can request a live room view (nurse-approved).</p>
+          <p className="text-[10px] text-slate-400 font-mono mb-2 break-all">{url}</p>
           <div className="flex gap-2">
-            <button onClick={() => router.push(`/family-track/${token}`)}
-              className="flex items-center gap-1.5 text-[12.5px] font-semibold text-white bg-blue-600 px-3 py-2 rounded-xl active:scale-95 transition-transform">
+            <button onClick={() => router.push(`/p/${uhid}`)}
+              className="flex items-center gap-1.5 text-[12.5px] font-semibold text-white bg-emerald-600 px-3 py-2 rounded-xl active:scale-95 transition-transform">
               <ExternalLink className="h-3.5 w-3.5" /> Open family view
             </button>
             <button onClick={share}
