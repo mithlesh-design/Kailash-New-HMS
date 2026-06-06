@@ -32,7 +32,7 @@ export function OutcomesMetrics() {
       <div className="max-w-7xl mx-auto px-5 lg:px-10">
         <Reveal className="text-center max-w-2xl mx-auto">
           <p className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#5EE3B0]">Outcomes that matter</p>
-          <h2 className="text-[30px] lg:text-[38px] font-bold text-white tracking-tight mt-2">Run on intelligence. Measure the difference.</h2>
+          <h2 className="text-[30px] lg:text-[38px] font-bold tracking-tight mt-2" style={{ color: "#FFFFFF" }}>Run on intelligence. Measure the difference.</h2>
           <p className="text-[14.5px] text-white/55 mt-3">Illustrative targets for a connected, AI-native hospital — the metrics leadership is judged on.</p>
         </Reveal>
         <motion.div
