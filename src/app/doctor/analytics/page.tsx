@@ -102,8 +102,8 @@ export default function DoctorAnalytics() {
               <Tooltip labelFormatter={(d) => tickFmt(d as string)} contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <Line type="monotone" dataKey="consults" name="Consultations" stroke="#2563eb" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="tests" name="Tests" stroke="#e11d48" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="prescriptions" name="Prescriptions" stroke="#db2777" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="tests" name="Tests" stroke="#0E9F6E" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="prescriptions" name="Prescriptions" stroke="#64748B" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </ClientOnly>
