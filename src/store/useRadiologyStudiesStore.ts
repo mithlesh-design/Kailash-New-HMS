@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { useNotificationStore } from './useNotificationStore'
+import { useNotificationStore, type NotificationChannel } from './useNotificationStore'
 import {
   RADIOLOGY_CATALOG,
   TEMPLATE_SECTIONS,
@@ -29,6 +29,25 @@ export type Attachment = {
   uploadedBy: string
   uploadedAt: string
 }
+
+// Structured AI detection (simulated). Each finding carries a confidence tier
+// and an optional heatmap region (normalised 0–1 box) for overlay rendering.
+export type AiFinding = {
+  id: string
+  label: string
+  category: 'normal' | 'actionable' | 'critical'
+  confidence: number            // 0–1
+  heatmap?: { x: number; y: number; w: number; h: number }
+  birads?: string
+  lungrads?: string
+  pirads?: string
+}
+
+export type DoseRecord = { dlp?: number; ctdi?: number; mas?: number; kv?: number; recordedBy?: string; recordedAt?: string }
+export type QualityFlags = { motion?: boolean; incompleteCoverage?: boolean; note?: string; assessedAt?: string }
+export type DistributionEntry = { channel: NotificationChannel; to: string; sentAt: string; label?: string }
+export type Escalation = { startedAt: string; level: number; acknowledgedAt?: string; acknowledgedBy?: string }
+export type VerificationLevel = 'resident' | 'consultant'
 
 export type RadiologyStudy = {
   id: string
@@ -63,6 +82,18 @@ export type RadiologyStudy = {
   orderedAt: string
   acknowledgedAt?: string
   cancelReason?: string
+
+  // ── Enterprise RIS extensions (all optional, default-safe) ──
+  noShowRisk?: number                  // 0–1 predicted no-show probability
+  predictedDurationMin?: number        // AI scan-duration estimate
+  doseRecord?: DoseRecord              // radiation dose tracking
+  aiFindings?: AiFinding[]             // structured AI detections
+  qualityFlags?: QualityFlags          // motion / completeness QA
+  verificationLevel?: VerificationLevel
+  residentReadBy?: RadTech
+  escalation?: Escalation              // critical-result escalation ladder
+  distribution?: DistributionEntry[]   // result delivery log
+  comparisonPriorId?: string           // linked prior study for comparison
 }
 
 // Lab/Radiology roster — currentUser for the radiology role is Dr. Sameer Khan (RAD-304)
@@ -114,6 +145,19 @@ interface State {
   logCallback: (id: string, calledBy: string, recipient: string) => void
   ackResult: (id: string) => void
   setContrastConsented: (id: string, ok: boolean) => void
+
+  // ── Enterprise RIS extensions (additive; never alter existing transitions) ──
+  setNoShowRisk: (id: string, risk: number) => void
+  setPredictedDuration: (id: string, minutes: number) => void
+  recordDose: (id: string, dose: DoseRecord) => void
+  setAIFindings: (id: string, findings: AiFinding[]) => void
+  flagQuality: (id: string, flags: QualityFlags) => void
+  residentSubmit: (id: string, resident: RadTech) => void      // reading → reported, tagged resident-level
+  consultantVerify: (id: string, verifier: RadTech) => void    // reported → released, tagged consultant-level
+  recordDistribution: (id: string, entry: DistributionEntry) => void
+  startEscalation: (id: string) => void
+  ackEscalation: (id: string, by: string) => void
+  linkPrior: (id: string, priorId: string) => void
 }
 
 // ─── Seed ─────────────────────────────────────────────────────────────────
@@ -481,6 +525,70 @@ export const useRadiologyStudiesStore = create<State>()(persist((set, get) => ({
 
   setContrastConsented: (id, ok) => set(s => ({
     studies: s.studies.map(x => x.id === id ? { ...x, contrastConsented: ok } : x),
+  })),
+
+  // ── Enterprise RIS extensions ─────────────────────────────────────────────
+  setNoShowRisk: (id, risk) => set(s => ({
+    studies: s.studies.map(x => x.id === id ? { ...x, noShowRisk: risk } : x),
+  })),
+
+  setPredictedDuration: (id, minutes) => set(s => ({
+    studies: s.studies.map(x => x.id === id ? { ...x, predictedDurationMin: minutes } : x),
+  })),
+
+  recordDose: (id, dose) => set(s => ({
+    studies: s.studies.map(x => x.id === id
+      ? { ...x, doseRecord: { ...dose, recordedAt: new Date().toISOString() } }
+      : x),
+  })),
+
+  setAIFindings: (id, findings) => set(s => ({
+    studies: s.studies.map(x => x.id === id ? { ...x, aiFindings: findings } : x),
+  })),
+
+  flagQuality: (id, flags) => set(s => ({
+    studies: s.studies.map(x => x.id === id
+      ? { ...x, qualityFlags: { ...flags, assessedAt: new Date().toISOString() } }
+      : x),
+  })),
+
+  // Resident first-read submit: same transition as submitReport (reading→reported)
+  // but tags the verification level so the consultant queue knows it's a first read.
+  residentSubmit: (id, resident) => set(s => ({
+    studies: s.studies.map(x => x.id === id && x.status === 'reading'
+      ? { ...x, status: 'reported' as StudyStatus, readingBy: x.readingBy ?? resident, residentReadBy: resident, reportedAt: new Date().toISOString(), verificationLevel: 'resident' as VerificationLevel }
+      : x),
+  })),
+
+  // Consultant sign-off: tags the level, then delegates to the existing
+  // verifyAndRelease so the critical-finding notification path is unchanged.
+  consultantVerify: (id, verifier) => {
+    set(s => ({ studies: s.studies.map(x => x.id === id ? { ...x, verificationLevel: 'consultant' as VerificationLevel } : x) }))
+    get().verifyAndRelease(id, verifier)
+  },
+
+  recordDistribution: (id, entry) => set(s => ({
+    studies: s.studies.map(x => x.id === id
+      ? { ...x, distribution: [...(x.distribution ?? []), entry] }
+      : x),
+  })),
+
+  startEscalation: (id) => set(s => ({
+    studies: s.studies.map(x => {
+      if (x.id !== id) return x
+      const level = (x.escalation?.level ?? 0) + 1
+      return { ...x, escalation: { startedAt: x.escalation?.startedAt ?? new Date().toISOString(), level, acknowledgedAt: undefined } }
+    }),
+  })),
+
+  ackEscalation: (id, by) => set(s => ({
+    studies: s.studies.map(x => x.id === id && x.escalation
+      ? { ...x, escalation: { ...x.escalation, acknowledgedAt: new Date().toISOString(), acknowledgedBy: by } }
+      : x),
+  })),
+
+  linkPrior: (id, priorId) => set(s => ({
+    studies: s.studies.map(x => x.id === id ? { ...x, comparisonPriorId: priorId } : x),
   })),
 }),
   {

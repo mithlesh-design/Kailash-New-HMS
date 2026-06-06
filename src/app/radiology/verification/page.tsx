@@ -16,6 +16,7 @@ import { toast } from "sonner"
 
 const PRIORITY_STYLE: Record<Priority, string> = {
   STAT: "bg-red-100 text-red-700", Urgent: "bg-amber-100 text-amber-700", Routine: "bg-slate-100 text-slate-600",
+  Trauma: "bg-red-100 text-red-800", Stroke: "bg-red-600 text-white", Critical: "bg-red-700 text-white",
 }
 const timeAgo = (iso?: string) => {
   if (!iso) return ""
@@ -37,7 +38,7 @@ export default function Verification() {
   const pending = useMemo(
     () => studies.filter(s => s.status === "reported")
       .sort((a, b) => {
-        const pri = { STAT: 0, Urgent: 1, Routine: 2 } as const
+        const pri = { Critical: -3, Stroke: -2, Trauma: -1, STAT: 0, Urgent: 1, Routine: 2 } as const
         return pri[a.priority] - pri[b.priority]
       }),
     [studies]

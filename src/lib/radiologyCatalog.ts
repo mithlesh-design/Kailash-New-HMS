@@ -3,7 +3,24 @@
 
 export type Modality = 'XR' | 'CT' | 'MRI' | 'US' | 'MAMMO' | 'NM'
 export type ReportTemplate = 'general' | 'bi_rads' | 'lung_rads' | 'pi_rads' | 'ti_rads' | 'us_abdo' | 'us_obs'
-export type Priority = 'STAT' | 'Urgent' | 'Routine'
+// Enterprise triage scale. The original three (Routine/Urgent/STAT) are preserved
+// for full backward-compatibility; Trauma/Stroke/Critical extend it for the RIS
+// command-center workflows. All existing data and code keep working unchanged.
+export type Priority = 'Routine' | 'Urgent' | 'STAT' | 'Trauma' | 'Stroke' | 'Critical'
+
+// Display + scheduling metadata for each priority. `rank` sorts worklists
+// (higher = more urgent); `sla` multiplies the catalog TAT (lower = tighter).
+export const PRIORITY_META: Record<Priority, { label: string; rank: number; sla: number; badge: string; dot: string }> = {
+  Routine:  { label: 'Routine',  rank: 0, sla: 1.0,  badge: 'bg-slate-100 text-slate-600 border-slate-200', dot: 'bg-slate-400' },
+  Urgent:   { label: 'Urgent',   rank: 1, sla: 0.6,  badge: 'bg-amber-50 text-amber-700 border-amber-200',  dot: 'bg-amber-500' },
+  STAT:     { label: 'STAT',     rank: 2, sla: 0.4,  badge: 'bg-red-50 text-red-700 border-red-200',        dot: 'bg-red-500' },
+  Trauma:   { label: 'Trauma',   rank: 3, sla: 0.3,  badge: 'bg-red-100 text-red-800 border-red-300',       dot: 'bg-red-600' },
+  Stroke:   { label: 'Stroke',   rank: 4, sla: 0.2,  badge: 'bg-red-600 text-white border-red-700',         dot: 'bg-white' },
+  Critical: { label: 'Critical', rank: 5, sla: 0.15, badge: 'bg-red-700 text-white border-red-800',         dot: 'bg-white' },
+}
+
+export const PRIORITIES = Object.keys(PRIORITY_META) as Priority[]
+export const priorityRank = (p: Priority): number => PRIORITY_META[p]?.rank ?? 0
 
 export type CatalogEntry = {
   code: string

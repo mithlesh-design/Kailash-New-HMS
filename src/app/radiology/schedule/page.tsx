@@ -29,8 +29,9 @@ const SOURCE_TINT: Record<RadSource, string> = {
 }
 const PRIORITY_TINT: Record<Priority, string> = {
   STAT: 'bg-red-100 text-red-700', Urgent: 'bg-amber-100 text-amber-700', Routine: 'bg-slate-100 text-slate-600',
+  Trauma: 'bg-red-100 text-red-800', Stroke: 'bg-red-600 text-white', Critical: 'bg-red-700 text-white',
 }
-const PRIORITY_RANK: Record<Priority, number> = { STAT: 0, Urgent: 1, Routine: 2 }
+const PRIORITY_RANK: Record<Priority, number> = { Critical: -3, Stroke: -2, Trauma: -1, STAT: 0, Urgent: 1, Routine: 2 }
 
 const minsAgo = (iso: string) => Math.round((Date.now() - new Date(iso).getTime()) / 60000)
 

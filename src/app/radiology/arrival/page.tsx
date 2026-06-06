@@ -25,6 +25,7 @@ const MODALITY_TINT: Record<Modality, string> = {
 }
 const PRIORITY_TINT: Record<Priority, string> = {
   STAT: 'bg-red-100 text-red-700', Urgent: 'bg-amber-100 text-amber-700', Routine: 'bg-slate-100 text-slate-600',
+  Trauma: 'bg-red-100 text-red-800', Stroke: 'bg-red-600 text-white', Critical: 'bg-red-700 text-white',
 }
 
 const fmtSlot = (iso?: string) =>
