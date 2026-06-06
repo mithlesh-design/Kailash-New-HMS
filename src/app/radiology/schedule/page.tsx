@@ -12,6 +12,7 @@ import {
 import { useAuthStore } from "@/store/useAuthStore"
 import { RADIOLOGY_CATALOG, type Modality, type Priority } from "@/lib/radiologyCatalog"
 import { notifyAndAudit } from "@/lib/notifyAndAudit"
+import { predictNoShow, predictScanDuration } from "@/lib/radiologyAI"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -167,6 +168,8 @@ export default function RadiologySchedulePage() {
                         {s.wardBed && <span className="text-[11px] text-slate-500">· {s.wardBed}</span>}
                         <span className={cn("text-[10px] font-bold uppercase px-2 py-0.5 rounded border", MODALITY_TINT[s.modality])}>{s.modality}</span>
                         <span className={cn("text-[10px] font-bold uppercase px-2 py-0.5 rounded", PRIORITY_TINT[s.priority])}>{s.priority}</span>
+                        {(() => { const ns = Math.round(predictNoShow(s).data.risk * 100); return ns >= 35 ? <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">No-show {ns}%</span> : null })()}
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">AI ~{predictScanDuration(s)}m</span>
                       </div>
                       <p className="text-sm font-semibold text-slate-700 mt-1">{s.name}</p>
                       <p className="text-xs text-slate-500 mt-0.5">

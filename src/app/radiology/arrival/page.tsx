@@ -12,6 +12,7 @@ import {
 import { useAuthStore } from "@/store/useAuthStore"
 import { RADIOLOGY_CATALOG, type Modality, type Priority } from "@/lib/radiologyCatalog"
 import { notifyAndAudit } from "@/lib/notifyAndAudit"
+import { checkPrepReadiness } from "@/lib/radiologyAI"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -149,6 +150,9 @@ export default function RadiologyArrivalPage() {
                         <span className="text-[11px] font-bold text-slate-400">{s.patientId}</span>
                         <span className={cn("text-[10px] font-bold uppercase px-2 py-0.5 rounded border", MODALITY_TINT[s.modality])}>{s.modality}</span>
                         <span className={cn("text-[10px] font-bold uppercase px-2 py-0.5 rounded", PRIORITY_TINT[s.priority])}>{s.priority}</span>
+                        {(() => { const issues = checkPrepReadiness(s).data; return issues.length
+                          ? <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 inline-flex items-center gap-0.5"><AlertTriangle className="h-2.5 w-2.5" />AI: {issues.length} prep issue{issues.length > 1 ? "s" : ""}</span>
+                          : <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">AI: prep ready</span> })()}
                         {late && (
                           <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-red-100 text-red-700 flex items-center gap-1">
                             <AlertTriangle className="h-2.5 w-2.5" />Late
