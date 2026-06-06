@@ -19,7 +19,7 @@ interface DataTableProps<T> {
 
 export function DataTable<T>({ columns, data, keyField, onRowClick, emptyState, className }: DataTableProps<T>) {
   return (
-    <div className={cn("overflow-x-auto rounded-xl border border-[#EAECF2] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]", className)}>
+    <div className={cn("overflow-x-auto rounded-2xl border border-[#EAECF2] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]", className)}>
       <table className="w-full text-sm">
         <thead className="bg-[#F9FAFB] border-b border-[#EAECF2]">
           <tr>
@@ -28,7 +28,7 @@ export function DataTable<T>({ columns, data, keyField, onRowClick, emptyState, 
                 key={col.key}
                 scope="col"
                 className={cn(
-                  "px-4 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap",
+                  "px-4 py-3.5 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap",
                   col.className
                 )}
               >
@@ -57,7 +57,7 @@ export function DataTable<T>({ columns, data, keyField, onRowClick, emptyState, 
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className={cn("px-4 py-3 text-slate-700", col.className)}
+                    className={cn("px-4 py-3.5 text-slate-700", col.className)}
                   >
                     {col.render
                       ? col.render(row, i)

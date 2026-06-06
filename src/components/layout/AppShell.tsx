@@ -381,7 +381,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#F0F4F8' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-background)' }}>
       <a href="#main-content" className="skip-link">Skip to main content</a>
 
       {/* Mobile drawer backdrop */}
@@ -396,7 +396,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           "max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-64 max-lg:shadow-2xl transition-transform",
           mobileOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full",
         )}
-        style={{ boxShadow: '4px 0 24px rgba(15,23,42,0.07)' }}
+        style={{ borderRight: '1px solid var(--color-border)' }}
         aria-label="Main sidebar"
       >
         {/* Brand Header */}
@@ -485,7 +485,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Top Header */}
         <header
           className="h-[68px] flex-shrink-0 flex items-center justify-between px-6 bg-white relative z-10"
-          style={{ boxShadow: '0 1px 12px rgba(15,23,42,0.06)' }}
+          style={{ borderBottom: '1px solid var(--color-border)' }}
         >
           <div className="flex items-center gap-4">
             <button
