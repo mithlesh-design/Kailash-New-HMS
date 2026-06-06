@@ -292,7 +292,7 @@ export default function AdminDashboard() {
       <div className="rounded-xl border border-slate-200 bg-white p-4">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-emerald-600" />
+            <Wallet className="h-4 w-4 text-[#0E9F6E]" />
             <h3 className="text-sm font-bold text-slate-800">Cash position</h3>
             <span className={cn('text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded',
               cashWidget.cashRunwayDays < 30 ? 'bg-red-100 text-red-700' :
@@ -302,31 +302,33 @@ export default function AdminDashboard() {
             </span>
           </div>
           <button onClick={() => router.push('/admin/finance')}
-            className="text-[11px] font-bold text-indigo-700 hover:underline flex items-center gap-1 cursor-pointer">
+            className="text-[11px] font-bold text-[#2563EB] hover:underline flex items-center gap-1 cursor-pointer">
             Open P&L <ChevronRight className="h-3 w-3" />
           </button>
         </div>
+        {/* Calm, single-language KPI strip — neutral hairline tiles, ink values
+            (no rainbow). Risk stays in the runway badge + the red overdue note. */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700">Cash on hand</p>
-            <p className="text-base font-black text-emerald-700 mt-1 tabular-nums">{fmtINRkLocal(cashWidget.cashOnHand)}</p>
+          <div className="rounded-xl bg-[#FBFCFE] border border-[#EAECF2] p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Cash on hand</p>
+            <p className="text-base font-bold text-slate-900 mt-1 tabular-nums">{fmtINRkLocal(cashWidget.cashOnHand)}</p>
           </div>
-          <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-blue-700">A/R outstanding</p>
-            <p className="text-base font-black text-blue-700 mt-1 tabular-nums">{fmtINRkLocal(billsOutstanding)}</p>
-            <p className="text-[10px] text-blue-600 mt-0.5">{bills.filter(b => b.status !== 'settled').length} bills</p>
+          <div className="rounded-xl bg-[#FBFCFE] border border-[#EAECF2] p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">A/R outstanding</p>
+            <p className="text-base font-bold text-slate-900 mt-1 tabular-nums">{fmtINRkLocal(billsOutstanding)}</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">{bills.filter(b => b.status !== 'settled').length} bills</p>
           </div>
-          <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-amber-700">A/P payable</p>
-            <p className="text-base font-black text-amber-700 mt-1 tabular-nums">{fmtINRkLocal(cashWidget.vendorPayable)}</p>
+          <div className="rounded-xl bg-[#FBFCFE] border border-[#EAECF2] p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">A/P payable</p>
+            <p className="text-base font-bold text-slate-900 mt-1 tabular-nums">{fmtINRkLocal(cashWidget.vendorPayable)}</p>
             {cashWidget.overdueCount > 0 && (
-              <p className="text-[10px] text-red-600 mt-0.5">{cashWidget.overdueCount} overdue</p>
+              <p className="text-[10px] text-red-600 mt-0.5 font-semibold">{cashWidget.overdueCount} overdue</p>
             )}
           </div>
-          <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-blue-700">Payroll due</p>
-            <p className="text-base font-black text-blue-700 mt-1 tabular-nums">{fmtINRkLocal(cashWidget.totalSalaryDue)}</p>
-            <p className="text-[10px] text-blue-600 mt-0.5">{cashWidget.activeStaffCount} staff</p>
+          <div className="rounded-xl bg-[#FBFCFE] border border-[#EAECF2] p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Payroll due</p>
+            <p className="text-base font-bold text-slate-900 mt-1 tabular-nums">{fmtINRkLocal(cashWidget.totalSalaryDue)}</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">{cashWidget.activeStaffCount} staff</p>
           </div>
         </div>
       </div>
@@ -464,8 +466,8 @@ export default function AdminDashboard() {
               { label: 'Avg Wait Time', value: '18m', sub: 'Down from 32m', icon: Clock, color: 'text-sky-600', bg: 'bg-sky-50 border-sky-200' },
               { label: 'Walk-in Rate', value: '62%', sub: 'vs appointments', icon: Activity, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
               { label: 'Pending Admissions', value: pendingAdmissions.length, sub: 'Awaiting bed assignment', icon: BedDouble, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
-            ].map(({ label, value, sub, icon: Icon, color, bg }) => (
-              <Card key={label} className={cn("p-4 border", bg)}>
+            ].map(({ label, value, sub, icon: Icon, color }) => (
+              <Card key={label} className="p-4">
                 <div className="flex items-center gap-2 mb-2"><Icon className={cn("h-5 w-5", color)} /><span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</span></div>
                 <p className="text-2xl font-bold text-slate-900">{value}</p>
                 <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
@@ -495,8 +497,8 @@ export default function AdminDashboard() {
               { label: 'Discharge Queue', value: dueDischargeToday, sub: 'Expected today', icon: CheckCircle, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
               { label: 'Avg LOS', value: `${qualityMetrics.avgLOS}d`, sub: 'Target: ≤5 days', icon: Clock, color: qualityMetrics.avgLOS > 5 ? 'text-amber-600' : 'text-green-600', bg: qualityMetrics.avgLOS > 5 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200' },
               { label: 'Pending Admissions', value: pendingAdmissions.length, sub: 'Awaiting bed', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
-            ].map(({ label, value, sub, icon: Icon, color, bg }) => (
-              <Card key={label} className={cn("p-4 border", bg)}>
+            ].map(({ label, value, sub, icon: Icon, color }) => (
+              <Card key={label} className="p-4">
                 <div className="flex items-center gap-2 mb-2"><Icon className={cn("h-5 w-5", color)} /><span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</span></div>
                 <p className="text-2xl font-bold text-slate-900">{value}</p>
                 <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
@@ -593,8 +595,8 @@ export default function AdminDashboard() {
               { label: 'Bills Pending Freeze', value: billsPendingFreeze, sub: 'Draft → Freeze needed', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
               { label: 'Cashless Pre-Auth', value: '3 pending', sub: 'TPAs awaiting approval', color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200' },
               { label: 'Bills Settled Today', value: bills.filter(b => b.status === 'settled').length, sub: 'Fully collected', color: 'text-green-600', bg: 'bg-green-50 border-green-200' },
-            ].map(({ label, value, sub, color, bg }) => (
-              <Card key={label} className={cn("p-4 border", bg)}>
+            ].map(({ label, value, sub, color }) => (
+              <Card key={label} className="p-4">
                 <p className={cn("text-2xl font-bold", color)}>{value}</p>
                 <p className="text-xs font-bold text-slate-600 mt-1">{label}</p>
                 <p className="text-[11px] text-slate-400 mt-0.5">{sub}</p>
