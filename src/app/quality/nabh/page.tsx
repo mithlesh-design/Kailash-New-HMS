@@ -176,7 +176,7 @@ export default function NabhCockpitPage() {
               <YAxis tick={{ fontSize: 11 }} domain={[50, 100]} />
               <Tooltip />
               <Line type="monotone" dataKey="handHygiene" stroke="#22c55e" strokeWidth={2} dot={false} name="Hand Hygiene %" />
-              <Line type="monotone" dataKey="nps" stroke="#6366f1" strokeWidth={2} dot={false} name="NPS" />
+              <Line type="monotone" dataKey="nps" stroke="#2563EB" strokeWidth={2} dot={false} name="NPS" />
             </LineChart>
           </ResponsiveContainer>
         </Card>

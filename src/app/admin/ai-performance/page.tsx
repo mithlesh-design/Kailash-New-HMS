@@ -30,7 +30,9 @@ const FEATURE_LABELS: Record<string, string> = {
   pre_brief: 'Pre-Brief',
 }
 
-const BAR_COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#2563EB', '#2563EB', '#ec4899', '#2563EB', '#f97316']
+// Disciplined blue-dominant categorical palette (no rainbow): brand blues + a
+// single clinical-green and amber accent, repeating across categories.
+const BAR_COLORS = ['#2563EB', '#0E9F6E', '#F59E0B', '#1E3A8A', '#2563EB', '#3B82F6', '#1E3A8A', '#2563EB']
 
 export default function AiPerformancePage() {
   const getPerformanceReport = useFeedbackStore(s => s.getPerformanceReport)
