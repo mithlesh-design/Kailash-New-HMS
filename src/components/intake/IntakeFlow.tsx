@@ -154,9 +154,9 @@ export function IntakeFlow() {
         const suggested = suggestDepartments(form.symptoms)
         return (
           <div className="h-full flex flex-col">
-            <p className="text-[13px] text-slate-500 mb-2 ml-1 flex-shrink-0">Suggested from your symptoms — pick one or more.</p>
+            <p className="text-[13px] text-slate-500 mb-2 ml-1 flex-shrink-0">Suggested from your symptoms — pick one.</p>
             <div className="flex-1 min-h-0">
-              <ChoiceStep fill options={suggested.map(d => ({ value: d, label: d }))} value={form.departments} onChange={v => update({ departments: v })} multi otherEnabled otherPlaceholder="Another department…" />
+              <ChoiceStep fill options={suggested.map(d => ({ value: d, label: d }))} value={form.departments} onChange={v => update({ departments: v })} otherEnabled otherPlaceholder="Another department…" />
             </div>
           </div>
         )
