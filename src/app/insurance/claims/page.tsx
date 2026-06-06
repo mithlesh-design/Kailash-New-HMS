@@ -50,7 +50,7 @@ function ValidationPanel({ claim, onClose }: { claim: InsuranceClaim; onClose: (
       initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
       className="mt-3 rounded-xl border border-blue-200 overflow-hidden"
     >
-      <div className="flex items-center justify-between px-4 py-3" style={{ background: 'linear-gradient(135deg,#7C3AED15,#4F46E510)' }}>
+      <div className="flex items-center justify-between px-4 py-3" style={{ background: 'linear-gradient(135deg,#1E3A8A12,#2563EB0A)' }}>
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-blue-600" />
           <span className="text-sm font-bold text-slate-900">AI Claim Validation</span>

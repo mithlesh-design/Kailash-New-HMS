@@ -157,7 +157,7 @@ export default function LabOverview() {
         <div className="flex gap-2">
           <Link href="/lab/inbox" className="flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-xl"><ClipboardList className="h-3.5 w-3.5" />Open Inbox</Link>
           <Link href="/lab/benches" className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl"
-            style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
+            style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
             <Microscope className="h-3.5 w-3.5" />Open Benches</Link>
         </div>
       </div>
@@ -358,7 +358,7 @@ export default function LabOverview() {
             )}
           </div>
 
-          <div className="rounded-xl border border-blue-200 p-4" style={{ background: "linear-gradient(135deg,rgba(37,99,235,0.06),rgba(236,72,153,0.04))" }}>
+          <div className="rounded-xl border border-blue-200 p-4" style={{ background: "linear-gradient(135deg,rgba(37,99,235,0.06),rgba(14,159,110,0.04))" }}>
             <h2 className="text-sm font-bold flex items-center gap-2 mb-2 text-blue-800"><Sparkles className="h-4 w-4 text-blue-600" />AI exception triage</h2>
             {m.overOverdue.length === 0 && m.repeatCriticals.length === 0 ? (
               <p className="text-xs text-slate-500">No exceptions. Pipeline is healthy.</p>

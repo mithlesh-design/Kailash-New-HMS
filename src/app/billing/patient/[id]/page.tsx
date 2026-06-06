@@ -270,7 +270,7 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
             exit={{ opacity: 0, y: -10 }}
             className="bg-white border border-blue-200 shadow-sm rounded-xl overflow-hidden"
           >
-            <div className="flex items-center justify-between px-5 py-4" style={{ background: 'linear-gradient(135deg,#7C3AED15,#4F46E510)' }}>
+            <div className="flex items-center justify-between px-5 py-4" style={{ background: 'linear-gradient(135deg,#1E3A8A12,#2563EB0A)' }}>
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-blue-600" />
                 <span className="font-bold text-slate-900">AI Suggested Charges</span>

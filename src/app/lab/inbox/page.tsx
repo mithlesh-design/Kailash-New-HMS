@@ -238,7 +238,7 @@ function OrderRow(props: {
           {awaiting && (
             <button onClick={props.onCollect}
               className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap"
-              style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
+              style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
               <Send className="h-3.5 w-3.5" /> Collect
             </button>
           )}

@@ -42,7 +42,7 @@ export default function DrugMaster() {
       </div>
 
       {/* AI status banner */}
-      <div className="rounded-2xl p-4 flex items-center gap-4 flex-wrap" style={{ background: "linear-gradient(135deg,rgba(37,99,235,0.10),rgba(236,72,153,0.08))" }}>
+      <div className="rounded-2xl p-4 flex items-center gap-4 flex-wrap" style={{ background: "linear-gradient(135deg,rgba(37,99,235,0.10),rgba(14,159,110,0.08))" }}>
         <div className="p-3 rounded-xl bg-white shadow-sm"><Sparkles className="h-5 w-5 text-blue-600" /></div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold text-slate-800">Maintained automatically by AI</p>
@@ -50,7 +50,7 @@ export default function DrugMaster() {
         </div>
         <button onClick={resync} disabled={syncing}
           className="flex items-center gap-1.5 text-xs font-bold text-white px-4 py-2 rounded-xl cursor-pointer disabled:opacity-60"
-          style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
+          style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
           <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} /> {syncing ? "Re-syncing…" : "Re-sync with AI"}
         </button>
       </div>

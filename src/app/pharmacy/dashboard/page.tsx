@@ -58,7 +58,7 @@ export default function PharmacyOverview() {
           <p className="text-sm text-[#64748B] mt-1">At-a-glance status · the live working surface is the Prescription Queue</p>
         </div>
         <Link href="/pharmacy/queue" className="flex items-center gap-1.5 text-sm font-bold text-white px-4 py-2 rounded-xl"
-          style={{ background: "linear-gradient(135deg,#EC4899,#2563EB)", boxShadow: "0 2px 8px rgba(236,72,153,0.25)" }}>
+          style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", boxShadow: "0 2px 8px rgba(30,58,138,0.25)" }}>
           Open queue <ArrowRight className="h-4 w-4" />
         </Link>
       </div>

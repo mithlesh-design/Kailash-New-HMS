@@ -51,7 +51,7 @@ export function OverviewTab({ ip, insight }: { ip: Inpatient; insight?: string |
               <YAxis allowDecimals={false} domain={[0, (max: number) => Math.max(4, max + 1)]} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={24} />
               <XAxis dataKey="at" tickFormatter={(d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} minTickGap={24} />
               <Tooltip labelFormatter={(d) => fmtTime(d as string)} formatter={(val) => [`NEWS ${val}`, '']} contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
-              <Line type="monotone" dataKey="score" stroke="#e11d48" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="score" stroke="#DC2626" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
           <p className="text-[10.5px] text-slate-400 mt-1">*Partial NEWS from captured vitals (RR + consciousness now recorded on rounds).</p>

@@ -32,8 +32,8 @@ const allRoleGroups: { id: string; label: string; roles: RoleCard[] }[] = [
     roles: [
       { role: 'doctor',    label: 'Doctor',          desc: 'AI pre-briefs, e-prescriptions, queue',         icon: Stethoscope, gradient: 'linear-gradient(135deg,#2563EB,#6366F1)', iconColor: '#2563EB', href: '/doctor/dashboard' },
       { role: 'nurse',     label: 'Nurse',           desc: 'Ward monitoring, vitals, MAR, handover',        icon: Activity,    gradient: 'linear-gradient(135deg,#10B981,#2563EB)', iconColor: '#10B981', href: '/nurse/dashboard' },
-      { role: 'pharmacy',  label: 'Pharmacy',        desc: 'Prescriptions, dispensing, narcotics log',      icon: Pill,        gradient: 'linear-gradient(135deg,#EC4899,#2563EB)', iconColor: '#EC4899', href: '/pharmacy/dashboard' },
-      { role: 'lab',       label: 'Laboratory',      desc: 'Sample tracking, AI anomaly, reflex tests',     icon: Microscope,  gradient: 'linear-gradient(135deg,#2563EB,#EC4899)', iconColor: '#2563EB', href: '/lab/dashboard' },
+      { role: 'pharmacy',  label: 'Pharmacy',        desc: 'Prescriptions, dispensing, narcotics log',      icon: Pill,        gradient: 'linear-gradient(135deg,#1E3A8A,#2563EB)', iconColor: '#EC4899', href: '/pharmacy/dashboard' },
+      { role: 'lab',       label: 'Laboratory',      desc: 'Sample tracking, AI anomaly, reflex tests',     icon: Microscope,  gradient: 'linear-gradient(135deg,#1E3A8A,#2563EB)', iconColor: '#2563EB', href: '/lab/dashboard' },
       { role: 'radiology', label: 'Radiology',       desc: 'Scan scheduling, DICOM viewer, AI findings',    icon: ScanLine,    gradient: 'linear-gradient(135deg,#6366F1,#2563EB)', iconColor: '#6366F1', href: '/radiology/dashboard' },
       { role: 'emergency', label: 'Emergency',       desc: 'ER triage, trauma tracking, sepsis alerts',     icon: Ambulance,   gradient: 'linear-gradient(135deg,#EF4444,#F97316)', iconColor: '#EF4444', href: '/emergency/dashboard' },
     ]
@@ -61,7 +61,7 @@ const allRoleGroups: { id: string; label: string; roles: RoleCard[] }[] = [
     label: 'Management',
     roles: [
       { role: 'admin',        label: 'Admin',        desc: 'Analytics, staff, operations overview',    icon: Shield,      gradient: 'linear-gradient(135deg,#2563EB,#6366F1)', iconColor: '#2563EB', href: '/admin/dashboard' },
-      { role: 'quality',      label: 'Quality',      desc: 'NABH compliance, audits, incidents',       icon: Heart,       gradient: 'linear-gradient(135deg,#EC4899,#2563EB)', iconColor: '#EC4899', href: '/quality/dashboard' },
+      { role: 'quality',      label: 'Quality',      desc: 'NABH compliance, audits, incidents',       icon: Heart,       gradient: 'linear-gradient(135deg,#1E3A8A,#2563EB)', iconColor: '#EC4899', href: '/quality/dashboard' },
       { role: 'housekeeping', label: 'Housekeeping', desc: 'Ward cleanliness, bed turnover tasks',     icon: Package,     gradient: 'linear-gradient(135deg,#1E3A8A,#6366F1)', iconColor: '#1E3A8A', href: '/housekeeping/dashboard' },
       { role: 'inventory',    label: 'Inventory',    desc: 'Assets, stock levels, procurement',        icon: FlaskConical,gradient: 'linear-gradient(135deg,#D97706,#EA580C)', iconColor: '#D97706', href: '/inventory/dashboard' },
     ]

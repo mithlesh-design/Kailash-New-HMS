@@ -162,7 +162,7 @@ export function BedFreeingForecast() {
 
   return (
     <div className="rounded-xl bg-white border border-blue-200 overflow-hidden"
-      style={{ background: "linear-gradient(135deg,rgba(37,99,235,0.04),rgba(236,72,153,0.03))" }}>
+      style={{ background: "linear-gradient(135deg,rgba(37,99,235,0.04),rgba(14,159,110,0.03))" }}>
       <div className="px-4 py-3 border-b border-blue-100 flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-blue-600" />AI bed-freeing forecast

@@ -368,7 +368,7 @@ function ActionBtn({ onClick, children, icon: Icon, tone = "brand" }: { onClick:
     <button onClick={onClick}
       className={cn("flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl cursor-pointer transition-all whitespace-nowrap",
         tone === "ghost" && "text-slate-600 bg-slate-100 hover:bg-slate-200")}
-      style={tone === "brand" ? { background: "linear-gradient(135deg,#2563EB,#EC4899)", color: "#fff", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" } : undefined}>
+      style={tone === "brand" ? { background: "linear-gradient(135deg,#1E3A8A,#2563EB)", color: "#fff", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" } : undefined}>
       <Icon className="h-3.5 w-3.5" />{children}
     </button>
   )

@@ -150,7 +150,7 @@ function InoculatedActions({ onAdvance, onFinalize, day }: { onAdvance: (p: Part
     <div className="flex flex-wrap gap-1.5">
       <button onClick={() => onAdvance({ phase: "growth_check", day: day + 1, growth: "growth" })}
         className="text-[11px] font-bold text-white px-2.5 py-1 rounded-lg cursor-pointer"
-        style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)" }}>Growth detected</button>
+        style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)" }}>Growth detected</button>
       <button onClick={() => onFinalize(`No growth after ${(day + 1) * 24} hours of incubation`)}
         className="text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg cursor-pointer">No growth — finalise</button>
     </div>
@@ -172,7 +172,7 @@ function GrowthCheckActions({ onAdvance, onFinalize, day }: { onAdvance: (p: Par
           }}
           disabled={!organism.trim()}
           className="text-[11px] font-bold text-white px-2.5 py-1 rounded-lg cursor-pointer disabled:opacity-50"
-          style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)" }}>Identify</button>
+          style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)" }}>Identify</button>
         <button onClick={() => onFinalize(`No significant growth identified — contaminant flora only`)}
           className="text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg cursor-pointer">No growth — finalise</button>
       </div>
@@ -211,7 +211,7 @@ function IdentifiedActions({ micro, onAdvance }: { micro: MicrobioResult; onAdva
       <button onClick={() => onAdvance({ phase: "ast", day: micro.day + 1 })}
         disabled={org.ast.length === 0}
         className="w-full text-[11px] font-bold text-white px-2.5 py-1 rounded-lg cursor-pointer disabled:opacity-50"
-        style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)" }}>Save AST → review</button>
+        style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)" }}>Save AST → review</button>
     </div>
   )
 }

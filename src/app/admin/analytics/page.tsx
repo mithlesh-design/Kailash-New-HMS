@@ -35,7 +35,7 @@ const PAYER_MIX = [
   { name: 'Govt Scheme (AB-PMJAY)', value: 24, color: '#10B981' },
   { name: 'Corporate TPA', value: 20, color: '#2563EB' },
   { name: 'Star Health', value: 10, color: '#F59E0B' },
-  { name: 'Other Insurers', value: 8, color: '#EC4899' },
+  { name: 'Other Insurers', value: 8, color: '#94A3B8' },
 ]
 
 const REVENUE = [
