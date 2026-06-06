@@ -11,7 +11,7 @@ import {
   Package, CheckCircle, ShieldCheck, Microscope, ScanLine, Ambulance, X,
   BedDouble, Scissors, CreditCard, Trash2, HeartPulse,
   Droplets, Utensils, Truck, Heart, BookOpen, AlertTriangle, ShieldAlert,
-  Sparkles, ChevronRight, MessageSquare, Video, Siren, Menu, ShoppingCart,
+  Sparkles, ChevronRight, MessageSquare, Video, Siren, Menu, ShoppingCart, Send,
 } from "lucide-react"
 import { useAuthStore, type Role } from "@/store/useAuthStore"
 import { usePatientStore } from "@/store/usePatientStore"
@@ -121,6 +121,30 @@ const PHARMACY_SECTIONS: { header: string; items: NavItem[] }[] = [
   ] },
 ]
 
+// Enterprise RIS — grouped sidebar (Command / Workflow / Reports).
+const RADIOLOGY_SECTIONS: { header: string; items: NavItem[] }[] = [
+  { header: 'Command', items: [
+    { href: '/radiology/dashboard',   label: 'RIS Command Center', icon: LayoutDashboard },
+    { href: '/radiology/ai-command',  label: 'AI Command Center',  icon: Sparkles },
+    { href: '/radiology/critical',    label: 'Critical Results',   icon: Siren },
+    { href: '/radiology/analytics',   label: 'Analytics',          icon: BarChart3 },
+  ] },
+  { header: 'Workflow', items: [
+    { href: '/radiology/orders',      label: 'Order Desk',         icon: ClipboardCheck },
+    { href: '/radiology/schedule',    label: 'Scheduling',         icon: Activity },
+    { href: '/radiology/arrival',     label: 'Arrival Desk',       icon: ScanLine },
+    { href: '/radiology/inbox',       label: 'Worklist Inbox',     icon: ClipboardList },
+    { href: '/radiology/bench',       label: 'Modality Bench',     icon: ScanLine },
+    { href: '/radiology/reading',     label: 'Reading Room',       icon: FileText },
+    { href: '/radiology/verification',label: 'Verification',       icon: ShieldCheck },
+  ] },
+  { header: 'Reports', items: [
+    { href: '/radiology/viewer',      label: 'DICOM Viewer',       icon: Microscope },
+    { href: '/radiology/templates',   label: 'Report Templates',   icon: BookOpen },
+    { href: '/radiology/distribution',label: 'Result Distribution',icon: Send },
+  ] },
+]
+
 const navByRole: Record<Role, NavItem[]> = {
   patient: PATIENT_SECTIONS.flatMap(s => s.items),
   doctor: DOCTOR_SECTIONS.flatMap(s => s.items),
@@ -180,17 +204,7 @@ const navByRole: Record<Role, NavItem[]> = {
     { href: '/lab/qc',              label: 'Quality Control',  icon: ShieldCheck },
     { href: '/lab/reflex',          label: 'Reflex Tests',     icon: Activity },
   ],
-  radiology: [
-    { href: '/radiology/dashboard',     label: 'RIS Overview',     icon: LayoutDashboard },
-    { href: '/radiology/schedule',      label: 'Scheduling',       icon: Activity },
-    { href: '/radiology/arrival',       label: 'Arrival Desk',     icon: ScanLine },
-    { href: '/radiology/inbox',         label: 'Inbox',            icon: ClipboardList },
-    { href: '/radiology/bench',         label: 'Modality Bench',   icon: ScanLine },
-    { href: '/radiology/reading',       label: 'Reading Room',     icon: FileText },
-    { href: '/radiology/verification',  label: 'Verification',     icon: ShieldCheck },
-    { href: '/radiology/viewer',        label: 'DICOM Viewer',     icon: FileText },
-    { href: '/radiology/templates',     label: 'Report Templates', icon: ClipboardList },
-  ],
+  radiology: RADIOLOGY_SECTIONS.flatMap(s => s.items),
   insurance: [
     { href: '/insurance/dashboard', label: 'TPA Overview',  icon: LayoutDashboard },
     { href: '/insurance/claims',    label: 'Active Claims', icon: FileText },
@@ -297,6 +311,7 @@ const sectionsByRole: Partial<Record<Role, { header: string; items: NavItem[] }[
   reception: RECEPTION_SECTIONS,
   doctor: DOCTOR_SECTIONS,
   pharmacy: PHARMACY_SECTIONS,
+  radiology: RADIOLOGY_SECTIONS,
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
