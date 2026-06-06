@@ -22,7 +22,7 @@ const STATUS_COLOR: Record<RadiologyScan['status'], string> = {
 const SCAN_COLOR: Record<RadiologyScan['scanType'], string> = {
   MRI:        'text-blue-700 bg-blue-50 border-blue-200',
   'CT Scan':  'text-amber-700 bg-amber-50 border-amber-200',
-  'X-Ray':    'text-teal-700 bg-teal-50 border-teal-200',
+  'X-Ray':    'text-blue-700 bg-blue-50 border-blue-200',
   Ultrasound: 'text-blue-700 bg-blue-50 border-blue-200',
 }
 

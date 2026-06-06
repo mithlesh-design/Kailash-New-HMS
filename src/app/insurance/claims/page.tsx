@@ -250,7 +250,7 @@ export default function InsuranceClaimsPage() {
             key={f}
             onClick={() => setFilter(f)}
             className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
-              filter === f ? 'bg-teal-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              filter === f ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
           >
             {f}
@@ -270,15 +270,15 @@ export default function InsuranceClaimsPage() {
             <Card key={claim.id} className="p-5">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-teal-50/80 flex items-center justify-center flex-shrink-0">
-                    <FileText className="h-5 w-5 text-teal-600" />
+                  <div className="h-10 w-10 rounded-xl bg-blue-50/80 flex items-center justify-center flex-shrink-0">
+                    <FileText className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-bold text-[#0F172A] text-sm">{claim.id}</p>
                       <NeonBadge variant={STATUS_COLOR[claim.status] as any}>{claim.status}</NeonBadge>
                       {claim.submissionStatus === 'submitted' && (
-                        <span className="flex items-center gap-1 text-[11px] font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200">
+                        <span className="flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
                           <Send className="h-2.5 w-2.5" /> Submitted
                         </span>
                       )}
@@ -353,7 +353,7 @@ export default function InsuranceClaimsPage() {
                   {(claim.status === 'Pending Pre-Auth' || claim.status === 'In Process') && (
                     <button
                       onClick={() => setReviewing(claim)}
-                      className="px-4 py-2 rounded-xl bg-teal-50/80 hover:bg-teal-100 text-teal-700 text-sm font-bold transition-colors cursor-pointer shadow-sm"
+                      className="px-4 py-2 rounded-xl bg-blue-50/80 hover:bg-blue-100 text-blue-700 text-sm font-bold transition-colors cursor-pointer shadow-sm"
                     >
                       Review
                     </button>

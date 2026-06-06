@@ -68,8 +68,8 @@ function VerificationPanel() {
     <Card className="p-6">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-teal-50/80 flex items-center justify-center">
-            <ShieldCheck className="h-5 w-5 text-teal-600" />
+          <div className="h-10 w-10 rounded-xl bg-blue-50/80 flex items-center justify-center">
+            <ShieldCheck className="h-5 w-5 text-blue-600" />
           </div>
           <div>
             <h2 className="text-base font-bold text-slate-900">Insurance Card Verification</h2>
@@ -93,7 +93,7 @@ function VerificationPanel() {
                   value={cardNumber}
                   onChange={e => setCardNumber(e.target.value)}
                   placeholder="e.g. SH12345678"
-                  className="w-full h-10 px-3 rounded-xl bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 font-medium"
+                  className="w-full h-10 px-3 rounded-xl bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 font-medium"
                 />
               </div>
               <div>
@@ -101,7 +101,7 @@ function VerificationPanel() {
                 <select
                   value={insurer}
                   onChange={e => setInsurer(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="w-full h-10 px-3 rounded-xl bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   {INSURERS.map(i => <option key={i}>{i}</option>)}
                 </select>
@@ -112,14 +112,14 @@ function VerificationPanel() {
                   value={patientName}
                   onChange={e => setPatientName(e.target.value)}
                   placeholder="Full name"
-                  className="w-full h-10 px-3 rounded-xl bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="w-full h-10 px-3 rounded-xl bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
             </div>
             <button
               onClick={handleVerify}
               disabled={!cardNumber.trim() || verifyState === 'verifying'}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
             >
               {verifyState === 'verifying' ? (
                 <><Sparkles className="h-4 w-4 animate-pulse" /> AI Verifying...</>
@@ -242,9 +242,9 @@ export default function InsuranceDashboard() {
       <div className="bg-white rounded-xl border border-slate-200 p-4">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-teal-600" />Cashless claim lifecycle
+            <Activity className="h-4 w-4 text-blue-600" />Cashless claim lifecycle
           </h2>
-          <Link href="/insurance/claims" className="text-[11px] font-bold text-teal-700 hover:underline flex items-center gap-0.5">
+          <Link href="/insurance/claims" className="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-0.5">
             All claims <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
@@ -292,7 +292,7 @@ export default function InsuranceDashboard() {
         {[
           { label: 'Total Claims Value',    value: `₹${(totalClaimsValue / 100000).toFixed(2)}L`, icon: IndianRupee, cardBg: 'bg-blue-50/70',   ib: 'text-blue-600',   lb: 'text-blue-800/60' },
           { label: 'Pending Pre-Auth',      value: pendingApprovals,                               icon: FileText,    cardBg: 'bg-amber-50/70',  ib: 'text-amber-600',  lb: 'text-amber-800/60' },
-          { label: 'Active Cashless Patients', value: claims.filter(c => c.status !== 'Approved' && c.status !== 'Rejected').length, icon: ShieldCheck, cardBg: 'bg-teal-50/70', ib: 'text-teal-600', lb: 'text-teal-800/60' },
+          { label: 'Active Cashless Patients', value: claims.filter(c => c.status !== 'Approved' && c.status !== 'Rejected').length, icon: ShieldCheck, cardBg: 'bg-blue-50/70', ib: 'text-blue-600', lb: 'text-blue-800/60' },
         ].map(({ label, value, icon: Icon, cardBg, ib, lb }) => (
           <div key={label} className={`rounded-xl ${cardBg} p-4 flex items-center gap-4`}>
             <div className="p-3 rounded-xl bg-white shadow-sm flex-shrink-0">

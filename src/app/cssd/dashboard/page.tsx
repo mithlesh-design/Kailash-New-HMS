@@ -44,7 +44,7 @@ export default function CSSDDashboard() {
       {/* Sterilization Cycles */}
       <div className="bg-white rounded-xl border border-slate-200 p-5">
         <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-          <Activity className="h-4 w-4 text-teal-500" /> Sterilization Cycles
+          <Activity className="h-4 w-4 text-blue-500" /> Sterilization Cycles
         </h3>
         <div className="space-y-2">
           {cycles.map((c, i) => {

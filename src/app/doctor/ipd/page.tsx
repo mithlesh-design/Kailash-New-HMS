@@ -25,7 +25,7 @@ import { notifyAndAudit } from "@/lib/notifyAndAudit"
 const CONDITION_TINT: Record<Condition, string> = {
   Critical: 'bg-red-50 text-red-700 border-red-200', Serious: 'bg-orange-50 text-orange-700 border-orange-200',
   Stable: 'bg-blue-50 text-blue-700 border-blue-200', Improving: 'bg-green-50 text-green-700 border-green-200',
-  'Discharge-ready': 'bg-teal-50 text-teal-700 border-teal-200',
+  'Discharge-ready': 'bg-blue-50 text-blue-700 border-blue-200',
 }
 function dueLabel(ip: Inpatient): { text: string; due: boolean } {
   const n = nextRound(ip)

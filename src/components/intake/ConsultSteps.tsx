@@ -117,7 +117,7 @@ export function PaymentStep({ form, update }: { form: IntakeForm; update: Update
           <p className="text-[12px] uppercase text-slate-400 font-semibold tracking-wide">Consultation fee</p>
           <p className="text-[13px] text-slate-500">{isVideo ? `${form.slotDoctor || 'Video consult'}` : `${form.departments[0] ?? 'OPD'} · in-person`}</p>
         </div>
-        <p className="text-[26px] font-bold text-slate-900">{form.payer === 'cashless' ? <span className="text-[15px] font-bold text-teal-600">Cashless</span> : `₹${fee}`}</p>
+        <p className="text-[26px] font-bold text-slate-900">{form.payer === 'cashless' ? <span className="text-[15px] font-bold text-blue-600">Cashless</span> : `₹${fee}`}</p>
       </div>
 
       {/* Payer */}
@@ -189,7 +189,7 @@ export function PaymentStep({ form, update }: { form: IntakeForm; update: Update
             <>
               <button onClick={verify} disabled={!canVerify || checking}
                 className={cn("w-full h-12 rounded-2xl font-semibold text-[15px] flex items-center justify-center gap-2 transition-all active:scale-[0.98]",
-                  (!canVerify || checking) ? "bg-slate-200 text-slate-400" : "bg-teal-600 text-white")}>
+                  (!canVerify || checking) ? "bg-slate-200 text-slate-400" : "bg-blue-600 text-white")}>
                 {checking ? <><Loader2 className="h-4.5 w-4.5 animate-spin" /> Checking with {form.insurer || 'insurer'}…</> : <><ShieldCheck className="h-4.5 w-4.5" /> Verify policy</>}
               </button>
               <p className="text-[12px] text-slate-400 ml-1">We confirm your policy is active &amp; cashless-eligible before you continue.</p>

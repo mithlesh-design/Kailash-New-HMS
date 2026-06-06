@@ -27,7 +27,7 @@ const SOURCE_STYLE: Record<RxSource, string> = {
   IPD: "bg-indigo-50 text-indigo-700 ring-indigo-200",
   ICU: "bg-red-50 text-red-700 ring-red-200",
   OT: "bg-blue-50 text-blue-700 ring-blue-200",
-  "Home Rx": "bg-teal-50 text-teal-700 ring-teal-200",
+  "Home Rx": "bg-blue-50 text-blue-700 ring-blue-200",
   Discharge: "bg-amber-50 text-amber-700 ring-amber-200",
 }
 const STATUS_STYLE: Record<PrepStatus, string> = {

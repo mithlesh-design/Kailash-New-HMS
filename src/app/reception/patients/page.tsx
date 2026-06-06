@@ -19,7 +19,7 @@ const STATUS_LABEL: Record<QueueStatus, string> = {
 }
 const STATUS_TINT: Record<QueueStatus, string> = {
   waiting: 'bg-amber-50 text-amber-700', vitals: 'bg-sky-50 text-sky-700', consulting: 'bg-blue-50 text-blue-700',
-  pharmacy: 'bg-teal-50 text-teal-700', billing: 'bg-orange-50 text-orange-700', done: 'bg-green-50 text-green-700',
+  pharmacy: 'bg-blue-50 text-blue-700', billing: 'bg-orange-50 text-orange-700', done: 'bg-green-50 text-green-700',
 }
 const TRIAGE_TINT: Record<TriageLevel, string> = {
   Critical: 'bg-red-50 text-red-700', High: 'bg-orange-50 text-orange-700', Medium: 'bg-amber-50 text-amber-700', Low: 'bg-green-50 text-green-700',

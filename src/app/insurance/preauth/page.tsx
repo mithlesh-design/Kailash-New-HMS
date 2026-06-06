@@ -39,8 +39,8 @@ export default function InsurancePreAuthPage() {
         {PENDING_ADMISSIONS.map((adm) => (
           <div key={adm.id} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-teal-50 flex items-center justify-center flex-shrink-0">
-                <ShieldCheck className="h-5 w-5 text-teal-600" />
+              <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="font-bold text-slate-900 text-sm">{adm.patient}</p>
@@ -55,7 +55,7 @@ export default function InsurancePreAuthPage() {
               <button
                 onClick={() => generate(adm.id)}
                 disabled={loading}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-60 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 transition-colors"
               >
                 {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Bot className="h-3.5 w-3.5" />}
                 Draft Pre-Auth
@@ -97,7 +97,7 @@ export default function InsurancePreAuthPage() {
                 <ul className="space-y-1">
                   {d.plannedProcedures.map((p, i) => (
                     <li key={i} className="text-xs text-slate-700 flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-teal-400 flex-shrink-0" />{p}
+                      <span className="h-1.5 w-1.5 rounded-full bg-blue-400 flex-shrink-0" />{p}
                     </li>
                   ))}
                 </ul>

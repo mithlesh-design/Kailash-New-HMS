@@ -140,9 +140,9 @@ export function IntakeFlow() {
       case 'about': return <AboutStep form={form} update={update} />
       case 'symptoms': {
         const aiBar = form.symptoms.length > 0 ? (
-          <div className="flex items-center justify-between px-4 py-2.5 rounded-[14px] bg-white border border-teal-100 shadow-[0_2px_12px_rgba(45,212,191,0.12)]">
+          <div className="flex items-center justify-between px-4 py-2.5 rounded-[14px] bg-white border border-blue-100 shadow-[0_2px_12px_rgba(45,212,191,0.12)]">
             <span className="flex items-center gap-2.5">
-              <span className="h-8 w-8 rounded-full bg-teal-50 flex items-center justify-center border border-teal-100"><Activity className="h-4 w-4 text-teal-600" aria-hidden="true" /></span>
+              <span className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100"><Activity className="h-4 w-4 text-blue-600" aria-hidden="true" /></span>
               <span className="text-[13px] font-bold text-slate-900">AI Assessment</span>
             </span>
             <NeonBadge variant={triage.variant} dot pulse className="px-3 py-1">{triage.level}</NeonBadge>

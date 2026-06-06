@@ -41,7 +41,7 @@ const WARD_TINT: Record<string, string> = {
   Maternity:     'bg-blue-50 text-blue-700',
   Radiology:     'bg-blue-50 text-blue-700',
   Pathology:     'bg-emerald-50 text-emerald-700',
-  Microbiology:  'bg-teal-50 text-teal-700',
+  Microbiology:  'bg-blue-50 text-blue-700',
   Pharmacy:      'bg-blue-50 text-blue-700',
   OT:            'bg-sky-50 text-sky-700',
 }

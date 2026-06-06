@@ -123,7 +123,7 @@ export default function ReceptionAppointments() {
               <div key={a.id} className={cn("rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_4px_16px_rgba(15,23,42,0.04)] p-4", cancelled && "opacity-65")}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">
-                    <span className={cn("h-10 w-10 rounded-2xl flex items-center justify-center flex-shrink-0", online ? "bg-blue-50 text-blue-600" : "bg-teal-50 text-teal-600")}>
+                    <span className={cn("h-10 w-10 rounded-2xl flex items-center justify-center flex-shrink-0", online ? "bg-blue-50 text-blue-600" : "bg-blue-50 text-blue-600")}>
                       {online ? <Video className="h-5 w-5" /> : <Building2 className="h-5 w-5" />}
                     </span>
                     <div className="min-w-0">
@@ -133,7 +133,7 @@ export default function ReceptionAppointments() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", online ? "bg-blue-50 text-blue-700" : "bg-teal-50 text-teal-700")}>{online ? 'Online' : 'In-person'}</span>
+                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", online ? "bg-blue-50 text-blue-700" : "bg-blue-50 text-blue-700")}>{online ? 'Online' : 'In-person'}</span>
                     <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full capitalize", STATUS_TINT[a.status])}>{a.status}</span>
                   </div>
                 </div>

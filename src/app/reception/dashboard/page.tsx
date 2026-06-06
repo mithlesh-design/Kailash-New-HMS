@@ -79,7 +79,7 @@ export default function ReceptionDashboard() {
     { label: 'Patients today', value: `${todayPatients.length}`, icon: Users, tint: 'bg-blue-50 text-blue-600', href: '/reception/patients' },
     { label: 'In queue', value: `${inQueue.length}`, sub: `avg wait ${avgWait}m`, icon: Activity, tint: 'bg-amber-50 text-amber-600', href: '/reception/opd' },
     { label: 'Now serving', value: nowServing ? `#${nowServing.token}` : '—', sub: nowServing?.name, icon: Volume2, tint: 'bg-blue-50 text-blue-600', href: '/reception/queue' },
-    { label: 'Free beds', value: `${freeBeds}`, sub: `of ${beds.length}`, icon: BedDouble, tint: 'bg-teal-50 text-teal-600', href: '/reception/beds' },
+    { label: 'Free beds', value: `${freeBeds}`, sub: `of ${beds.length}`, icon: BedDouble, tint: 'bg-blue-50 text-blue-600', href: '/reception/beds' },
     { label: 'Pending bills', value: `${pendingBills.length}`, sub: `₹${totalDue.toLocaleString('en-IN')} due`, icon: CreditCard, tint: 'bg-rose-50 text-rose-600', href: '/reception/billing' },
     { label: 'Appointments', value: `${todayAppts.length}`, sub: 'today', icon: Calendar, tint: 'bg-indigo-50 text-indigo-600', href: '/reception/appointments' },
   ]
@@ -228,7 +228,7 @@ export default function ReceptionDashboard() {
                 { label: 'Register walk-in', icon: UserPlus, href: '/reception/opd', tint: 'from-blue-500 to-indigo-500' },
                 { label: 'New appointment', icon: Calendar, href: '/reception/appointments', tint: 'from-blue-500 to-blue-500' },
                 { label: 'OPD display', icon: Volume2, href: '/reception/queue', tint: 'from-amber-500 to-orange-500' },
-                { label: 'Bed status', icon: BedDouble, href: '/reception/beds', tint: 'from-teal-500 to-cyan-500' },
+                { label: 'Bed status', icon: BedDouble, href: '/reception/beds', tint: 'from-blue-500 to-blue-500' },
               ].map(a => (
                 <Link key={a.label} href={a.href} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 transition active:scale-[0.97]">
                   <span className={cn("h-10 w-10 rounded-2xl bg-gradient-to-br flex items-center justify-center", a.tint)}><a.icon className="h-5 w-5 text-white" /></span>

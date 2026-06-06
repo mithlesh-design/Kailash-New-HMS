@@ -23,9 +23,9 @@ const CATEGORY_TINT: Record<VendorCategory, string> = {
   security:     'bg-slate-50 text-slate-700 ring-slate-200',
   it:           'bg-indigo-50 text-indigo-700 ring-indigo-200',
   pharma:       'bg-blue-50 text-blue-700 ring-blue-200',
-  linen:        'bg-cyan-50 text-cyan-700 ring-cyan-200',
+  linen:        'bg-blue-50 text-blue-700 ring-blue-200',
   consumables:  'bg-blue-50 text-blue-700 ring-blue-200',
-  utilities:    'bg-teal-50 text-teal-700 ring-teal-200',
+  utilities:    'bg-blue-50 text-blue-700 ring-blue-200',
   other:        'bg-slate-100 text-slate-600 ring-slate-200',
 }
 

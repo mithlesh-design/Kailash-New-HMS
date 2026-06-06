@@ -40,7 +40,7 @@ const CATEGORY_META = {
   observation: { label: 'Observation',  icon: Activity,      color: 'text-blue-600',   bg: 'bg-blue-50/80',   badge: 'blue'    as const },
   medication:  { label: 'Medication',   icon: Pill,          color: 'text-blue-600', bg: 'bg-blue-50/80', badge: 'muted'   as const },
   test:        { label: 'Test Order',   icon: FlaskConical,  color: 'text-amber-600',  bg: 'bg-amber-50/80',  badge: 'warning' as const },
-  instruction: { label: 'Instruction',  icon: ClipboardList, color: 'text-teal-600',   bg: 'bg-teal-50/80',   badge: 'teal'    as const },
+  instruction: { label: 'Instruction',  icon: ClipboardList, color: 'text-blue-600',   bg: 'bg-blue-50/80',   badge: 'teal'    as const },
 }
 
 function inferCategory(text: string): RoundsNote['category'] {
@@ -111,14 +111,14 @@ function AddInstructionForm({ onAdd, onCancel }: { onAdd: (i: string) => void; o
   const [text, setText] = useState('')
   return (
     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-      className="bg-teal-50/70 rounded-xl p-4 space-y-3">
-      <p className="text-xs font-bold text-teal-700 uppercase tracking-wide flex items-center gap-1.5"><ClipboardList className="h-3.5 w-3.5" /> Add Instruction</p>
+      className="bg-blue-50/70 rounded-xl p-4 space-y-3">
+      <p className="text-xs font-bold text-blue-700 uppercase tracking-wide flex items-center gap-1.5"><ClipboardList className="h-3.5 w-3.5" /> Add Instruction</p>
       <textarea placeholder="Ward instruction for nursing staff..." value={text} onChange={e => setText(e.target.value)}
-        className="w-full h-16 px-3 py-2 rounded-lg bg-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 shadow-sm" />
+        className="w-full h-16 px-3 py-2 rounded-lg bg-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm" />
       <div className="flex gap-2">
         <button onClick={onCancel} className="flex-1 h-8 rounded-lg text-xs font-semibold text-slate-600 bg-white shadow-sm hover:bg-slate-50 cursor-pointer">Cancel</button>
         <button onClick={() => { if (text.trim()) { onAdd(text.trim()); onCancel() } }} disabled={!text.trim()}
-          className="flex-1 h-8 rounded-lg text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 cursor-pointer">
+          className="flex-1 h-8 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer">
           Add Instruction
         </button>
       </div>
@@ -339,7 +339,7 @@ function NotesPanel({ patient }: { patient: PatientBed }) {
                 <Plus className="h-3.5 w-3.5" /> Test
               </button>
               <button onClick={() => setQuickAction('instruction')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-teal-700 bg-teal-50/80 hover:bg-teal-100 cursor-pointer transition-colors">
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-blue-700 bg-blue-50/80 hover:bg-blue-100 cursor-pointer transition-colors">
                 <Plus className="h-3.5 w-3.5" /> Instruction
               </button>
             </div>
@@ -361,9 +361,9 @@ function NotesPanel({ patient }: { patient: PatientBed }) {
                 </div>
               ))}
               {pendingInstructions.map((inst, i) => (
-                <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-teal-50/70 text-xs">
-                  <span className="font-bold text-teal-700"><ClipboardList className="h-3 w-3 inline mr-1" />{inst}</span>
-                  <button onClick={() => setPendingInstructions(p => p.filter((_, j) => j !== i))} className="text-teal-400 hover:text-red-500 cursor-pointer"><X className="h-3.5 w-3.5" /></button>
+                <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-blue-50/70 text-xs">
+                  <span className="font-bold text-blue-700"><ClipboardList className="h-3 w-3 inline mr-1" />{inst}</span>
+                  <button onClick={() => setPendingInstructions(p => p.filter((_, j) => j !== i))} className="text-blue-400 hover:text-red-500 cursor-pointer"><X className="h-3.5 w-3.5" /></button>
                 </div>
               ))}
             </div>
@@ -412,7 +412,7 @@ function NotesPanel({ patient }: { patient: PatientBed }) {
                         <p key={i} className="text-xs font-bold text-amber-700 mt-1"><FlaskConical className="h-3 w-3 inline mr-1" />{t.name} ({t.urgency})</p>
                       ))}
                       {note.instructions?.map((inst, i) => (
-                        <p key={i} className="text-xs font-bold text-teal-700 mt-1"><ClipboardList className="h-3 w-3 inline mr-1" />{inst}</p>
+                        <p key={i} className="text-xs font-bold text-blue-700 mt-1"><ClipboardList className="h-3 w-3 inline mr-1" />{inst}</p>
                       ))}
                     </div>
                   )

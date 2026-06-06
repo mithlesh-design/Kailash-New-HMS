@@ -24,7 +24,7 @@ export default function ReceptionTPA() {
     { label: 'Claims value', value: `₹${(totalClaimsValue / 100000).toFixed(1)}L`, icon: FileText, tint: 'bg-blue-50 text-blue-600' },
     { label: 'Pending approvals', value: `${pendingApprovals}`, icon: Clock, tint: 'bg-amber-50 text-amber-600' },
     { label: 'Approved', value: `${approved}`, icon: CheckCircle2, tint: 'bg-green-50 text-green-600' },
-    { label: 'Active claims', value: `${claims.length}`, icon: ShieldCheck, tint: 'bg-teal-50 text-teal-600' },
+    { label: 'Active claims', value: `${claims.length}`, icon: ShieldCheck, tint: 'bg-blue-50 text-blue-600' },
   ]
 
   return (
@@ -46,7 +46,7 @@ export default function ReceptionTPA() {
           <div key={c.id} className="rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_4px_16px_rgba(15,23,42,0.04)] p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="h-10 w-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center flex-shrink-0"><ShieldCheck className="h-5 w-5" /></span>
+                <span className="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0"><ShieldCheck className="h-5 w-5" /></span>
                 <div>
                   <p className="text-[14.5px] font-bold text-slate-900">{c.patientName}</p>
                   <p className="text-[12px] text-slate-500">{c.provider} · ₹{c.amount.toLocaleString('en-IN')}{c.tpaReferenceId ? ` · ${c.tpaReferenceId}` : ''}</p>

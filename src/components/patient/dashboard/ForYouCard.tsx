@@ -17,7 +17,7 @@ function nudgesFor(mode: LiveMode, stage: OpdStage): Nudge[] {
     if (stage === 'booked' || stage === 'waiting_room') return [
       { icon: Video, tint: 'bg-blue-50 text-blue-600', title: 'Be ready for your video call', detail: 'Find a quiet, well-lit spot and test your camera & mic.', cta: 'Test camera & mic', priority: true },
       { icon: Upload, tint: 'bg-blue-50 text-blue-600', title: 'Add your past reports', detail: 'Share old prescriptions or reports so your doctor is prepared.', cta: 'Upload reports' },
-      { icon: Stethoscope, tint: 'bg-teal-50 text-teal-600', title: 'Answer a few questions', detail: 'A quick pre-consult helps your doctor make the most of the call.', cta: 'Start pre-consult' },
+      { icon: Stethoscope, tint: 'bg-blue-50 text-blue-600', title: 'Answer a few questions', detail: 'A quick pre-consult helps your doctor make the most of the call.', cta: 'Start pre-consult' },
     ]
     if (stage === 'in_call') return [
       { icon: Video, tint: 'bg-emerald-50 text-emerald-600', title: 'Your consultation is on', detail: 'Your AI scribe is noting key points for your summary.', cta: 'Back to call', priority: true },
@@ -33,7 +33,7 @@ function nudgesFor(mode: LiveMode, stage: OpdStage): Nudge[] {
   if (stage === 'waiting' || stage === 'vitals') return [
     { icon: Activity, tint: 'bg-blue-50 text-blue-600', title: "We'll call you for vitals", detail: 'Keep your phone close — your live status updates right here.', cta: 'View live status', priority: true },
     { icon: Upload, tint: 'bg-blue-50 text-blue-600', title: 'Add your past reports', detail: 'Share old prescriptions or lab reports with your doctor.', cta: 'Upload reports' },
-    { icon: MapPin, tint: 'bg-teal-50 text-teal-600', title: 'Find your way', detail: 'Directions to the vitals room and consultation.', cta: 'Hospital map' },
+    { icon: MapPin, tint: 'bg-blue-50 text-blue-600', title: 'Find your way', detail: 'Directions to the vitals room and consultation.', cta: 'Hospital map' },
   ]
   if (stage === 'consulting') return [
     { icon: Stethoscope, tint: 'bg-emerald-50 text-emerald-600', title: "You're with the doctor", detail: 'Your AI brief was shared so this visit is quicker.', cta: 'My record', priority: true },

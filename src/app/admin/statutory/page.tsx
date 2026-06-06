@@ -34,7 +34,7 @@ const STATUS_LABEL: Record<StatutoryStatus, string> = {
 
 const TYPE_TINT: Record<StatutoryType, string> = {
   PF:            'bg-blue-100 text-blue-800',
-  ESI:           'bg-cyan-100 text-cyan-800',
+  ESI:           'bg-blue-100 text-blue-800',
   GSTR1:         'bg-blue-100 text-blue-800',
   GSTR3B:        'bg-blue-100 text-blue-800',
   TDS:           'bg-indigo-100 text-indigo-800',

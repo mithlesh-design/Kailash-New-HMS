@@ -25,7 +25,7 @@ const STYLE: Record<Cat, { Icon: typeof FileText; tint: string }> = {
   'Forms': { Icon: ClipboardList, tint: 'bg-blue-50 text-blue-600' },
   'Receipts': { Icon: Receipt, tint: 'bg-amber-50 text-amber-600' },
   'Token slips': { Icon: Ticket, tint: 'bg-blue-50 text-blue-600' },
-  'Reports': { Icon: FileText, tint: 'bg-teal-50 text-teal-600' },
+  'Reports': { Icon: FileText, tint: 'bg-blue-50 text-blue-600' },
   'Insurance': { Icon: ShieldCheck, tint: 'bg-rose-50 text-rose-600' },
 }
 

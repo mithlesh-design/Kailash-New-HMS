@@ -19,7 +19,7 @@ const MODALITY_TINT: Record<Modality, string> = {
   XR: 'bg-blue-50 text-blue-700 border-blue-200',
   CT: 'bg-blue-50 text-blue-700 border-blue-200',
   MRI: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  US: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+  US: 'bg-blue-50 text-blue-700 border-blue-200',
   MAMMO: 'bg-blue-50 text-blue-700 border-blue-200',
   NM: 'bg-amber-50 text-amber-700 border-amber-200',
 }

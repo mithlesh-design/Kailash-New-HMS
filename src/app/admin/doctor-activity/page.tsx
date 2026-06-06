@@ -66,7 +66,7 @@ export default function AdminDoctorActivity() {
               <tr key={doc.id} className="border-b border-slate-50 hover:bg-slate-50/60 transition">
                 <td className="py-3 pr-3">
                   <div className="flex items-center gap-2.5">
-                    <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white flex items-center justify-center text-[12px] font-bold flex-shrink-0">{initials(doc.name)}</span>
+                    <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-500 text-white flex items-center justify-center text-[12px] font-bold flex-shrink-0">{initials(doc.name)}</span>
                     <div><p className="text-[13.5px] font-bold text-slate-900 leading-tight">{doc.name}</p><p className="text-[11px] text-slate-500">{doc.department}</p></div>
                   </div>
                 </td>

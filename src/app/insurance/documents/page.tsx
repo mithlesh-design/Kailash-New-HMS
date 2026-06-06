@@ -155,7 +155,7 @@ export default function InsuranceDocumentsPage() {
       {allMandatoryMet && (
         <button
           onClick={() => toast.success('Claim package submitted to insurer — reference: CLM-2026-' + Math.floor(Math.random() * 9000 + 1000))}
-          className="w-full py-3 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 transition-colors"
+          className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors"
         >
           Submit Complete Claim Package
         </button>

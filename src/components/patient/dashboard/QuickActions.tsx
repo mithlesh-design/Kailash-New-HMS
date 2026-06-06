@@ -7,7 +7,7 @@ const ACTIONS = [
   { icon: CalendarPlus, label: "Book visit", sub: "AI best slot", href: "/patient/appointments", tint: "from-blue-500 to-indigo-500" },
   { icon: Video, label: "Teleconsult", sub: "Video visit", href: "/patient/teleconsult", tint: "from-blue-500 to-blue-500" },
   { icon: CreditCard, label: "Pay bill", sub: "View dues", href: "/patient/billing", tint: "from-amber-500 to-orange-500" },
-  { icon: FileText, label: "My reports", sub: "Results & docs", href: "/patient/records", tint: "from-teal-500 to-cyan-500" },
+  { icon: FileText, label: "My reports", sub: "Results & docs", href: "/patient/records", tint: "from-blue-500 to-blue-500" },
   { icon: Salad, label: "Diet plan", sub: "Personalized", href: "/patient/followup", tint: "from-green-500 to-emerald-500" },
   { icon: MessageSquareText, label: "Ask AI", sub: "Health companion", href: "/patient/assistant", tint: "from-blue-500 to-blue-500" },
 ]

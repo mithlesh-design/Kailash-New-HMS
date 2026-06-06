@@ -34,7 +34,7 @@ export default function DoctorAnalytics() {
 
   const tiles = [
     { label: 'Total consultations', value: t.consults, icon: Users, tint: 'bg-blue-50 text-blue-600' },
-    { label: 'In-person (OPD)', value: t.opd, icon: Building2, tint: 'bg-teal-50 text-teal-600' },
+    { label: 'In-person (OPD)', value: t.opd, icon: Building2, tint: 'bg-blue-50 text-blue-600' },
     { label: 'Online consults', value: t.online, icon: Video, tint: 'bg-blue-50 text-blue-600' },
     { label: 'Tests ordered', value: t.tests, icon: FlaskConical, tint: 'bg-rose-50 text-rose-600' },
     { label: 'Prescriptions', value: t.prescriptions, icon: Pill, tint: 'bg-blue-50 text-blue-600' },
@@ -113,7 +113,7 @@ export default function DoctorAnalytics() {
         <div className="flex items-center gap-2 mb-2"><Activity className="h-4.5 w-4.5 text-slate-400" /><h3 className="text-[15px] font-bold text-slate-900">Consultation mix · {periodLabel}</h3></div>
         <div className="flex items-center gap-3 mb-2">
           <span className="text-[12.5px] font-semibold text-slate-500 w-24">In-person</span>
-          <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden"><div className="h-full bg-teal-500" style={{ width: `${t.consults ? (t.opd / t.consults) * 100 : 0}%` }} /></div>
+          <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${t.consults ? (t.opd / t.consults) * 100 : 0}%` }} /></div>
           <span className="text-[12.5px] font-bold text-slate-700 w-10 text-right">{t.opd}</span>
         </div>
         <div className="flex items-center gap-3">

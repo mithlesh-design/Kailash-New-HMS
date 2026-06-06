@@ -47,7 +47,7 @@ export default function InpatientChart() {
       <aside className="lg:w-72 flex-shrink-0 rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-5 overflow-y-auto">
         <button onClick={() => router.push('/doctor/ipd')} className="text-[12.5px] font-semibold text-slate-500 hover:text-slate-700 flex items-center gap-1 mb-4"><ArrowLeft className="h-4 w-4" /> All inpatients</button>
         <div className="flex items-center gap-3 mb-4">
-          <span className={cn("h-12 w-12 rounded-2xl text-white flex items-center justify-center font-bold text-[16px]", ip.condition === 'Critical' ? 'bg-gradient-to-br from-red-500 to-rose-600' : 'bg-gradient-to-br from-blue-500 to-cyan-500')}>{initials(ip.name)}</span>
+          <span className={cn("h-12 w-12 rounded-2xl text-white flex items-center justify-center font-bold text-[16px]", ip.condition === 'Critical' ? 'bg-gradient-to-br from-red-500 to-rose-600' : 'bg-gradient-to-br from-blue-500 to-blue-500')}>{initials(ip.name)}</span>
           <div className="min-w-0">
             <p className="text-[17px] font-bold text-slate-900 leading-tight truncate">{ip.name}</p>
             <p className="text-[12.5px] text-slate-500">{ip.patientId} · {ip.age}y · {ip.gender}</p>

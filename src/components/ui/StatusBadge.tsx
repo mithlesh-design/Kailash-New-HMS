@@ -14,7 +14,7 @@ const VARIANT_CLASSES: Record<Variant, string> = {
   danger:  'bg-red-50    text-red-700    border-red-200',
   warning: 'bg-amber-50  text-amber-700  border-amber-200',
   blue:    'bg-blue-50   text-blue-700   border-blue-200',
-  teal:    'bg-teal-50   text-teal-700   border-teal-200',
+  teal:    'bg-blue-50   text-blue-700   border-blue-200',
   muted:   'bg-slate-50  text-slate-600  border-slate-200',
   purple:  'bg-blue-50 text-blue-700 border-blue-200',
 }
@@ -24,7 +24,7 @@ const DOT_CLASSES: Record<Variant, string> = {
   danger:  'bg-red-500',
   warning: 'bg-amber-500',
   blue:    'bg-blue-500',
-  teal:    'bg-teal-500',
+  teal:    'bg-blue-500',
   muted:   'bg-slate-400',
   purple:  'bg-blue-500',
 }

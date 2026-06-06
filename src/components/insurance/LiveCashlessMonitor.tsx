@@ -200,7 +200,7 @@ export function LiveCashlessMonitor() {
     <div className="rounded-xl bg-white border border-slate-200 overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <Activity className="h-4 w-4 text-teal-600" />
+          <Activity className="h-4 w-4 text-blue-600" />
           <h2 className="text-sm font-bold text-slate-900">Live cashless monitor</h2>
           <span className="text-[11px] font-bold text-slate-500">{cases.length} active</span>
           {breachCount > 0 && (
@@ -209,7 +209,7 @@ export function LiveCashlessMonitor() {
             </span>
           )}
         </div>
-        <Link href="/insurance/claims" className="text-[11px] font-bold text-teal-700 hover:underline flex items-center gap-0.5">
+        <Link href="/insurance/claims" className="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-0.5">
           Open claims <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
@@ -262,7 +262,7 @@ export function LiveCashlessMonitor() {
                   <span className="text-[11px] font-bold text-slate-400">{c.patientId}</span>
                   <span className={cn("text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border", meta.tint)}>{meta.label}</span>
                   {c.claimId && <span className="text-[10px] text-slate-500 font-mono">{c.claimId}</span>}
-                  {c.tpaRef && <span className="text-[10px] text-cyan-700 bg-cyan-50 border border-cyan-200 px-1.5 py-0.5 rounded">TPA {c.tpaRef}</span>}
+                  {c.tpaRef && <span className="text-[10px] text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">TPA {c.tpaRef}</span>}
                   {c.denialRisk != null && c.denialRisk >= 60 && (
                     <span className="text-[10px] font-bold text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded flex items-center gap-0.5">
                       <ShieldAlert className="h-2.5 w-2.5" />Risk {c.denialRisk}
@@ -270,7 +270,7 @@ export function LiveCashlessMonitor() {
                   )}
                 </div>
                 <p className="text-xs text-slate-600 mt-0.5">
-                  <ShieldCheck className="inline h-3 w-3 text-teal-500 mr-1" />
+                  <ShieldCheck className="inline h-3 w-3 text-blue-500 mr-1" />
                   <b>{c.insurer}</b>
                   {c.policyNumber && <span className="text-slate-400 font-mono"> · {c.policyNumber}</span>}
                 </p>

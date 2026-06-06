@@ -51,7 +51,7 @@ export default function CheckinPage() {
           </div>
           <div className="flex items-center gap-6 mt-8 pt-6 border-t border-slate-200">
             <div className="flex items-center gap-2 text-[13px] font-bold text-slate-600"><Shield className="h-4.5 w-4.5 text-green-500" /> AES-256 Encrypted</div>
-            <div className="flex items-center gap-2 text-[13px] font-bold text-slate-600"><Clock className="h-4.5 w-4.5 text-teal-500" /> Under 2 minutes</div>
+            <div className="flex items-center gap-2 text-[13px] font-bold text-slate-600"><Clock className="h-4.5 w-4.5 text-blue-500" /> Under 2 minutes</div>
           </div>
         </div>
       </div>
@@ -79,10 +79,10 @@ export default function CheckinPage() {
               <p className="font-bold text-[17px] text-slate-900">Kailash Healthcare — OPD</p>
               <p className="text-[13px] font-medium text-slate-500">Scan with your phone camera • No app needed</p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-teal-50 border border-teal-100 w-full justify-center">
-              <Sparkles className="h-4 w-4 text-teal-600" />
-              <span className="text-[13px] font-bold text-teal-700">AI Triage Active</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse ml-1" />
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 w-full justify-center">
+              <Sparkles className="h-4 w-4 text-blue-600" />
+              <span className="text-[13px] font-bold text-blue-700">AI Triage Active</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse ml-1" />
             </div>
           </div>
 

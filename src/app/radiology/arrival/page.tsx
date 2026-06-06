@@ -19,7 +19,7 @@ const MODALITY_TINT: Record<Modality, string> = {
   XR: 'bg-blue-50 text-blue-700 border-blue-200',
   CT: 'bg-blue-50 text-blue-700 border-blue-200',
   MRI: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  US: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+  US: 'bg-blue-50 text-blue-700 border-blue-200',
   MAMMO: 'bg-blue-50 text-blue-700 border-blue-200',
   NM: 'bg-amber-50 text-amber-700 border-amber-200',
 }
@@ -81,7 +81,7 @@ export default function RadiologyArrivalPage() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <UserCheck className="h-6 w-6 text-cyan-600" />Arrival desk
+            <UserCheck className="h-6 w-6 text-blue-600" />Arrival desk
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             Check patients in when they arrive · capture contrast consent if not yet done · alert the tech
@@ -111,9 +111,9 @@ export default function RadiologyArrivalPage() {
           <p className="text-2xl font-bold text-red-700">{lateCount}</p>
           <p className="text-xs font-semibold text-red-700 mt-1">Late (past slot, not arrived)</p>
         </div>
-        <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-3">
-          <p className="text-2xl font-bold text-cyan-700">{arrived.length}</p>
-          <p className="text-xs font-semibold text-cyan-700 mt-1">Currently checked in</p>
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-3">
+          <p className="text-2xl font-bold text-blue-700">{arrived.length}</p>
+          <p className="text-xs font-semibold text-blue-700 mt-1">Currently checked in</p>
         </div>
       </div>
 
@@ -177,7 +177,7 @@ export default function RadiologyArrivalPage() {
                         </button>
                       ) : (
                         <button onClick={() => onArrive(s)}
-                          className="flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white cursor-pointer">
+                          className="flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
                           <UserCheck className="h-3.5 w-3.5" />Check in
                         </button>
                       )}
@@ -196,13 +196,13 @@ export default function RadiologyArrivalPage() {
           <h2 className="text-sm font-bold text-slate-700 mb-2">Currently checked in ({arrived.length})</h2>
           <ul className="space-y-2">
             {arrived.slice(0, 6).map(s => (
-              <li key={s.id} className="rounded-xl bg-cyan-50/40 border border-cyan-200 p-3 flex items-center gap-3">
-                <UserCheck className="h-4 w-4 text-cyan-600 flex-shrink-0" />
+              <li key={s.id} className="rounded-xl bg-blue-50/40 border border-blue-200 p-3 flex items-center gap-3">
+                <UserCheck className="h-4 w-4 text-blue-600 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-slate-900">{s.patientName} <span className="text-[11px] font-bold text-slate-400">{s.patientId}</span></p>
                   <p className="text-xs text-slate-500">{s.modality} {s.name} · arrived {Math.round((Date.now() - new Date(s.arrivedAt ?? '').getTime()) / 60000)}m ago</p>
                 </div>
-                <a href="/radiology/bench" className="text-[11px] font-bold text-cyan-700 hover:underline flex items-center gap-0.5">
+                <a href="/radiology/bench" className="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-0.5">
                   Modality bench <ArrowRight className="h-3 w-3" />
                 </a>
               </li>

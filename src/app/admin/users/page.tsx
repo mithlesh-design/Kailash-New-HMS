@@ -42,7 +42,7 @@ const ROLE_TINT: Record<string, string> = {
   lab: 'bg-blue-50 text-blue-700',
   pharmacy: 'bg-blue-50 text-blue-700',
   admin: 'bg-blue-50 text-blue-700',
-  quality: 'bg-cyan-50 text-cyan-700',
+  quality: 'bg-blue-50 text-blue-700',
   audit_officer: 'bg-indigo-50 text-indigo-700',
 }
 

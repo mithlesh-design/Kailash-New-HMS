@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 const SOURCES: RxSource[] = ["OPD", "IPD", "ICU", "OT", "Home Rx", "Discharge"]
 const SOURCE_STYLE: Record<RxSource, string> = {
   OPD: "bg-blue-50 text-blue-700", IPD: "bg-indigo-50 text-indigo-700", ICU: "bg-red-50 text-red-700",
-  OT: "bg-blue-50 text-blue-700", "Home Rx": "bg-teal-50 text-teal-700", Discharge: "bg-amber-50 text-amber-700",
+  OT: "bg-blue-50 text-blue-700", "Home Rx": "bg-blue-50 text-blue-700", Discharge: "bg-amber-50 text-amber-700",
 }
 const STATUS_STYLE: Record<string, string> = {
   queued: "bg-amber-100 text-amber-700", preparing: "bg-blue-100 text-blue-700", ready: "bg-green-100 text-green-700",

@@ -19,7 +19,7 @@ type Row = Patient & { mode: Mode }
 
 const STATUS_TINT: Record<QueueStatus, string> = {
   waiting: 'bg-amber-50 text-amber-700', vitals: 'bg-sky-50 text-sky-700', consulting: 'bg-blue-50 text-blue-700',
-  pharmacy: 'bg-teal-50 text-teal-700', billing: 'bg-orange-50 text-orange-700', done: 'bg-green-50 text-green-700',
+  pharmacy: 'bg-blue-50 text-blue-700', billing: 'bg-orange-50 text-orange-700', done: 'bg-green-50 text-green-700',
 }
 const TRIAGE_TINT: Record<string, string> = {
   Critical: 'bg-red-100 text-red-700', High: 'bg-orange-100 text-orange-700', Medium: 'bg-amber-100 text-amber-700', Low: 'bg-slate-100 text-slate-500',
@@ -117,7 +117,7 @@ export default function DoctorRecords() {
                     className="border-b border-slate-50 last:border-0 hover:bg-blue-50/40 cursor-pointer transition">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <span className={cn("h-9 w-9 rounded-xl text-white flex items-center justify-center font-bold text-[12.5px] flex-shrink-0", r.mode === 'online' ? "bg-gradient-to-br from-blue-500 to-blue-500" : "bg-gradient-to-br from-blue-500 to-cyan-500")}>{initials(r.name)}</span>
+                        <span className={cn("h-9 w-9 rounded-xl text-white flex items-center justify-center font-bold text-[12.5px] flex-shrink-0", r.mode === 'online' ? "bg-gradient-to-br from-blue-500 to-blue-500" : "bg-gradient-to-br from-blue-500 to-blue-500")}>{initials(r.name)}</span>
                         <div className="min-w-0">
                           <p className="text-[13.5px] font-bold text-slate-900 truncate flex items-center gap-1.5">
                             {r.name}
@@ -129,7 +129,7 @@ export default function DoctorRecords() {
                     </td>
                     <td className="px-4 py-3 text-[13px] text-slate-600 whitespace-nowrap">{r.age}y · {r.gender}</td>
                     <td className="px-4 py-3">
-                      <span className={cn("inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full", r.mode === 'online' ? "bg-blue-50 text-blue-700" : "bg-teal-50 text-teal-700")}>
+                      <span className={cn("inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full", r.mode === 'online' ? "bg-blue-50 text-blue-700" : "bg-blue-50 text-blue-700")}>
                         {r.mode === 'online' ? <><Video className="h-3 w-3" /> Online</> : <><Building2 className="h-3 w-3" /> In-person</>}
                       </span>
                     </td>
@@ -153,10 +153,10 @@ export default function DoctorRecords() {
               className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white z-50 shadow-2xl overflow-y-auto" role="dialog" aria-modal="true" aria-label="Patient record">
               <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-4 flex items-start justify-between gap-3 z-10">
                 <div className="flex items-center gap-3">
-                  <span className={cn("h-12 w-12 rounded-2xl text-white flex items-center justify-center font-bold text-[16px]", selected.mode === 'online' ? "bg-gradient-to-br from-blue-500 to-blue-500" : "bg-gradient-to-br from-blue-500 to-cyan-500")}>{initials(selected.name)}</span>
+                  <span className={cn("h-12 w-12 rounded-2xl text-white flex items-center justify-center font-bold text-[16px]", selected.mode === 'online' ? "bg-gradient-to-br from-blue-500 to-blue-500" : "bg-gradient-to-br from-blue-500 to-blue-500")}>{initials(selected.name)}</span>
                   <div>
                     <p className="text-[17px] font-bold text-slate-900 leading-tight">{selected.name}</p>
-                    <p className="text-[12.5px] text-slate-500">{selected.id} · {selected.age}y · {selected.gender} · <span className={cn("font-semibold", selected.mode === 'online' ? "text-blue-600" : "text-teal-600")}>{selected.mode === 'online' ? 'Online' : 'In-person'}</span></p>
+                    <p className="text-[12.5px] text-slate-500">{selected.id} · {selected.age}y · {selected.gender} · <span className={cn("font-semibold", selected.mode === 'online' ? "text-blue-600" : "text-blue-600")}>{selected.mode === 'online' ? 'Online' : 'In-person'}</span></p>
                   </div>
                 </div>
                 <button onClick={() => setSelectedId(null)} aria-label="Close" className="p-1.5 rounded-lg hover:bg-slate-100"><X className="h-4.5 w-4.5 text-slate-500" /></button>

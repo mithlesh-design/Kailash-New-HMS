@@ -84,7 +84,7 @@ export default function ReceptionBilling() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 <Amt label="Bill total" value={b.subtotal} />
-                <Amt label="Insurance" value={b.insuranceCovered} prefix="−" tint="text-teal-600" icon />
+                <Amt label="Insurance" value={b.insuranceCovered} prefix="−" tint="text-blue-600" icon />
                 <Amt label="Paid" value={b.paidAmount} tint="text-green-600" />
                 <Amt label="Outstanding" value={due} tint={due > 0 ? "text-rose-600" : "text-slate-900"} bold />
               </div>

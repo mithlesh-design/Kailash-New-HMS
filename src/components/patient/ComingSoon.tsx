@@ -7,7 +7,7 @@ export function ComingSoon({ title, note, Icon }: { title: string; note: string;
     <div className="max-w-3xl mx-auto pb-10">
       <h1 className="text-[24px] font-bold text-slate-900 tracking-tight mb-5">{title}</h1>
       <div className="rounded-3xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] p-10 text-center">
-        <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto mb-4">
+        <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
           <Icon className="h-8 w-8 text-white" />
         </div>
         <p className="text-[17px] font-bold text-slate-900">{title}</p>

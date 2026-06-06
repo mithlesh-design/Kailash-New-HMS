@@ -107,7 +107,7 @@ export default function PatientInsurance() {
       </div>
 
       {/* Policy card */}
-      <div className="rounded-3xl p-5 text-white bg-gradient-to-br from-teal-500 to-cyan-600 shadow-[0_10px_30px_rgba(30,58,138,0.3)]">
+      <div className="rounded-3xl p-5 text-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-[0_10px_30px_rgba(30,58,138,0.3)]">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" /><span className="text-[13px] font-bold uppercase tracking-wider text-white/80">Cashless · Active</span></div>
           <span className="text-[13px] font-semibold text-white/90">{mine.provider}</span>
@@ -147,12 +147,12 @@ export default function PatientInsurance() {
             <div key={s.label} className="flex items-center flex-1 last:flex-none">
               <div className="flex flex-col items-center gap-1">
                 <div className={cn('h-8 w-8 rounded-full flex items-center justify-center',
-                  i <= currentStageIdx ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-400')}>
+                  i <= currentStageIdx ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400')}>
                   {i < currentStageIdx ? <CheckCircle className="h-4.5 w-4.5" /> : i === currentStageIdx ? <Clock className="h-4 w-4" /> : <span className="text-[12px] font-bold">{i + 1}</span>}
                 </div>
-                <span className={cn('text-[11px] font-semibold', i <= currentStageIdx ? 'text-teal-600' : 'text-slate-400')}>{s.label}</span>
+                <span className={cn('text-[11px] font-semibold', i <= currentStageIdx ? 'text-blue-600' : 'text-slate-400')}>{s.label}</span>
               </div>
-              {i < STAGES.length - 1 && <div className={cn('flex-1 h-0.5 mx-1 -mt-4 rounded', i < currentStageIdx ? 'bg-teal-600' : 'bg-slate-200')} />}
+              {i < STAGES.length - 1 && <div className={cn('flex-1 h-0.5 mx-1 -mt-4 rounded', i < currentStageIdx ? 'bg-blue-600' : 'bg-slate-200')} />}
             </div>
           ))}
         </div>
@@ -209,7 +209,7 @@ export default function PatientInsurance() {
           </span>
         </div>
         <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">
-          <div className="h-full bg-teal-500" style={{ width: `${docsCompleteness}%` }} />
+          <div className="h-full bg-blue-500" style={{ width: `${docsCompleteness}%` }} />
         </div>
         <div className="space-y-2">
           {docs.map(d => (

@@ -442,7 +442,7 @@ function FloorRow(props: {
                         status === 'released'   ? (crit ? 'bg-red-100 text-red-700' : flagged > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')
                         : status === 'verified' ? 'bg-blue-100 text-blue-700'
                         : status === 'entered'  ? 'bg-blue-100 text-blue-700'
-                        : status === 'in_progress' || status === 'on_bench' ? 'bg-cyan-100 text-cyan-700'
+                        : status === 'in_progress' || status === 'on_bench' ? 'bg-blue-100 text-blue-700'
                         : 'bg-slate-100 text-slate-500')}>
                         {status.replace('_', ' ')}
                       </span>
@@ -458,7 +458,7 @@ function FloorRow(props: {
                       s.status === 'released' ? 'bg-emerald-100 text-emerald-700'
                       : s.status === 'verified' ? 'bg-blue-100 text-blue-700'
                       : s.status === 'reported' ? 'bg-blue-100 text-blue-700'
-                      : s.status === 'acquired' ? 'bg-cyan-100 text-cyan-700'
+                      : s.status === 'acquired' ? 'bg-blue-100 text-blue-700'
                       : s.status === 'acquiring' || s.status === 'arrived' ? 'bg-amber-100 text-amber-700'
                       : 'bg-slate-100 text-slate-500')}>
                       {s.status.replace('_', ' ')}

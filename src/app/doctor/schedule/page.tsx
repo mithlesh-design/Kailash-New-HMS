@@ -61,8 +61,8 @@ export default function DoctorSchedule() {
 
       {/* Availability — driven by Settings */}
       <div className="rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-4 flex flex-wrap items-center gap-2.5">
-        <span className="flex items-center gap-1.5 text-[13px] font-bold text-slate-800"><Clock className="h-4 w-4 text-teal-600" /> {profile.hoursStart}–{profile.hoursEnd}</span>
-        <span className={cn("text-[11.5px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1", profile.availableForOPD ? "bg-teal-50 text-teal-700" : "bg-slate-100 text-slate-400")}><Building2 className="h-3 w-3" /> OPD {profile.availableForOPD ? 'on' : 'off'}</span>
+        <span className="flex items-center gap-1.5 text-[13px] font-bold text-slate-800"><Clock className="h-4 w-4 text-blue-600" /> {profile.hoursStart}–{profile.hoursEnd}</span>
+        <span className={cn("text-[11.5px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1", profile.availableForOPD ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-400")}><Building2 className="h-3 w-3" /> OPD {profile.availableForOPD ? 'on' : 'off'}</span>
         <span className={cn("text-[11.5px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1", profile.availableForOnline ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-400")}><Video className="h-3 w-3" /> Online {profile.availableForOnline ? 'on' : 'off'}</span>
         {profile.onLeave && <span className="text-[11.5px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 flex items-center gap-1"><Plane className="h-3 w-3" /> On leave{profile.leaveUntil ? ` · until ${new Date(profile.leaveUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}</span>}
         <Link href="/doctor/settings" className="ml-auto text-[12px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"><Settings className="h-3.5 w-3.5" /> Edit</Link>
@@ -102,7 +102,7 @@ export default function DoctorSchedule() {
           <div className="space-y-2.5">
             {upcomingAppts.map(a => (
               <div key={a.id} className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4">
-                <span className={cn("h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0", a.mode === 'online' ? 'bg-blue-50 text-blue-600' : 'bg-teal-50 text-teal-600')}>
+                <span className={cn("h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0", a.mode === 'online' ? 'bg-blue-50 text-blue-600' : 'bg-blue-50 text-blue-600')}>
                   {a.mode === 'online' ? <Video className="h-4.5 w-4.5" /> : <Building2 className="h-4.5 w-4.5" />}
                 </span>
                 <div className="flex-1 min-w-0">

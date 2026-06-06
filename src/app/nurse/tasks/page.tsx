@@ -13,7 +13,7 @@ const CATEGORY_COLOR: Record<NurseTaskCategory, string> = {
   Medication:    'text-red-600 bg-red-50 border-red-100',
   Vitals:        'text-green-600 bg-green-50 border-green-100',
   Assessment:    'text-blue-600 bg-blue-50 border-blue-100',
-  Hygiene:       'text-cyan-600 bg-cyan-50 border-cyan-100',
+  Hygiene:       'text-blue-600 bg-blue-50 border-blue-100',
   Mobility:      'text-amber-600 bg-amber-50 border-amber-100',
   Documentation: 'text-slate-600 bg-slate-50 border-slate-100',
   Procedure:     'text-blue-600 bg-blue-50 border-blue-100',

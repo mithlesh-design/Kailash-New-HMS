@@ -156,7 +156,7 @@ export default function RadiologyOverview() {
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 items-stretch">
           {[
             { label: 'Ordered',     sub: 'Needs slot',       count: m.kpis.orderedOnly,    color: 'border-amber-200 bg-amber-50',     icon: ClipboardList, fg: 'text-amber-700',     href: '/radiology/schedule', cta: 'Book slot' },
-            { label: 'Scheduled',   sub: 'Awaiting arrival', count: m.kpis.scheduledOnly,  color: 'border-cyan-200 bg-cyan-50',       icon: Calendar,      fg: 'text-cyan-700',      href: '/radiology/arrival',  cta: 'Check in' },
+            { label: 'Scheduled',   sub: 'Awaiting arrival', count: m.kpis.scheduledOnly,  color: 'border-blue-200 bg-blue-50',       icon: Calendar,      fg: 'text-blue-700',      href: '/radiology/arrival',  cta: 'Check in' },
             { label: 'Arrived',     sub: 'Ready for scan',   count: m.kpis.arrivedOnly,    color: 'border-blue-200 bg-blue-50',       icon: UserCheck,     fg: 'text-blue-700',      href: '/radiology/bench',    cta: 'Acquire' },
             { label: 'Acquired',    sub: 'Pending read',     count: m.kpis.pendingRead,    color: 'border-blue-200 bg-blue-50',   icon: ScanLine,      fg: 'text-blue-700',    href: '/radiology/reading',  cta: 'Read' },
             { label: 'Reported',    sub: 'Pending verify',   count: m.kpis.pendingVerify,  color: 'border-blue-200 bg-blue-50',       icon: ShieldCheck,   fg: 'text-blue-700',      href: '/radiology/verification', cta: 'Verify' },

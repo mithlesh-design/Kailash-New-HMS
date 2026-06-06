@@ -51,7 +51,7 @@ const maxRev = Math.max(...REVENUE.map(r => r.opd + r.pharmacy))
 
 const DISEASE = [
   { disease: 'URTI / Respiratory', count: 312, pct: 38, color: 'bg-blue-600' },
-  { disease: 'Gastro / GI Disorders', count: 178, pct: 22, color: 'bg-teal-500' },
+  { disease: 'Gastro / GI Disorders', count: 178, pct: 22, color: 'bg-blue-500' },
   { disease: 'Hypertension', count: 143, pct: 17, color: 'bg-blue-600' },
   { disease: 'Diabetes Follow-up', count: 112, pct: 14, color: 'bg-amber-500' },
   { disease: 'Orthopaedic', count: 73, pct: 9, color: 'bg-red-500' },
@@ -239,7 +239,7 @@ export default function AdminAnalytics() {
           </div>
           <div className="flex gap-4 text-xs">
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-blue-600 inline-block" />OPD</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-teal-500 inline-block" />Pharmacy</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-blue-500 inline-block" />Pharmacy</span>
           </div>
         </div>
         <div className="flex items-end gap-3 h-44">
@@ -254,7 +254,7 @@ export default function AdminAnalytics() {
                   <motion.div
                     initial={{ height: 0 }} animate={{ height: `${pharmH}%` }}
                     transition={{ delay: 0.2 + i * 0.05, duration: 0.5 }}
-                    className="w-full bg-teal-500 rounded-t-sm"
+                    className="w-full bg-blue-500 rounded-t-sm"
                     style={{ height: `${pharmH}%` }}
                   />
                   <motion.div

@@ -54,7 +54,7 @@ export function LiveJourneyCard() {
         {/* "Your turn" call */}
         {meta?.isCall && (
           <motion.div key={stage} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-            className="relative rounded-2xl p-5 text-white overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 shadow-[0_10px_30px_rgba(16,185,129,0.35)]">
+            className="relative rounded-2xl p-5 text-white overflow-hidden bg-gradient-to-br from-emerald-500 to-blue-600 shadow-[0_10px_30px_rgba(16,185,129,0.35)]">
             <motion.div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/15" animate={{ scale: [1, 1.25, 1], opacity: [0.5, 0.2, 0.5] }} transition={{ duration: 2, repeat: Infinity }} />
             <div className="relative flex items-start gap-4">
               <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0"><Icon className="h-6 w-6 text-white" /></div>

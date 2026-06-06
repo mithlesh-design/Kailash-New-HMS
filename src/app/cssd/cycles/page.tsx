@@ -117,7 +117,7 @@ export default function CSSDCyclesPage() {
     <div className="space-y-5 p-6 max-w-6xl mx-auto">
       <div>
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <Beaker className="h-6 w-6 text-teal-600" />Sterilization Cycles
+          <Beaker className="h-6 w-6 text-blue-600" />Sterilization Cycles
         </h1>
         <p className="text-sm text-slate-500 mt-1">Start cycles · BI / Chemical-indicator gating · NABH HIC evidence</p>
       </div>
@@ -146,7 +146,7 @@ export default function CSSDCyclesPage() {
               </select>
               <button onClick={onStart}
                 disabled={picked.size === 0}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                 <Play className="h-3.5 w-3.5" />Start cycle ({picked.size})
               </button>
             </div>
@@ -160,9 +160,9 @@ export default function CSSDCyclesPage() {
                 return (
                   <button key={i.id} onClick={() => togglePick(i.id)}
                     className={cn("flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer text-left",
-                      isPicked ? "bg-teal-50 border-teal-200" : "bg-white border-slate-200 hover:border-slate-300")}>
+                      isPicked ? "bg-blue-50 border-blue-200" : "bg-white border-slate-200 hover:border-slate-300")}>
                     <span className={cn("h-3.5 w-3.5 rounded border flex-shrink-0",
-                      isPicked ? "bg-teal-600 border-teal-600" : "bg-white border-slate-300")} />
+                      isPicked ? "bg-blue-600 border-blue-600" : "bg-white border-slate-300")} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-slate-800">{i.name}</p>
                       <p className="text-[11px] text-slate-500">{i.category} · qty {i.quantity} · {i.status}</p>

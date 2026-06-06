@@ -284,7 +284,7 @@ export default function OTDashboard() {
             { label: 'PAC done',     sub: 'ASA · M · NPO set',       count: pacDone,          color: 'border-blue-200 bg-blue-50',       icon: Stethoscope,      fg: 'text-blue-700',      href: '/ot/checklist', cta: 'Open PAC' },
             { label: 'Pre-op',       sub: `${whoOpen} WHO pending`,  count: preOp.length,     color: 'border-blue-200 bg-blue-50',   icon: ClipboardCheck,   fg: 'text-blue-700',    href: '/ot/checklist', cta: 'Sign-In' },
             { label: 'In progress',  sub: 'Time-Out → Sign-Out',     count: inProgress.length,color: 'border-blue-200 bg-blue-50',       icon: Heart,            fg: 'text-blue-700',      href: '/ot/checklist', cta: 'Track' },
-            { label: 'Recovery',     sub: 'PACU monitoring',         count: recovery.length,  color: 'border-cyan-200 bg-cyan-50',       icon: Wind,             fg: 'text-cyan-700',      href: '/ot/checklist', cta: 'Debrief' },
+            { label: 'Recovery',     sub: 'PACU monitoring',         count: recovery.length,  color: 'border-blue-200 bg-blue-50',       icon: Wind,             fg: 'text-blue-700',      href: '/ot/checklist', cta: 'Debrief' },
             { label: 'Completed',    sub: 'Ward transfer',           count: completed.length, color: 'border-emerald-200 bg-emerald-50', icon: LogOut,           fg: 'text-emerald-700',   href: '/ot/dashboard', cta: 'Archive' },
             { label: 'Critical',     sub: 'Open checklist',          count: criticalIncomplete.length, color: criticalIncomplete.length > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: AlertTriangle, fg: criticalIncomplete.length > 0 ? 'text-red-700' : 'text-slate-400', href: '/ot/checklist', cta: 'Resolve' },
           ].map((s, i, arr) => (
@@ -348,7 +348,7 @@ export default function OTDashboard() {
                       <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.mallampati ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-400')}>
                         M {a?.mallampati ?? '—'}
                       </span>
-                      <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.npoSince ? 'bg-cyan-50 border-cyan-200 text-cyan-700' : 'bg-white border-slate-200 text-slate-400')}>
+                      <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.npoSince ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-400')}>
                         NPO {a?.npoSince ? new Date(a.npoSince).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—'}
                       </span>
                       <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.technique ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-400')}>

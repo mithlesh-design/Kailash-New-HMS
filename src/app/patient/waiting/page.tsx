@@ -198,7 +198,7 @@ export default function WaitingRoomPage() {
   const [viewMode, setViewMode] = useState<'opd' | 'ipd'>('opd')
   const [notifications] = useState([
     { id: 1, text: 'Your vitals have been recorded.', time: '2 min ago', icon: Activity, color: 'text-green-500', bg: 'bg-green-50' },
-    { id: 2, text: 'AI brief sent to Dr. Priya Nair.', time: '1 min ago', icon: Sparkles, color: 'text-teal-500', bg: 'bg-teal-50' },
+    { id: 2, text: 'AI brief sent to Dr. Priya Nair.', time: '1 min ago', icon: Sparkles, color: 'text-blue-500', bg: 'bg-blue-50' },
     { id: 3, text: '3 patients ahead of you.', time: 'Just now', icon: Users, color: 'text-blue-500', bg: 'bg-blue-50' },
   ])
 
@@ -295,7 +295,7 @@ export default function WaitingRoomPage() {
             <div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Est. Wait Time</p>
               <p className="text-3xl font-bold text-slate-900">{waitMin} min</p>
-              <p className="text-xs font-medium text-teal-600 mt-1">AI predicted</p>
+              <p className="text-xs font-medium text-blue-600 mt-1">AI predicted</p>
             </div>
           </div>
         </motion.div>

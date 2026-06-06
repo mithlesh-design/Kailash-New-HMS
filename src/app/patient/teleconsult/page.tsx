@@ -43,7 +43,7 @@ function VideoStub({ name }: { name: string }) {
     <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
       <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)' }} />
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-        <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-3xl font-bold">{name.replace('Dr. ', '').split(' ').map(w => w[0]).join('')}</div>
+        <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center text-white text-3xl font-bold">{name.replace('Dr. ', '').split(' ').map(w => w[0]).join('')}</div>
         <p className="text-white font-semibold text-[17px]">{name}</p>
         <p className="text-white/50 text-[12px]">{now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</p>
       </div>

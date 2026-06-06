@@ -18,7 +18,7 @@ const EVENT_DOT: Record<string, string> = { info: 'bg-slate-300', success: 'bg-g
 
 const CONDITION_TINT: Record<Condition, string> = {
   Critical: 'bg-red-100 text-red-700', Serious: 'bg-orange-100 text-orange-700',
-  Stable: 'bg-blue-100 text-blue-700', Improving: 'bg-green-100 text-green-700', 'Discharge-ready': 'bg-teal-100 text-teal-700',
+  Stable: 'bg-blue-100 text-blue-700', Improving: 'bg-green-100 text-green-700', 'Discharge-ready': 'bg-blue-100 text-blue-700',
 }
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })

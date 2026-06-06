@@ -17,7 +17,7 @@ const KIND: Record<OrderKind, { icon: React.ElementType; tint: string }> = {
   test:     { icon: FlaskConical, tint: "bg-blue-50 text-blue-600 border-blue-100" },
   med:      { icon: Pill,         tint: "bg-blue-50 text-blue-600 border-blue-100" },
   iv:       { icon: Droplets,     tint: "bg-blue-50 text-blue-600 border-blue-100" },
-  referral: { icon: Send,         tint: "bg-teal-50 text-teal-600 border-teal-100" },
+  referral: { icon: Send,         tint: "bg-blue-50 text-blue-600 border-blue-100" },
   icu:      { icon: ArrowUpRight, tint: "bg-red-50 text-red-600 border-red-100" },
   ot:       { icon: Scissors,     tint: "bg-rose-50 text-rose-600 border-rose-100" },
 }
@@ -97,7 +97,7 @@ export default function NurseOrdersPage() {
                             {o.patientName} · {o.ward} {o.bed}{o.detail ? ` · ${o.detail}` : ""}
                           </p>
                           <div className="flex items-center gap-3 mt-1 text-[11px] flex-wrap">
-                            <span className="flex items-center gap-1 text-teal-700 font-semibold"><Stethoscope className="h-3 w-3" /> Ordered by {o.requestedBy}</span>
+                            <span className="flex items-center gap-1 text-blue-700 font-semibold"><Stethoscope className="h-3 w-3" /> Ordered by {o.requestedBy}</span>
                             <span className="flex items-center gap-1 text-slate-400"><Clock className="h-3 w-3" /> {timeAgo(o.at)}</span>
                             <span className="flex items-center gap-1 text-blue-600 font-semibold"><Sparkles className="h-3 w-3" /> {o.aiReason}</span>
                           </div>

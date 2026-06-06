@@ -52,7 +52,7 @@ export default function DoctorSettings() {
 
       {/* Consultation hours */}
       <div className={CARD}>
-        <h3 className="text-[15px] font-bold text-slate-900 mb-4 flex items-center gap-2"><Clock className="h-4.5 w-4.5 text-teal-600" /> Consultation hours</h3>
+        <h3 className="text-[15px] font-bold text-slate-900 mb-4 flex items-center gap-2"><Clock className="h-4.5 w-4.5 text-blue-600" /> Consultation hours</h3>
         <div className="grid grid-cols-2 gap-3">
           <div><label className={label}>Start</label><input type="time" value={p.hoursStart} onChange={e => p.setProfile({ hoursStart: e.target.value })} className={field} /></div>
           <div><label className={label}>End</label><input type="time" value={p.hoursEnd} onChange={e => p.setProfile({ hoursEnd: e.target.value })} className={field} /></div>

@@ -75,7 +75,7 @@ export default function PatientBilling() {
         </div>
         <div className="rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] p-4">
           <p className="text-[12px] text-slate-400 font-semibold">Insurance covered</p>
-          <p className="text-[20px] font-bold text-teal-600 mt-0.5">₹{ADMISSION.covered.toLocaleString('en-IN')}</p>
+          <p className="text-[20px] font-bold text-blue-600 mt-0.5">₹{ADMISSION.covered.toLocaleString('en-IN')}</p>
         </div>
         <div className="rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] p-4">
           <p className="text-[12px] text-slate-400 font-semibold">Outstanding</p>
@@ -124,8 +124,8 @@ export default function PatientBilling() {
             <span className="font-semibold text-slate-900">₹{ADMISSION.total.toLocaleString('en-IN')}</span>
           </div>
           <div className="flex items-center justify-between text-[13px]">
-            <span className="text-teal-700 flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> Cashless approved · {ADMISSION.insurer}</span>
-            <span className="font-semibold text-teal-700">− ₹{ADMISSION.covered.toLocaleString('en-IN')}</span>
+            <span className="text-blue-700 flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> Cashless approved · {ADMISSION.insurer}</span>
+            <span className="font-semibold text-blue-700">− ₹{ADMISSION.covered.toLocaleString('en-IN')}</span>
           </div>
           <div className="border-t border-slate-200 pt-2.5 flex items-center justify-between">
             <span className="text-[13px] font-bold text-slate-900">Your co-pay (paid)</span>
@@ -133,7 +133,7 @@ export default function PatientBilling() {
           </div>
           {/* coverage bar */}
           <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
-            <div className="h-full bg-teal-500 rounded-full" style={{ width: `${Math.round((ADMISSION.covered / ADMISSION.total) * 100)}%` }} />
+            <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.round((ADMISSION.covered / ADMISSION.total) * 100)}%` }} />
           </div>
           <p className="text-[11.5px] text-slate-400">{Math.round((ADMISSION.covered / ADMISSION.total) * 100)}% covered by your insurer · {100 - Math.round((ADMISSION.covered / ADMISSION.total) * 100)}% co-pay</p>
         </div>

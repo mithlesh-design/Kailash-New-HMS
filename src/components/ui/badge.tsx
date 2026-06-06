@@ -30,7 +30,7 @@ const VARIANT_STYLES: Record<BadgeVariant, string> = {
   info:     "bg-sky-50    text-sky-700    border-sky-200",
   muted:    "bg-slate-50  text-slate-500  border-slate-100",
   purple:   "bg-blue-50 text-blue-700 border-blue-200",
-  teal:     "bg-teal-50   text-teal-700   border-teal-200",
+  teal:     "bg-blue-50   text-blue-700   border-blue-200",
   orange:   "bg-orange-50 text-orange-700 border-orange-200",
 }
 
@@ -43,7 +43,7 @@ const DOT_STYLES: Record<BadgeVariant, string> = {
   info:    "bg-sky-500",
   muted:   "bg-slate-300",
   purple:  "bg-blue-500",
-  teal:    "bg-teal-500",
+  teal:    "bg-blue-500",
   orange:  "bg-orange-500",
 }
 
