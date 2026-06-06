@@ -123,7 +123,7 @@ export default function LoginPage() {
   const activeGroup = allRoleGroups.find(g => g.id === activeTab) ?? allRoleGroups[0]
 
   return (
-    <div className="min-h-screen flex w-full overflow-hidden" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="min-h-screen flex w-full overflow-hidden">
 
       {/* ── Left Panel: Premium Brand Visual ───────────────── */}
       <div

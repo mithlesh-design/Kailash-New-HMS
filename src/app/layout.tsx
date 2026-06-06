@@ -1,24 +1,17 @@
 import type { Metadata } from "next"
-import { Figtree, Noto_Sans } from "next/font/google"
+// Single product typeface: Calibri (used first when the viewer has it — Windows/Office),
+// falling back to Carlito, its metric-identical open clone, self-hosted via @fontsource.
+// The family stack lives in globals.css (`--font-body` / `--font-heading`) so Calibri
+// always wins over the bundled Carlito @font-face. Carlito ships 400 + 700 only.
+import "@fontsource/carlito/latin-400.css"
+import "@fontsource/carlito/latin-700.css"
+import "@fontsource/carlito/latin-400-italic.css"
+import "@fontsource/carlito/latin-700-italic.css"
 import "./globals.css"
 import { Toaster } from "sonner"
 import { NextIntlClientProvider } from "next-intl"
 import { getLocale, getMessages } from "next-intl/server"
 import { StoreHydrator } from "@/components/StoreHydrator"
-
-const figtree = Figtree({
-  subsets: ['latin'],
-  variable: '--font-heading',
-  display: 'swap',
-  weight: ['300', '400', '500', '600', '700', '800'],
-})
-
-const notoSans = Noto_Sans({
-  subsets: ['latin'],
-  variable: '--font-body',
-  display: 'swap',
-  weight: ['300', '400', '500', '700'],
-})
 
 export const metadata: Metadata = {
   title: "Kailash Healthcare HMS",
@@ -31,7 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const messages = await getMessages()
 
   return (
-    <html lang={locale} suppressHydrationWarning className={`${figtree.variable} ${notoSans.variable}`}>
+    <html lang={locale} suppressHydrationWarning>
       <body suppressHydrationWarning className="font-body antialiased text-[#1E293B] bg-[#F8FAFC]">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <StoreHydrator />

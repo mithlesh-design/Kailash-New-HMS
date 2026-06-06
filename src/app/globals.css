@@ -1,9 +1,11 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Typography */
-  --font-body:    var(--font-body,    "Inter", "DM Sans", "Segoe UI", system-ui, sans-serif);
-  --font-heading: var(--font-heading, "Figtree", "Inter", "Segoe UI", system-ui, sans-serif);
+  /* Typography — single product typeface.
+     Real Calibri first (viewers who have it: Windows/Office), then the self-hosted,
+     metric-identical Carlito clone, then graceful system fallbacks. */
+  --font-body:    "Calibri", "Carlito", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-heading: "Calibri", "Carlito", "Segoe UI", system-ui, -apple-system, sans-serif;
 
   /* Brand Colors — single disciplined deep-blue system (matches Kailash logo).
      `primary` is the deep navy used for filled actions/active states;
@@ -14,6 +16,14 @@
   --color-primary-soft: rgba(30, 58, 138, 0.06);
   --color-accent: #2563EB;
   --color-accent-soft: rgba(37, 99, 235, 0.08);
+  /* Clinical-green — the disciplined SECONDARY accent (reference image #1).
+     Used only for positive/health/"stable" signals: upward deltas, healthy vitals,
+     one accent in AI/insight panels. Never a competing brand driver; blue stays dominant.
+     Kept distinct from the semantic `--color-success` so the two never collide. */
+  --color-brand-green: #0E9F6E;
+  --color-brand-green-strong: #0B8A5F;
+  --color-brand-green-soft: rgba(14, 159, 110, 0.08);
+  --color-brand-green-border: rgba(14, 159, 110, 0.18);
   /* Legacy aliases kept so older inline references stay coherent (now blue). */
   --color-secondary: #2563EB;
   --color-secondary-light: #3B82F6;
@@ -112,8 +122,8 @@
   --radius-full: 9999px;
 
   /* Fonts */
-  --font-sans: var(--font-body, "Inter", "Segoe UI", system-ui, sans-serif);
-  --font-heading-stack: var(--font-heading, "Figtree", "Segoe UI", system-ui, sans-serif);
+  --font-sans: var(--font-body);
+  --font-heading-stack: var(--font-heading);
 
   /* Keyframe names */
   --animate-fade-in:    fadeIn 0.25s var(--ease-out) forwards;
@@ -155,9 +165,11 @@ html, body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading-stack);
   color: var(--color-foreground);
+  /* Calibri/Carlito ship 400 + 700 only — headings use the bold master.
+     Its humanist, slightly-wider metrics want looser tracking than Figtree did. */
   font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+  letter-spacing: -0.011em;
+  line-height: 1.22;
 }
 
 /* ── Scrollbar ──────────────────────────────────────────── */
