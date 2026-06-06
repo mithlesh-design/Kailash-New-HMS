@@ -3,13 +3,14 @@
 import { useMemo, useState } from "react"
 import {
   ScanLine, Bed, Stethoscope, ChevronDown, ChevronRight, Hand, Camera, Upload,
-  Image as ImageIcon, CheckCircle, X, Clock, ShieldCheck,
+  Image as ImageIcon, CheckCircle, X, Clock, ShieldCheck, Sparkles, Gauge, AlertTriangle,
 } from "lucide-react"
 import {
   useRadiologyStudiesStore,
-  type RadiologyStudy, type StudyStatus, type RadTech,
+  type RadiologyStudy, type StudyStatus, type RadTech, type DoseRecord,
 } from "@/store/useRadiologyStudiesStore"
 import { type Modality, type Priority, RADIOLOGY_CATALOG } from "@/lib/radiologyCatalog"
+import { assessImageQuality } from "@/lib/radiologyAI"
 import { useAuthStore } from "@/store/useAuthStore"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -63,6 +64,8 @@ export default function ModalityBench() {
   const claimAcquisition = useRadiologyStudiesStore(s => s.claimAcquisition)
   const markAcquired = useRadiologyStudiesStore(s => s.markAcquired)
   const attachImage = useRadiologyStudiesStore(s => s.attachImage)
+  const recordDose = useRadiologyStudiesStore(s => s.recordDose)
+  const flagQuality = useRadiologyStudiesStore(s => s.flagQuality)
   const currentUser = useAuthStore(s => s.currentUser)
   const me: RadTech = { id: currentUser?.id ?? "RT-101", name: currentUser?.name ?? "Radiographer" }
 
@@ -145,7 +148,9 @@ export default function ModalityBench() {
               markAcquired(s.id)
               toast.success(`${s.name} acquired · sent to Reading Room`)
             }}
-            onAttach={() => onAttach(s)} />
+            onAttach={() => onAttach(s)}
+            onDose={(d) => { recordDose(s.id, { ...d, recordedBy: me.name }); toast.success("Dose recorded") }}
+            onFlagQuality={() => { const a = assessImageQuality(s).data; flagQuality(s.id, { motion: a.motion, incompleteCoverage: a.incompleteCoverage, note: a.note }); toast.warning("Quality issue flagged") }} />
         ))}
       </div>
     </div>
@@ -161,6 +166,8 @@ function BenchRow(props: {
   onClaim: () => void
   onAcquire: () => void
   onAttach: () => void
+  onDose: (d: DoseRecord) => void
+  onFlagQuality: () => void
 }) {
   const { s, me, expanded, filename } = props
   const cat = RADIOLOGY_CATALOG[s.code]
@@ -169,6 +176,10 @@ function BenchRow(props: {
   const overdue = minsElapsed > s.expectedTATmin && s.status !== "released" && s.status !== "verified"
   const needsContrast = !!cat?.contrast
   const contrastReady = !!s.contrastConsented
+  const [dlp, setDlp] = useState("")
+  const [mas, setMas] = useState("")
+  const showDose = !!cat?.radiationDose && (s.status === "acquiring" || s.status === "acquired")
+  const quality = assessImageQuality(s).data
 
   return (
     <div className={cn("rounded-xl bg-white ring-1 overflow-hidden", overdue ? "ring-red-200" : "ring-slate-200/70")}>
@@ -267,6 +278,37 @@ function BenchRow(props: {
 
           {s.aiPrelim && (
             <p className="text-[11px] text-blue-700 italic bg-blue-50/60 rounded-md px-2 py-1.5">{s.aiPrelim}</p>
+          )}
+
+          {/* AI image-quality assessment */}
+          {(s.status === "acquiring" || s.status === "acquired") && s.attachments.length > 0 && (
+            <div className={cn("rounded-lg ring-1 p-2.5 flex items-start gap-2", quality.passed ? "bg-emerald-50 ring-emerald-200" : "bg-amber-50 ring-amber-200")}>
+              {quality.passed ? <Sparkles className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" /> : <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />}
+              <div className="flex-1">
+                <p className={cn("text-[11px] font-bold", quality.passed ? "text-emerald-800" : "text-amber-800")}>AI quality check{quality.passed ? " — diagnostic" : " — review"}</p>
+                <p className={cn("text-[11px]", quality.passed ? "text-emerald-700" : "text-amber-700")}>{quality.note}</p>
+              </div>
+              {!quality.passed && mine && (
+                <button onClick={props.onFlagQuality} className="text-[10.5px] font-bold text-amber-800 bg-white ring-1 ring-amber-300 px-2 py-1 rounded-lg cursor-pointer flex-shrink-0">Flag</button>
+              )}
+            </div>
+          )}
+
+          {/* Radiation dose tracking */}
+          {showDose && (
+            <div className="rounded-lg ring-1 ring-slate-200/70 bg-white p-2.5">
+              <p className="text-[11px] font-bold text-slate-700 flex items-center gap-1 mb-1.5"><Gauge className="h-3.5 w-3.5 text-[#1E3A8A]" />Radiation dose ({cat?.radiationDose} dose exam)</p>
+              {s.doseRecord ? (
+                <p className="text-[11.5px] text-slate-600">Recorded: {s.doseRecord.dlp ? `DLP ${s.doseRecord.dlp} mGy·cm` : ""} {s.doseRecord.mas ? `· ${s.doseRecord.mas} mAs` : ""} {s.doseRecord.recordedBy ? `· by ${s.doseRecord.recordedBy}` : ""}</p>
+              ) : mine ? (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <input value={dlp} onChange={e => setDlp(e.target.value)} placeholder="DLP (mGy·cm)" inputMode="decimal" className="h-8 w-32 px-2 text-xs rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                  <input value={mas} onChange={e => setMas(e.target.value)} placeholder="mAs" inputMode="decimal" className="h-8 w-20 px-2 text-xs rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                  <button onClick={() => { props.onDose({ dlp: dlp ? Number(dlp) : undefined, mas: mas ? Number(mas) : undefined }); setDlp(""); setMas("") }}
+                    className="h-8 px-3 text-xs font-bold text-white bg-[#1E3A8A] hover:bg-[#172E6E] rounded-lg cursor-pointer">Record</button>
+                </div>
+              ) : <p className="text-[11px] text-slate-400 italic">Dose not yet recorded.</p>}
+            </div>
           )}
 
           {s.status === "acquiring" && mine && (

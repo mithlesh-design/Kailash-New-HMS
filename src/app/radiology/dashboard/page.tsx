@@ -129,7 +129,7 @@ export default function RadiologyOverview() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A]">RIS Overview</h1>
+          <h1 className="text-2xl font-bold text-[#0F172A]">RIS Command Center</h1>
           <p className="text-sm text-[#64748B] mt-1">Radiology incharge command center · pipeline by modality · critical-finding SLA · AI exception triage</p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -140,6 +140,25 @@ export default function RadiologyOverview() {
             <FileText className="h-3.5 w-3.5" />Reading Room
           </Link>
         </div>
+      </div>
+
+      {/* Enterprise command surfaces */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { href: "/radiology/ai-command", label: "AI Command Center", sub: "Queue · forecast · assistant", icon: Sparkles, accent: "#1E3A8A" },
+          { href: "/radiology/critical", label: "Critical Results", sub: "Closed-loop · SLA", icon: AlertTriangle, accent: "#DC2626" },
+          { href: "/radiology/analytics", label: "Analytics", sub: "TAT · utilization · revenue", icon: Activity, accent: "#0E9F6E" },
+          { href: "/radiology/distribution", label: "Distribution", sub: "Deliver · patient summary", icon: Send, accent: "#2563EB" },
+        ].map(({ href, label, sub, icon: Icon, accent }) => (
+          <Link key={href} href={href} className="group flex items-center gap-3 rounded-2xl border border-[#EAECF2] bg-white p-3.5 hover:border-[#D0D5DD] hover:shadow-[var(--shadow-card-hover)] transition-all">
+            <span className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${accent}14`, color: accent }}><Icon className="h-5 w-5" /></span>
+            <div className="min-w-0">
+              <p className="text-[13px] font-bold text-slate-900 truncate">{label}</p>
+              <p className="text-[11px] text-slate-500 truncate">{sub}</p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-slate-300 ml-auto group-hover:text-[#1E3A8A] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+          </Link>
+        ))}
       </div>
 
       {/* M13.2 — Order-to-release pipeline.
