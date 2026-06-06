@@ -89,8 +89,8 @@ const allRoleGroups: { id: string; label: string; roles: RoleCard[] }[] = [
 ]
 
 // Uniform brand identity (no per-item color) — premium, single deep-blue system.
-const BRAND_COLOR = '#2563EB'
-const BRAND_GRADIENT = 'linear-gradient(135deg,#1E3A8A,#2563EB)'
+const BRAND_COLOR = '#1E3A8A'
+const BRAND_SOFT = 'rgba(30,58,138,0.08)'
 
 const floatingCards = [
   { icon: Activity,    title: 'Live Queue',      value: '24 patients',    sub: 'Avg wait: 12 min',            color: BRAND_COLOR, delay: 0 },
@@ -121,289 +121,218 @@ export default function LoginPage() {
   }
 
   const activeGroup = allRoleGroups.find(g => g.id === activeTab) ?? allRoleGroups[0]
+  const totalRoles = allRoleGroups.reduce((n, g) => n + g.roles.length, 0)
 
   return (
-    <div className="min-h-screen flex w-full overflow-hidden">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-background)' }}>
 
-      {/* ── Left Panel: Premium Brand Visual ───────────────── */}
-      <div
-        className="hidden lg:flex w-[44%] flex-col justify-between p-10 relative overflow-hidden flex-shrink-0"
-        style={{ background: 'linear-gradient(145deg, #0A1628 0%, #0F2040 40%, #091520 100%)' }}
+      {/* ── Top bar ─────────────────────────────────────────── */}
+      <header
+        className="flex-shrink-0 h-16 flex items-center justify-between px-5 lg:px-10 bg-white"
+        style={{ borderBottom: '1px solid var(--color-border)' }}
       >
-        {/* Subtle grid overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
-        />
-
-        {/* Glow orbs */}
-        <div className="absolute top-[-5%] left-[-10%] w-[500px] h-[500px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.16) 0%, transparent 70%)' }} />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(30,58,138,0.18) 0%, transparent 70%)' }} />
-
-        {/* Logo + Brand */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-white"
-            style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.20)' }}>
-            <img src="/kailash-Logo.png" alt="Kailash" className="h-8 w-8 object-contain" />
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-white border border-[#EAECF2]">
+            <img src="/kailash-Logo.png" alt="Kailash Healthcare" className="h-7 w-7 object-contain" />
           </div>
-          <div>
-            <p className="text-white font-bold text-base tracking-tight leading-none">Kailash HMS</p>
-            <p className="text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.45)' }}>Hospital Management System</p>
+          <div className="leading-none">
+            <p className="font-bold text-[15px] text-[#101828] tracking-tight">Kailash HMS</p>
+            <p className="text-[11px] font-medium text-[#667085] mt-0.5">Hospital Management System</p>
           </div>
         </div>
+        <button
+          onClick={() => router.push('/checkin')}
+          className="hidden sm:inline-flex items-center gap-2 h-9 px-4 rounded-full text-[13px] font-semibold text-[#344054] bg-white border border-[#EAECF2] hover:border-[#D0D5DD] hover:bg-[#F8FAFC] transition-colors cursor-pointer"
+        >
+          <QrCode className="h-4 w-4 text-[#1E3A8A]" />
+          Patient Self Check-In
+        </button>
+      </header>
 
-        {/* Hero Copy */}
-        <div className="relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <h1 className="text-4xl font-bold leading-tight tracking-tight mb-5" style={{ color: 'rgba(255,255,255,0.96)' }}>
-              Intelligent Care.{' '}
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #93B4FF, #2563EB)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                Seamless Operations.
+      {/* ── Body ────────────────────────────────────────────── */}
+      <div className="flex-1 w-full max-w-7xl mx-auto px-5 lg:px-10 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6 lg:gap-8 min-h-0">
+
+        {/* Left — contained premium brand panel */}
+        <motion.aside
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="hidden lg:flex flex-col justify-between rounded-3xl relative overflow-hidden p-8"
+          style={{ background: 'linear-gradient(160deg, #0B1A36 0%, #0F2347 45%, #0A1526 100%)' }}
+        >
+          {/* grid + glow texture */}
+          <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+            style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
+          <div className="absolute -top-16 -left-16 w-80 h-80 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.22) 0%, transparent 70%)' }} />
+          <div className="absolute -bottom-20 -right-12 w-72 h-72 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(14,159,110,0.14) 0%, transparent 70%)' }} />
+
+          {/* Hero copy */}
+          <div className="relative z-10">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-semibold tracking-wide"
+              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.10)' }}>
+              <Sparkles className="h-3 w-3" /> AI-NATIVE PLATFORM
+            </span>
+            <h1 className="text-[28px] font-bold leading-[1.2] tracking-tight mt-5 text-white">
+              Intelligent care,<br />
+              <span style={{ background: 'linear-gradient(135deg, #93B4FF, #5EE3B0)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                seamless operations.
               </span>
             </h1>
-            <p className="text-base leading-relaxed mb-8" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              Enterprise-grade platform for modern hospitals — built with AI at its core.
+            <p className="text-[13.5px] leading-relaxed mt-3" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              One enterprise platform for the entire hospital — clinical, operations, and support teams, unified.
             </p>
-          </motion.div>
+          </div>
 
-          {/* Floating Live Metric Cards */}
-          <div className="space-y-3">
+          {/* Live metric chips */}
+          <div className="relative z-10 space-y-2.5 my-7">
             {floatingCards.map((card, i) => {
               const Icon = card.icon
               return (
                 <motion.div
                   key={card.title}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + i * 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex items-center gap-3.5 px-4 py-3 rounded-2xl"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    backdropFilter: 'blur(12px)',
-                  }}
+                  transition={{ delay: 0.25 + i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
                 >
-                  <div
-                    className="h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${card.color}20`, border: `1px solid ${card.color}30` }}
-                  >
-                    <Icon className="h-4 w-4" style={{ color: card.color }} />
+                  <div className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(147,180,255,0.14)', border: '1px solid rgba(147,180,255,0.18)' }}>
+                    <Icon className="h-4 w-4" style={{ color: '#93B4FF' }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.40)' }}>{card.title}</p>
-                    <p className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.88)' }}>{card.value}</p>
+                    <p className="text-[10.5px] font-semibold" style={{ color: 'rgba(255,255,255,0.42)' }}>{card.title}</p>
+                    <p className="text-[13px] font-bold" style={{ color: 'rgba(255,255,255,0.92)' }}>{card.value}</p>
                   </div>
-                  <p className="text-[11px] text-right flex-shrink-0" style={{ color: 'rgba(255,255,255,0.30)' }}>{card.sub}</p>
+                  <p className="text-[10.5px] text-right flex-shrink-0" style={{ color: 'rgba(255,255,255,0.32)' }}>{card.sub}</p>
                 </motion.div>
               )
             })}
           </div>
 
-          {/* Trust Badges */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.5 }}
-            className="flex flex-wrap gap-2 mt-6"
-          >
-            {trustBadges.map(({ icon: Icon, label }) => (
-              <div
-                key={label}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
-                style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                <Icon className="h-3 w-3" />
-                {label}
-              </div>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* Footer */}
-        <div className="relative z-10 flex items-center justify-between text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.25)' }}>
-          <p>© 2026 Kailash Healthcare Group</p>
-          <div className="flex gap-4">
-            <span>Privacy</span>
-            <span>Terms</span>
+          {/* Trust badges + footer */}
+          <div className="relative z-10">
+            <div className="flex flex-wrap gap-1.5">
+              {trustBadges.map(({ icon: Icon, label }) => (
+                <div key={label} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <Icon className="h-3 w-3" /> {label}
+                </div>
+              ))}
+            </div>
+            <p className="text-[10.5px] font-medium mt-5" style={{ color: 'rgba(255,255,255,0.25)' }}>© 2026 Kailash Healthcare Group</p>
           </div>
-        </div>
-      </div>
+        </motion.aside>
 
-      {/* ── Right Panel: Role Selector ──────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-white">
-        {/* Mobile header */}
-        <div className="lg:hidden flex items-center justify-center gap-3 py-6 px-6" style={{ borderBottom: '1px solid #F1F5F9' }}>
-          <div className="h-9 w-9 rounded-xl flex items-center justify-center bg-white"
-            style={{ boxShadow: '0 2px 8px rgba(15,23,42,0.12)' }}>
-            <img src="/kailash-Logo.png" alt="" className="h-7 w-7 object-contain" />
-          </div>
-          <span className="text-lg font-bold text-slate-900">Kailash HMS</span>
-        </div>
-
-        <div className="flex-1 flex flex-col overflow-hidden px-8 py-8 max-w-2xl w-full mx-auto">
-          {/* Header */}
+        {/* Right — portal launcher */}
+        <main className="flex flex-col min-w-0">
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="flex-shrink-0 mb-6"
+            className="flex items-start justify-between gap-4 flex-wrap mb-5"
           >
-            {/* Demo Banner */}
-            <div
-              className="mb-5 flex items-center gap-3 px-4 py-2.5 rounded-xl"
-              style={{ background: 'linear-gradient(135deg,#FFFBEB,#FEF3C7)', border: '1px solid rgba(245,158,11,0.25)' }}
-            >
-              <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
-              <p className="text-sm font-semibold text-amber-800">Demo environment — select any role to explore</p>
+            <div>
+              <h2 className="text-[22px] font-bold text-[#101828] tracking-tight">Select your portal</h2>
+              <p className="text-[13.5px] text-[#667085] mt-1">{totalRoles} role portals across clinical, operations, finance &amp; support</p>
             </div>
-
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">Select your portal</h2>
-            <p className="text-slate-400 text-sm">24 role portals across clinical, operations, and support teams</p>
+            <div className="inline-flex items-center gap-2 h-8 px-3 rounded-full"
+              style={{ background: 'var(--color-warning-bg)', border: '1px solid rgba(217,119,6,0.20)' }}>
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="text-[12px] font-semibold text-[#B45309]">Demo — pick any role to explore</span>
+            </div>
           </motion.div>
 
-          {/* Tab Navigation */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.15, duration: 0.35 }}
-            className="flex-shrink-0 flex gap-1 p-1 rounded-xl mb-6 overflow-x-auto"
-            style={{ background: '#F8FAFC', border: '1px solid rgba(15,23,42,0.05)' }}
-          >
-            {allRoleGroups.map(group => (
-              <button
-                key={group.id}
-                onClick={() => setActiveTab(group.id)}
-                className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
-                style={activeTab === group.id ? {
-                  background: 'white',
-                  color: '#0F172A',
-                  boxShadow: '0 1px 4px rgba(15,23,42,0.08)',
-                } : {
-                  color: '#94A3B8',
-                  background: 'transparent',
-                }}
-              >
-                {group.label}
-              </button>
-            ))}
-          </motion.div>
+          {/* Category pills */}
+          <div className="flex-shrink-0 flex gap-1.5 mb-5 overflow-x-auto pb-1 -mx-1 px-1">
+            {allRoleGroups.map(group => {
+              const active = activeTab === group.id
+              return (
+                <button
+                  key={group.id}
+                  onClick={() => setActiveTab(group.id)}
+                  className={cn(
+                    "flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-[13px] font-semibold transition-all cursor-pointer whitespace-nowrap border",
+                    active
+                      ? "bg-[#1E3A8A] text-white border-[#1E3A8A]"
+                      : "bg-white text-[#475467] border-[#EAECF2] hover:border-[#D0D5DD] hover:text-[#101828]"
+                  )}
+                >
+                  {group.label}
+                  <span className={cn("text-[11px] font-bold", active ? "text-white/70" : "text-[#98A2B3]")}>{group.roles.length}</span>
+                </button>
+              )
+            })}
+          </div>
 
-          {/* Role Cards Grid */}
-          <div className="flex-1 overflow-y-auto pb-4">
+          {/* Role cards */}
+          <div className="flex-1 min-h-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18 }}
+                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"
               >
                 {activeGroup.roles.map(({ role, label, desc, icon: Icon, href }) => {
-                  // Uniform brand color for every portal card (design direction).
-                  const gradient = BRAND_GRADIENT
-                  const iconColor = BRAND_COLOR
                   const isSelected = selectedRole === role
                   const isLoading = loadingRole === role
                   return (
-                    <motion.button
+                    <button
                       key={role}
                       onClick={() => handleLogin(role, href)}
                       disabled={!!loadingRole}
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ duration: 0.15 }}
-                      className="group flex items-start gap-3.5 p-4 rounded-2xl text-left cursor-pointer w-full relative overflow-hidden"
-                      style={{
-                        background: isSelected ? `${iconColor}08` : 'white',
-                        boxShadow: isSelected
-                          ? `0 0 0 2px ${iconColor}, 0 4px 16px ${iconColor}20`
-                          : '0 1px 4px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)',
-                      }}
+                      className={cn(
+                        "group flex items-start gap-3 p-4 rounded-2xl text-left cursor-pointer w-full bg-white border transition-all duration-200",
+                        isSelected
+                          ? "border-[#1E3A8A] shadow-[0_0_0_1px_#1E3A8A,0_8px_24px_rgba(30,58,138,0.12)]"
+                          : "border-[#EAECF2] hover:border-[#D0D5DD] hover:shadow-[0_6px_18px_rgba(16,24,40,0.08)] hover:-translate-y-0.5"
+                      )}
                     >
-                      {/* Hover gradient overlay */}
-                      <div
-                        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                        style={{ background: `linear-gradient(135deg, ${iconColor}05, transparent)` }}
-                      />
-
-                      {/* Icon */}
-                      <div
-                        className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10"
-                        style={{ background: gradient, boxShadow: `0 4px 12px ${iconColor}30` }}
-                      >
+                      {/* Icon chip — soft tinted, uniform brand */}
+                      <div className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
+                        style={{ background: BRAND_SOFT, color: BRAND_COLOR }}>
                         {isLoading ? (
-                          <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin h-5 w-5" style={{ color: BRAND_COLOR }} fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                           </svg>
                         ) : (
-                          <Icon className="h-5 w-5 text-white" />
+                          <Icon className="h-5 w-5" />
                         )}
                       </div>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0 relative z-10">
-                        <p className="font-bold text-slate-900 text-sm leading-tight">{label}</p>
-                        <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{desc}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-[#101828] text-[14px] leading-tight">{label}</p>
+                        <p className="text-[11.5px] text-[#667085] mt-1 leading-relaxed">{desc}</p>
                       </div>
 
-                      {/* Arrow */}
-                      <div
-                        className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 mt-0.5 transition-all duration-200 group-hover:scale-110"
-                        style={{
-                          background: isSelected ? gradient : 'rgba(15,23,42,0.04)',
-                          boxShadow: isSelected ? `0 2px 8px ${iconColor}30` : 'none',
-                        }}
-                      >
-                        <ArrowRight
-                          className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5"
-                          style={{ color: isSelected ? 'white' : '#94A3B8' }}
-                        />
-                      </div>
-                    </motion.button>
+                      <ArrowRight
+                        className={cn(
+                          "h-4 w-4 flex-shrink-0 mt-0.5 transition-all duration-200",
+                          isSelected ? "text-[#1E3A8A]" : "text-[#CBD2DC] group-hover:text-[#1E3A8A] group-hover:translate-x-0.5"
+                        )}
+                      />
+                    </button>
                   )
                 })}
               </motion.div>
             </AnimatePresence>
           </div>
 
-          {/* Footer CTA */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.35 }}
-            className="flex-shrink-0 mt-4 pt-4"
-            style={{ borderTop: '1px solid rgba(15,23,42,0.05)' }}
+          {/* Mobile check-in CTA */}
+          <button
+            onClick={() => router.push('/checkin')}
+            className="sm:hidden mt-5 w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl font-semibold text-sm text-[#344054] bg-white border border-[#EAECF2] cursor-pointer"
           >
-            <button
-              onClick={() => router.push('/checkin')}
-              className="w-full flex items-center justify-center gap-2.5 p-3.5 rounded-xl font-semibold text-sm cursor-pointer transition-all duration-200"
-              style={{ background: '#F8FAFC', color: '#64748B', border: '1px solid rgba(15,23,42,0.06)' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#F1F5F9' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#F8FAFC' }}
-            >
-              <QrCode className="h-4 w-4" />
-              Patient Self Check-In (Public Kiosk)
-            </button>
-          </motion.div>
-        </div>
+            <QrCode className="h-4 w-4 text-[#1E3A8A]" />
+            Patient Self Check-In
+          </button>
+        </main>
       </div>
     </div>
   )
