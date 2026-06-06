@@ -23,7 +23,7 @@ const MODULE_TINT: Record<string, string> = {
   'AI HITL': 'bg-blue-50 text-blue-700',
   Doctor: 'bg-blue-50 text-blue-700',
   Nursing: 'bg-emerald-50 text-emerald-700',
-  Pharmacy: 'bg-pink-50 text-pink-700',
+  Pharmacy: 'bg-blue-50 text-blue-700',
   Lab: 'bg-blue-50 text-blue-700',
   Radiology: 'bg-indigo-50 text-indigo-700',
   OT: 'bg-blue-50 text-blue-700',

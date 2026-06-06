@@ -37,7 +37,7 @@ export default function DoctorAnalytics() {
     { label: 'In-person (OPD)', value: t.opd, icon: Building2, tint: 'bg-teal-50 text-teal-600' },
     { label: 'Online consults', value: t.online, icon: Video, tint: 'bg-blue-50 text-blue-600' },
     { label: 'Tests ordered', value: t.tests, icon: FlaskConical, tint: 'bg-rose-50 text-rose-600' },
-    { label: 'Prescriptions', value: t.prescriptions, icon: Pill, tint: 'bg-pink-50 text-pink-600' },
+    { label: 'Prescriptions', value: t.prescriptions, icon: Pill, tint: 'bg-blue-50 text-blue-600' },
     { label: 'Admissions', value: t.admissions, icon: BedDouble, tint: 'bg-amber-50 text-amber-600' },
   ]
 

@@ -55,7 +55,7 @@ export default function InventoryManagerRequests() {
         {[
           { label: "Open requests", value: openCount, icon: ShoppingCart, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Restock asks", value: restockCount, icon: Pill, fg: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Patient procurement", value: patientCount, icon: User, fg: "text-pink-600", bg: "bg-pink-50" },
+          { label: "Patient procurement", value: patientCount, icon: User, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Pending action", value: pending.length, icon: Hourglass, fg: "text-amber-600", bg: "bg-amber-50" },
         ].map(s => (
           <div key={s.label} className={cn("rounded-xl p-4 flex items-center gap-3", s.bg)}>
@@ -130,7 +130,7 @@ function RequestRow({ po, action, flat }: { po: PurchaseOrder; action: React.Rea
         <p className="text-sm font-semibold text-slate-800 flex items-center gap-2 flex-wrap">
           {po.drug} <span className="text-slate-400 font-normal">× {po.qty}</span>
           <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full capitalize", PO_STYLE[po.status])}>{po.status}</span>
-          <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", po.kind === "patient" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700")}>{po.kind === "patient" ? "PATIENT" : "RESTOCK"}</span>
+          <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", po.kind === "patient" ? "bg-blue-100 text-blue-700" : "bg-blue-100 text-blue-700")}>{po.kind === "patient" ? "PATIENT" : "RESTOCK"}</span>
         </p>
         <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
           {po.forPatient && <>for <b className="text-slate-600">{po.forPatient}</b> · </>}

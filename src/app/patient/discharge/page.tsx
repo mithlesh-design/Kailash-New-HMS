@@ -150,8 +150,8 @@ export default function PatientDischarge() {
           <div className="rounded-3xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] p-5 space-y-2">
             {mine.ttoMeds!.map((m, i) => (
               <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50">
-                <span className="h-9 w-9 rounded-2xl bg-pink-50 flex items-center justify-center flex-shrink-0">
-                  <Pill className="h-4.5 w-4.5 text-pink-600" />
+                <span className="h-9 w-9 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                  <Pill className="h-4.5 w-4.5 text-blue-600" />
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-bold text-slate-900">{m.name}</p>

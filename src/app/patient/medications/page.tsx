@@ -48,7 +48,7 @@ export default function MedicationsPage() {
           <div key={m.name} className="rounded-3xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
-                <span className="h-11 w-11 rounded-2xl bg-pink-50 flex items-center justify-center flex-shrink-0"><Pill className="h-5.5 w-5.5 text-pink-600" /></span>
+                <span className="h-11 w-11 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0"><Pill className="h-5.5 w-5.5 text-blue-600" /></span>
                 <div>
                   <p className="text-[16px] font-bold text-slate-900">{m.name}</p>
                   <p className="text-[13px] text-slate-500">{m.purpose}</p>

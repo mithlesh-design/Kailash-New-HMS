@@ -194,7 +194,7 @@ export default function ERDashboard() {
           { label: 'Awaiting triage / placement', value: m.kpis.awaitingTriage, icon: ClipboardList, fg: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'NEWS2 high', value: m.kpis.high, icon: ShieldAlert, fg: 'text-red-600', bg: 'bg-red-50' },
           { label: 'Sepsis suspected (qSOFA)', value: m.kpis.sepsisSuspected, icon: ShieldAlert, fg: 'text-orange-600', bg: 'bg-orange-50' },
-          { label: 'Trauma active', value: m.kpis.traumaActive, icon: AlertTriangle, fg: 'text-pink-600', bg: 'bg-pink-50' },
+          { label: 'Trauma active', value: m.kpis.traumaActive, icon: AlertTriangle, fg: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Awaiting bed', value: m.kpis.awaitingBed, icon: PackageCheck, fg: 'text-blue-600', bg: 'bg-blue-50' },
         ].map(s => (
           <div key={s.label} className={cn('rounded-xl p-3 flex items-center gap-3', s.bg)}>

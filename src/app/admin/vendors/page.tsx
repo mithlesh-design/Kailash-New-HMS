@@ -22,7 +22,7 @@ const CATEGORY_TINT: Record<VendorCategory, string> = {
   food:         'bg-green-50 text-green-700 ring-green-200',
   security:     'bg-slate-50 text-slate-700 ring-slate-200',
   it:           'bg-indigo-50 text-indigo-700 ring-indigo-200',
-  pharma:       'bg-pink-50 text-pink-700 ring-pink-200',
+  pharma:       'bg-blue-50 text-blue-700 ring-blue-200',
   linen:        'bg-cyan-50 text-cyan-700 ring-cyan-200',
   consumables:  'bg-blue-50 text-blue-700 ring-blue-200',
   utilities:    'bg-teal-50 text-teal-700 ring-teal-200',

@@ -16,7 +16,7 @@ const TYPE_CONFIG: Record<ChargeType, { label: string; color: string }> = {
   consultation: { label: 'Consultation',  color: 'text-blue-600 bg-blue-50' },
   lab:          { label: 'Laboratory',    color: 'text-blue-600 bg-blue-50' },
   radiology:    { label: 'Radiology',     color: 'text-indigo-600 bg-indigo-50' },
-  pharmacy:     { label: 'Pharmacy',      color: 'text-pink-600 bg-pink-50' },
+  pharmacy:     { label: 'Pharmacy',      color: 'text-blue-600 bg-blue-50' },
   ward:         { label: 'Ward / Room',   color: 'text-teal-600 bg-teal-50' },
   procedure:    { label: 'Procedure',     color: 'text-orange-600 bg-orange-50' },
   consumable:   { label: 'Consumables',   color: 'text-slate-600 bg-slate-50' },

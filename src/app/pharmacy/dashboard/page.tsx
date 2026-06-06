@@ -89,7 +89,7 @@ export default function PharmacyOverview() {
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
               <h2 className="text-sm font-bold text-slate-800">Next in queue</h2>
-              <Link href="/pharmacy/queue" className="text-xs font-bold text-pink-600 hover:underline flex items-center gap-1">Open queue <ArrowRight className="h-3 w-3" /></Link>
+              <Link href="/pharmacy/queue" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">Open queue <ArrowRight className="h-3 w-3" /></Link>
             </div>
             <div className="divide-y divide-slate-100">
               {m.active.slice(0, 6).map(rx => (

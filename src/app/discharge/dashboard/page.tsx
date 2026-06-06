@@ -17,7 +17,7 @@ import { LogOut, ChevronRight as ChevronRightIcon } from "lucide-react"
 const PILLAR_CONFIG: Record<ClearancePillar, { label: string; icon: React.ElementType; color: string }> = {
   doctor:    { label: 'Doctor',    icon: Stethoscope, color: 'text-blue-500' },
   nursing:   { label: 'Nursing',   icon: User,        color: 'text-green-500' },
-  pharmacy:  { label: 'Pharmacy',  icon: Pill,        color: 'text-pink-500' },
+  pharmacy:  { label: 'Pharmacy',  icon: Pill,        color: 'text-blue-500' },
   billing:   { label: 'Billing',   icon: Receipt,     color: 'text-orange-500' },
   insurance: { label: 'Insurance', icon: ShieldCheck, color: 'text-blue-500' },
 }

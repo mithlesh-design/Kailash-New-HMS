@@ -41,7 +41,7 @@ const TYPE_TINT: Record<StatutoryType, string> = {
   PT:            'bg-blue-100 text-blue-800',
   TRADE_LICENCE: 'bg-emerald-100 text-emerald-800',
   POLLUTION:     'bg-green-100 text-green-800',
-  DRUG_LICENCE:  'bg-pink-100 text-pink-800',
+  DRUG_LICENCE:  'bg-blue-100 text-blue-800',
   AERB:          'bg-orange-100 text-orange-800',
   BOILER:        'bg-amber-100 text-amber-800',
   LIFT:          'bg-yellow-100 text-yellow-800',

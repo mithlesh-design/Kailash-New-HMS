@@ -411,7 +411,7 @@ function FloorRow(props: {
                       className={cn("flex items-center gap-1.5 h-9 px-2 rounded-lg border text-[11px] font-bold cursor-pointer transition text-left",
                         o.kind === 'lab' ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
                         : o.kind === 'imaging' ? 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
-                        : 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100')}>
+                        : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100')}>
                       <Icon className="h-3 w-3 flex-shrink-0" />
                       <span className="truncate">{o.label}</span>
                       {already && <span className="ml-auto text-[9px] font-bold text-emerald-600">✓</span>}

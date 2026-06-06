@@ -24,7 +24,7 @@ export default function ReceptionDiagnostics() {
   const tiles = [
     { label: 'Lab results ready', value: labReady, icon: FlaskConical, tint: 'bg-rose-50 text-rose-600' },
     { label: 'Scans ready', value: radReady, icon: ScanLine, tint: 'bg-indigo-50 text-indigo-600' },
-    { label: 'Medicines ready', value: rxReady, icon: Pill, tint: 'bg-pink-50 text-pink-600' },
+    { label: 'Medicines ready', value: rxReady, icon: Pill, tint: 'bg-blue-50 text-blue-600' },
     { label: 'Blood units ready', value: bbReady, icon: Droplets, tint: 'bg-red-50 text-red-600' },
   ]
 
@@ -47,7 +47,7 @@ export default function ReceptionDiagnostics() {
           items={samples.map(s => ({ id: s.id, name: s.patientName, detail: s.testName, status: s.status, ready: s.status === 'Completed' }))} />
         <ServiceCard title="Radiology" Icon={ScanLine} tint="bg-indigo-50 text-indigo-600"
           items={scans.map(s => ({ id: s.id, name: s.patientName, detail: s.scanType, status: s.status, ready: s.status === 'Ready for Review' || s.status === 'Reported' }))} />
-        <ServiceCard title="Pharmacy" Icon={Pill} tint="bg-pink-50 text-pink-600"
+        <ServiceCard title="Pharmacy" Icon={Pill} tint="bg-blue-50 text-blue-600"
           items={prescriptions.map(p => ({ id: p.id, name: p.patientName, detail: `${p.medicines.length} item${p.medicines.length !== 1 ? 's' : ''}`, status: p.status, ready: p.status === 'ready' }))} />
         <ServiceCard title="Blood Bank" Icon={Droplets} tint="bg-red-50 text-red-600"
           items={crossMatch.map(c => ({ id: c.id, name: c.patientName, detail: `${c.bloodGroup} · ${c.component} ×${c.units}`, status: c.status, ready: c.status === 'compatible' || c.status === 'issued' }))} />

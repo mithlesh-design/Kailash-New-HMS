@@ -100,7 +100,7 @@ export default function DoctorOrdersPage() {
         <div className="flex items-start gap-3">
           {item.kind === 'test'
             ? <TestIcon item={item} />
-            : <span className="h-10 w-10 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center flex-shrink-0"><Pill className="h-5 w-5" /></span>}
+            : <span className="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0"><Pill className="h-5 w-5" /></span>}
 
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">

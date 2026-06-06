@@ -81,7 +81,7 @@ export default function PharmacyInventory() {
                   <p className="text-sm font-semibold text-slate-800 flex items-center gap-2 flex-wrap">
                     {po.drug} <span className="text-slate-400 font-normal">× {po.qty}</span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${PO_STYLE[po.status]}`}>{po.status}</span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${po.kind === "patient" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"}`}>{po.kind === "patient" ? "PATIENT" : "RESTOCK"}</span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${po.kind === "patient" ? "bg-blue-100 text-blue-700" : "bg-blue-100 text-blue-700"}`}>{po.kind === "patient" ? "PATIENT" : "RESTOCK"}</span>
                   </p>
                   <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
                     {po.forPatient && <>for <b className="text-slate-600">{po.forPatient}</b> · </>}

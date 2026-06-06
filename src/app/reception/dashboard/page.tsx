@@ -115,7 +115,7 @@ export default function ReceptionDashboard() {
             { label: 'Waiting',    sub: 'In waiting room',  count: pipelineCounts.waiting,    color: 'border-amber-200 bg-amber-50',     icon: Users,        fg: 'text-amber-700',    href: '/reception/opd',     cta: 'Send to vitals' },
             { label: 'Vitals',     sub: 'With nurse',       count: pipelineCounts.vitals,     color: 'border-orange-200 bg-orange-50',   icon: Activity,     fg: 'text-orange-700',   href: '/reception/opd',     cta: 'Track' },
             { label: 'Consulting', sub: 'With doctor',      count: pipelineCounts.consulting, color: 'border-blue-200 bg-blue-50',   icon: Stethoscope,  fg: 'text-blue-700',   href: '/reception/queue',   cta: 'Display board' },
-            { label: 'Pharmacy',   sub: 'Collecting Rx',    count: pipelineCounts.pharmacy,   color: 'border-pink-200 bg-pink-50',       icon: Pill,         fg: 'text-pink-700',     href: '/reception/opd',     cta: 'Track' },
+            { label: 'Pharmacy',   sub: 'Collecting Rx',    count: pipelineCounts.pharmacy,   color: 'border-blue-200 bg-blue-50',       icon: Pill,         fg: 'text-blue-700',     href: '/reception/opd',     cta: 'Track' },
             { label: 'Billing',    sub: 'Settling fees',    count: pipelineCounts.billing,    color: 'border-rose-200 bg-rose-50',       icon: CreditCard,   fg: 'text-rose-700',     href: '/reception/billing', cta: 'Collect' },
             { label: 'Done',       sub: 'Completed today',  count: pipelineCounts.done,       color: 'border-emerald-200 bg-emerald-50', icon: CheckCircle2, fg: 'text-emerald-700',  href: '/reception/patients',cta: 'Review' },
           ].map((s, i, arr) => (

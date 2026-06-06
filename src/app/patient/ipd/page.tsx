@@ -203,11 +203,11 @@ export default function IpdPage() {
 
       {/* Medicines (MAR) */}
       <div className="rounded-3xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] p-5">
-        <h3 className="text-[15px] font-bold text-slate-900 mb-3 flex items-center gap-2"><Pill className="h-4.5 w-4.5 text-pink-600" /> Your medicines</h3>
+        <h3 className="text-[15px] font-bold text-slate-900 mb-3 flex items-center gap-2"><Pill className="h-4.5 w-4.5 text-blue-600" /> Your medicines</h3>
         <div className="space-y-2">
           {ip.meds.map((m, i) => (
             <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50">
-              <span className="h-9 w-9 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center flex-shrink-0"><Pill className="h-4.5 w-4.5" /></span>
+              <span className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0"><Pill className="h-4.5 w-4.5" /></span>
               <div className="flex-1 min-w-0"><p className="text-[14px] font-semibold text-slate-900">{m.name} {m.dose}</p><p className="text-[12px] text-slate-500">{m.freq} · {m.route}</p></div>
             </div>
           ))}
@@ -265,7 +265,7 @@ export default function IpdPage() {
             {d.meds.length > 0 && (
               <div className="mt-3">
                 <p className={cn("text-[11px] font-bold uppercase tracking-wide mb-1.5", done ? "text-white/70" : "text-slate-400")}>Take-home medicines</p>
-                <div className="flex flex-wrap gap-1.5">{d.meds.map((m, i) => <span key={i} className={cn("text-[12px] font-medium px-2.5 py-1 rounded-full", done ? "bg-white/15 text-white" : "bg-pink-50 text-pink-700")}>{m.name} {m.dose} · {m.freq}</span>)}</div>
+                <div className="flex flex-wrap gap-1.5">{d.meds.map((m, i) => <span key={i} className={cn("text-[12px] font-medium px-2.5 py-1 rounded-full", done ? "bg-white/15 text-white" : "bg-blue-50 text-blue-700")}>{m.name} {m.dose} · {m.freq}</span>)}</div>
               </div>
             )}
             {d.redFlags.length > 0 && (

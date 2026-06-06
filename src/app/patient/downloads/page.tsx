@@ -54,7 +54,7 @@ type Filter = typeof FILTERS[number]
 
 const CATEGORY_STYLE: Record<Category, { Icon: typeof FileText; tint: string; fg: string }> = {
   'Lab Reports':   { Icon: FlaskConical, tint: 'bg-blue-50',  fg: 'text-blue-600' },
-  'Prescriptions': { Icon: Pill,         tint: 'bg-pink-50',    fg: 'text-pink-600' },
+  'Prescriptions': { Icon: Pill,         tint: 'bg-blue-50',    fg: 'text-blue-600' },
   'Invoices':      { Icon: Receipt,      tint: 'bg-amber-50',   fg: 'text-amber-600' },
   'Summaries':     { Icon: FileText,     tint: 'bg-blue-50',    fg: 'text-blue-600' },
   'Insurance':     { Icon: ShieldCheck,  tint: 'bg-teal-50',    fg: 'text-teal-600' },

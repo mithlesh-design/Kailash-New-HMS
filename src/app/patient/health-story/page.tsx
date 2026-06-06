@@ -13,7 +13,7 @@ const BP_TREND = [
 const TIMELINE = [
   { icon: Stethoscope, tint: 'bg-blue-50 text-blue-600', title: 'OPD consultation — Dr. Priya Nair', sub: 'Today · Chest tightness, breathlessness' },
   { icon: FlaskConical, tint: 'bg-blue-50 text-blue-600', title: 'Lab: Complete Blood Count', sub: 'Today · Reviewed — mildly raised WBC' },
-  { icon: Pill, tint: 'bg-pink-50 text-pink-600', title: 'Prescription dispensed', sub: '20 Apr · Metformin, Cetirizine' },
+  { icon: Pill, tint: 'bg-blue-50 text-blue-600', title: 'Prescription dispensed', sub: '20 Apr · Metformin, Cetirizine' },
   { icon: Stethoscope, tint: 'bg-blue-50 text-blue-600', title: 'Hypertension follow-up', sub: '05 Mar · BP controlled' },
 ]
 

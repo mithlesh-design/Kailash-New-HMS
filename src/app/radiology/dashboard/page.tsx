@@ -159,7 +159,7 @@ export default function RadiologyOverview() {
             { label: 'Scheduled',   sub: 'Awaiting arrival', count: m.kpis.scheduledOnly,  color: 'border-cyan-200 bg-cyan-50',       icon: Calendar,      fg: 'text-cyan-700',      href: '/radiology/arrival',  cta: 'Check in' },
             { label: 'Arrived',     sub: 'Ready for scan',   count: m.kpis.arrivedOnly,    color: 'border-blue-200 bg-blue-50',       icon: UserCheck,     fg: 'text-blue-700',      href: '/radiology/bench',    cta: 'Acquire' },
             { label: 'Acquired',    sub: 'Pending read',     count: m.kpis.pendingRead,    color: 'border-blue-200 bg-blue-50',   icon: ScanLine,      fg: 'text-blue-700',    href: '/radiology/reading',  cta: 'Read' },
-            { label: 'Reported',    sub: 'Pending verify',   count: m.kpis.pendingVerify,  color: 'border-pink-200 bg-pink-50',       icon: ShieldCheck,   fg: 'text-pink-700',      href: '/radiology/verification', cta: 'Verify' },
+            { label: 'Reported',    sub: 'Pending verify',   count: m.kpis.pendingVerify,  color: 'border-blue-200 bg-blue-50',       icon: ShieldCheck,   fg: 'text-blue-700',      href: '/radiology/verification', cta: 'Verify' },
             { label: 'Released',    sub: 'Today',            count: m.kpis.releasedToday,  color: 'border-emerald-200 bg-emerald-50', icon: Send,          fg: 'text-emerald-700',   href: '/radiology/inbox',    cta: 'View inbox' },
             { label: 'Critical CB', sub: 'Awaiting callback',count: m.kpis.critPending,    color: m.kpis.critPending > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: Phone, fg: m.kpis.critPending > 0 ? 'text-red-700' : 'text-slate-400', href: '#critical-callback', cta: 'Log callback' },
           ].map((s, i, arr) => (
@@ -187,7 +187,7 @@ export default function RadiologyOverview() {
           { label: "Ordered / scheduled", value: m.kpis.ordered, icon: ClipboardList, fg: "text-amber-600", bg: "bg-amber-50" },
           { label: "On bench", value: m.kpis.onBench, icon: ScanLine, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Pending read", value: m.kpis.pendingRead, icon: Hourglass, fg: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Pending verify", value: m.kpis.pendingVerify, icon: ShieldCheck, fg: "text-pink-600", bg: "bg-pink-50" },
+          { label: "Pending verify", value: m.kpis.pendingVerify, icon: ShieldCheck, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Released today", value: m.kpis.releasedToday, icon: PackageCheck, fg: "text-emerald-600", bg: "bg-emerald-50" },
           { label: "TAT breaches", value: m.kpis.tatBreaches, icon: AlertTriangle, fg: "text-orange-600", bg: "bg-orange-50", action: escalateRadiologyTat, actionLabel: "Escalate" },
         ].map(s => (
@@ -225,7 +225,7 @@ export default function RadiologyOverview() {
                       {counts.arrived + counts.acquiring > 0 && <p className="text-[10px] text-amber-600"><b>{counts.arrived + counts.acquiring}</b> on bench</p>}
                       {counts.acquired > 0 && <p className="text-[10px] text-blue-600"><b>{counts.acquired}</b> awaiting read</p>}
                       {counts.reading > 0 && <p className="text-[10px] text-blue-600"><b>{counts.reading}</b> being read</p>}
-                      {counts.reported > 0 && <p className="text-[10px] text-pink-600"><b>{counts.reported}</b> pending verify</p>}
+                      {counts.reported > 0 && <p className="text-[10px] text-blue-600"><b>{counts.reported}</b> pending verify</p>}
                     </div>
                   </div>
                 )
@@ -278,7 +278,7 @@ export default function RadiologyOverview() {
             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Hourglass className="h-4 w-4 text-pink-600" />
+                  <Hourglass className="h-4 w-4 text-blue-600" />
                   <h2 className="text-sm font-bold text-slate-800">Pending verification</h2>
                   <span className="text-xs text-slate-400">{m.reported.length}</span>
                 </div>

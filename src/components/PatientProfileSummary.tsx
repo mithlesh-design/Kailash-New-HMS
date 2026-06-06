@@ -34,7 +34,7 @@ export function PatientProfileSummary({ patientId }: { patientId: string }) {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <Row icon={ShieldAlert} tint="text-red-500" label="Allergies" danger={!p.noKnownAllergies && p.allergies.length > 0} value={p.noKnownAllergies ? "No known allergies" : p.allergies.join(", ")} />
-        <Row icon={HeartPulse} tint="text-pink-500" label="Conditions" value={p.chronicConditions.join(", ")} />
+        <Row icon={HeartPulse} tint="text-blue-500" label="Conditions" value={p.chronicConditions.join(", ")} />
         <Row icon={Droplet} tint="text-red-500" label="Blood group" value={p.bloodGroup ?? ""} />
         <Row icon={Pill} tint="text-blue-500" label="Current meds" value={p.currentMedications.join(", ")} />
         <Row icon={Phone} tint="text-slate-400" label="Emergency" value={p.emergencyName ? `${p.emergencyName}${p.emergencyRelation ? ` (${p.emergencyRelation})` : ""} · ${p.emergencyPhone ?? ""}` : ""} />
