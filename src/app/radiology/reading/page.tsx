@@ -277,7 +277,7 @@ function ReadingRow(props: {
                   <div key={f.id} className="flex items-center gap-2">
                     <span className={cn("h-2 w-2 rounded-full flex-shrink-0", f.category === "critical" ? "bg-red-500" : f.category === "actionable" ? "bg-amber-500" : "bg-emerald-500")} />
                     <span className="text-[12px] font-semibold text-slate-800 flex-1 truncate">{f.label}{f.birads ? ` · BI-RADS ${f.birads}` : ""}{f.lungrads ? ` · Lung-RADS ${f.lungrads}` : ""}{f.pirads ? ` · PI-RADS ${f.pirads}` : ""}</span>
-                    <AiConfidenceBadge confidence={Math.round(f.confidence * 100)} tier={getConfidenceTier(f.confidence)} />
+                    <AiConfidenceBadge confidence={f.confidence} tier={getConfidenceTier(f.confidence)} />
                   </div>
                 ))}
                 {s.comparisonPriorId && <p className="text-[10.5px] text-slate-500 flex items-center gap-1 pt-0.5"><GitCompare className="h-3 w-3" />Prior study linked for comparison</p>}

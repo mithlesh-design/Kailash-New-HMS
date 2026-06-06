@@ -120,7 +120,7 @@ export default function AiCommandCenter() {
                     </div>
                     <p className="text-[11.5px] text-slate-500 truncate">{study.patientName} · {study.name} · {study.status}</p>
                   </div>
-                  <AiConfidenceBadge confidence={Math.round(top.confidence * 100)} tier={getConfidenceTier(top.confidence)} />
+                  <AiConfidenceBadge confidence={top.confidence} tier={getConfidenceTier(top.confidence)} />
                   <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-[#1E3A8A] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                 </Link>
               ))}

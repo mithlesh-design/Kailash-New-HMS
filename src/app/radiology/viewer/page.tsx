@@ -96,7 +96,7 @@ export default function RadiologyViewer() {
                   </div>
                   <div className="mt-1.5 flex items-center justify-between">
                     <span className="text-[10px] font-semibold uppercase text-slate-400">{f.category}{f.birads ? ` · BI-RADS ${f.birads}` : ""}{f.lungrads ? ` · Lung-RADS ${f.lungrads}` : ""}{f.pirads ? ` · PI-RADS ${f.pirads}` : ""}</span>
-                    <AiConfidenceBadge confidence={Math.round(f.confidence * 100)} tier={getConfidenceTier(f.confidence)} />
+                    <AiConfidenceBadge confidence={f.confidence} tier={getConfidenceTier(f.confidence)} />
                   </div>
                 </div>
               ))}
