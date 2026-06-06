@@ -54,7 +54,7 @@ export default function PharmacyInventory() {
         {[
           { label: "Stock lines", value: items.length, icon: Package, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Reorder alerts", value: low.length, icon: AlertTriangle, fg: "text-amber-600", bg: "bg-amber-50" },
-          { label: "Open requests", value: openPOs.length, icon: ShoppingCart, fg: "text-violet-600", bg: "bg-violet-50" },
+          { label: "Open requests", value: openPOs.length, icon: ShoppingCart, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Controlled (Sch. X/H1)", value: controlled.length, icon: ShieldAlert, fg: "text-red-600", bg: "bg-red-50" },
         ].map(s => (
           <div key={s.label} className={`rounded-xl p-4 flex items-center gap-4 ${s.bg}`}>
@@ -67,7 +67,7 @@ export default function PharmacyInventory() {
       {/* My requests (read-only status) */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
-          <ShoppingCart className="h-4 w-4 text-violet-600" />
+          <ShoppingCart className="h-4 w-4 text-blue-600" />
           <h2 className="text-sm font-bold text-slate-800">My requests to Inventory Manager</h2>
           <span className="text-xs text-slate-400">restocks and patient-specific procurements · status updates as the manager acts</span>
         </div>
@@ -96,9 +96,9 @@ export default function PharmacyInventory() {
       </div>
 
       {low.length > 0 && (
-        <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
-          <p className="flex items-center gap-2 text-sm font-bold text-violet-800 mb-1"><Sparkles className="h-4 w-4" /> AI reorder suggestion</p>
-          <p className="text-xs text-violet-700">{low.map(i => `${i.name} (${i.qty}/${i.reorderAt})`).join(" · ")} — below reorder level; raise restock requests below.</p>
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+          <p className="flex items-center gap-2 text-sm font-bold text-blue-800 mb-1"><Sparkles className="h-4 w-4" /> AI reorder suggestion</p>
+          <p className="text-xs text-blue-700">{low.map(i => `${i.name} (${i.qty}/${i.reorderAt})`).join(" · ")} — below reorder level; raise restock requests below.</p>
         </div>
       )}
 
@@ -127,7 +127,7 @@ export default function PharmacyInventory() {
                         <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg inline-flex items-center gap-1"><ShoppingCart className="h-3.5 w-3.5" />Requested</span>
                       ) : (
                         <button onClick={() => requestRestockFor(i)}
-                          className="flex items-center gap-1.5 text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-lg cursor-pointer"><Send className="h-3.5 w-3.5" />Request restock</button>
+                          className="flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg cursor-pointer"><Send className="h-3.5 w-3.5" />Request restock</button>
                       )
                     ) : (
                       <span className="text-xs text-slate-400">Adequate</span>

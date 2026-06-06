@@ -19,7 +19,7 @@ const PILLAR_CONFIG: Record<ClearancePillar, { label: string; icon: React.Elemen
   nursing:   { label: 'Nursing',   icon: User,        color: 'text-green-500' },
   pharmacy:  { label: 'Pharmacy',  icon: Pill,        color: 'text-pink-500' },
   billing:   { label: 'Billing',   icon: Receipt,     color: 'text-orange-500' },
-  insurance: { label: 'Insurance', icon: ShieldCheck, color: 'text-purple-500' },
+  insurance: { label: 'Insurance', icon: ShieldCheck, color: 'text-blue-500' },
 }
 
 const PILLARS: ClearancePillar[] = ['doctor', 'nursing', 'pharmacy', 'billing', 'insurance']
@@ -275,7 +275,7 @@ function PatientCard({ patient }: { patient: DischargePatient }) {
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Discharge Summary</p>
                   {!patient.summaryDrafted && (
-                    <button onClick={handleDraftSummary} className="text-xs font-semibold text-purple-600 hover:text-purple-800 flex items-center gap-1 cursor-pointer">
+                    <button onClick={handleDraftSummary} className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer">
                       <Sparkles className="h-3 w-3" /> AI Draft
                     </button>
                   )}
@@ -408,7 +408,7 @@ export default function DischargeDashboard() {
           {[
             { label: 'Initiated',  sub: 'Order + draft',    count: initiated,      color: 'border-blue-200 bg-blue-50',     icon: FileText,     fg: 'text-blue-700',     cta: 'Draft summary' },
             { label: 'Clearing',   sub: 'Pillars in flight',count: clearing,       color: 'border-amber-200 bg-amber-50',   icon: Clock,        fg: 'text-amber-700',    cta: 'Track' },
-            { label: 'Ready',      sub: '8/9 cleared',      count: ready,          color: 'border-violet-200 bg-violet-50', icon: CheckCircle2, fg: 'text-violet-700',   cta: 'Issue exit' },
+            { label: 'Ready',      sub: '8/9 cleared',      count: ready,          color: 'border-blue-200 bg-blue-50', icon: CheckCircle2, fg: 'text-blue-700',   cta: 'Issue exit' },
             { label: 'Exit issued',sub: 'Today',            count: cleared.length, color: 'border-emerald-200 bg-emerald-50', icon: LogOut,    fg: 'text-emerald-700',  cta: 'Archive' },
             { label: 'Blockers',   sub: 'Stuck steps',      count: blockerCount,   color: blockerCount > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: AlertCircle, fg: blockerCount > 0 ? 'text-red-700' : 'text-slate-400', cta: 'Resolve' },
           ].map((s, i, arr) => (
@@ -434,7 +434,7 @@ export default function DischargeDashboard() {
           { label: "Discharging Today", value: today.length, color: "text-blue-600", bg: "bg-blue-50 border-blue-200" },
           { label: "Active Blockers", value: blockerCount, color: blockerCount > 0 ? "text-red-600" : "text-green-600", bg: blockerCount > 0 ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200" },
           { label: "Clearances Obtained", value: `${clearancesDone}/${clearancesTotal}`, color: "text-green-600", bg: "bg-green-50 border-green-200" },
-          { label: "Exits Issued Today", value: cleared.length, color: "text-purple-600", bg: "bg-purple-50 border-purple-200" },
+          { label: "Exits Issued Today", value: cleared.length, color: "text-blue-600", bg: "bg-blue-50 border-blue-200" },
         ].map(({ label, value, color, bg }) => (
           <div key={label} className={cn("rounded-xl border p-5", bg)}>
             <p className={cn("text-3xl font-bold", color)}>{value}</p>

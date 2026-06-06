@@ -30,7 +30,7 @@ export default function PatientJourneyPage({ params }: { params: Promise<{ patie
 
         <div className="bg-white rounded-2xl border border-slate-200 p-6">
           <div className="flex items-start gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex items-center justify-center font-bold text-xl flex-shrink-0">
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-500 text-white flex items-center justify-center font-bold text-xl flex-shrink-0">
               {name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">

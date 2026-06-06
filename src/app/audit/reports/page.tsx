@@ -58,7 +58,7 @@ export default function AuditReports() {
       <div className="flex items-start justify-between gap-3 flex-wrap print:hidden">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <FileText className="h-6 w-6 text-violet-600" />Compliance Reports
+            <FileText className="h-6 w-6 text-blue-600" />Compliance Reports
           </h2>
           <p className="text-sm text-slate-500 mt-1">Printable NABH evidence bundle · live from audit trail · {entries.length} events</p>
         </div>
@@ -93,7 +93,7 @@ export default function AuditReports() {
         </div>
         <div className="rounded-xl border border-slate-200 p-3 bg-white">
           <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">AI accept rate</p>
-          <p className="text-2xl font-black text-violet-700 mt-1">{hitlRate}<span className="text-base font-bold">%</span></p>
+          <p className="text-2xl font-black text-blue-700 mt-1">{hitlRate}<span className="text-base font-bold">%</span></p>
         </div>
         <div className="rounded-xl border border-slate-200 p-3 bg-white">
           <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Severity mix</p>

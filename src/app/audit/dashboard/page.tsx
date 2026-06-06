@@ -47,7 +47,7 @@ export default function AuditDashboard() {
         </div>
         <div className="flex gap-2">
           <Link href="/audit/log" className="flex items-center gap-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-xl"><FileText className="h-3.5 w-3.5" />Open Trail</Link>
-          <Link href="/audit/reports" className="flex items-center gap-1.5 text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-3 py-2 rounded-xl"><ClipboardList className="h-3.5 w-3.5" />Reports</Link>
+          <Link href="/audit/reports" className="flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-xl"><ClipboardList className="h-3.5 w-3.5" />Reports</Link>
         </div>
       </motion.div>
 
@@ -56,7 +56,7 @@ export default function AuditDashboard() {
           { label: 'Total events', value: m.total, icon: Activity, fg: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Critical events', value: m.sev.critical, icon: ShieldAlert, fg: 'text-red-600', bg: 'bg-red-50' },
           { label: 'Warning events', value: m.sev.warning, icon: AlertTriangle, fg: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'AI accept rate', value: `${m.aiAcceptRate}%`, icon: ThumbsUp, fg: 'text-violet-600', bg: 'bg-violet-50' },
+          { label: 'AI accept rate', value: `${m.aiAcceptRate}%`, icon: ThumbsUp, fg: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Active actors', value: m.users, icon: Users, fg: 'text-emerald-600', bg: 'bg-emerald-50' },
           { label: 'NABH chapters covered', value: `${m.nabhReady}/${NABH_CHAPTERS.length}`, icon: ShieldCheck, fg: 'text-indigo-600', bg: 'bg-indigo-50' },
         ].map(s => (
@@ -139,9 +139,9 @@ export default function AuditDashboard() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-violet-200 p-4" style={{ background: 'linear-gradient(135deg,rgba(139,92,246,0.06),rgba(99,102,241,0.04))' }}>
-            <h2 className="text-sm font-bold flex items-center gap-2 mb-1 text-violet-800"><Sparkles className="h-4 w-4 text-violet-600" />AI HITL summary</h2>
-            <p className="text-[12px] text-violet-700">{m.hitlTotal} human-in-the-loop decisions logged · {m.aiAcceptRate}% accepted</p>
+          <div className="rounded-xl border border-blue-200 p-4" style={{ background: 'linear-gradient(135deg,rgba(37,99,235,0.06),rgba(99,102,241,0.04))' }}>
+            <h2 className="text-sm font-bold flex items-center gap-2 mb-1 text-blue-800"><Sparkles className="h-4 w-4 text-blue-600" />AI HITL summary</h2>
+            <p className="text-[12px] text-blue-700">{m.hitlTotal} human-in-the-loop decisions logged · {m.aiAcceptRate}% accepted</p>
             <p className="text-[10px] text-slate-500 mt-1">Acceptance rate is a leading indicator of AI suggestion quality and clinician trust.</p>
           </div>
         </div>

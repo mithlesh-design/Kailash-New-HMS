@@ -8,12 +8,14 @@ interface AvatarProps {
   className?: string
 }
 
+// Restrained cool-professional palette (no warm rainbow) — subtle variation for
+// list legibility while staying within the single deep-blue/slate identity.
 const colors = [
-  "bg-blue-600 text-white",
-  "bg-teal-500 text-white",
-  "bg-purple-600 text-white",
-  "bg-green-600 text-white",
-  "bg-amber-500 text-white",
+  "bg-[#1E3A8A] text-white",
+  "bg-[#2563EB] text-white",
+  "bg-[#475467] text-white",
+  "bg-[#334155] text-white",
+  "bg-[#1D4ED8] text-white",
 ]
 
 function getColor(name: string) {

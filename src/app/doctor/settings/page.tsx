@@ -74,7 +74,7 @@ export default function DoctorSettings() {
 
       {/* e-Signature */}
       <div className={CARD}>
-        <h3 className="text-[15px] font-bold text-slate-900 mb-4 flex items-center gap-2"><PenLine className="h-4.5 w-4.5 text-violet-600" /> e-Signature</h3>
+        <h3 className="text-[15px] font-bold text-slate-900 mb-4 flex items-center gap-2"><PenLine className="h-4.5 w-4.5 text-blue-600" /> e-Signature</h3>
         <input value={p.signature} onChange={e => p.setProfile({ signature: e.target.value })} className={field} placeholder="Name, qualifications" />
         <div className="mt-3 rounded-xl bg-slate-50 p-4">
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Preview · used on prescriptions, referrals & discharge summaries</p>

@@ -26,7 +26,7 @@ const SOURCE_STYLE: Record<RxSource, string> = {
   OPD: "bg-blue-50 text-blue-700 ring-blue-200",
   IPD: "bg-indigo-50 text-indigo-700 ring-indigo-200",
   ICU: "bg-red-50 text-red-700 ring-red-200",
-  OT: "bg-purple-50 text-purple-700 ring-purple-200",
+  OT: "bg-blue-50 text-blue-700 ring-blue-200",
   "Home Rx": "bg-teal-50 text-teal-700 ring-teal-200",
   Discharge: "bg-amber-50 text-amber-700 ring-amber-200",
 }
@@ -414,7 +414,7 @@ function QueueRow(props: {
                         {m.inStock === false && m.supply === "pharmacy" && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">OUT OF STOCK</span>}
                         {m.supply === "order_raised" && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">PO RAISED</span>}
                         {m.supply === "advised_outside" && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">BUY OUTSIDE</span>}
-                        {m.substitutedFrom && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 flex items-center gap-0.5"><Repeat className="h-2.5 w-2.5" />substituted ← {m.substitutedFrom}</span>}
+                        {m.substitutedFrom && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 flex items-center gap-0.5"><Repeat className="h-2.5 w-2.5" />substituted ← {m.substitutedFrom}</span>}
                       </p>
                       <p className="text-[11px] text-slate-500 mt-0.5">{m.dosage} · {m.frequency} · {m.duration} · ₹{UNIT_PRICES[m.name] ?? 0}/unit</p>
                     </div>
@@ -449,12 +449,12 @@ function QueueRow(props: {
                     const picking = props.substitutingMed === m.name
                     if (picking) {
                       return (
-                        <div className="mt-2 rounded-lg bg-violet-50 ring-1 ring-violet-200 p-2">
-                          <p className="text-[11px] font-bold text-violet-700 flex items-center gap-1 mb-1.5"><Repeat className="h-3 w-3" />Substitute with an in-stock alternative:</p>
+                        <div className="mt-2 rounded-lg bg-blue-50 ring-1 ring-blue-200 p-2">
+                          <p className="text-[11px] font-bold text-blue-700 flex items-center gap-1 mb-1.5"><Repeat className="h-3 w-3" />Substitute with an in-stock alternative:</p>
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {alts.map(a => (
                               <button key={a} onClick={() => props.onSubstitute(m.name, a)}
-                                className="text-[11px] font-bold text-violet-700 bg-white hover:bg-violet-100 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg cursor-pointer">{a}</button>
+                                className="text-[11px] font-bold text-blue-700 bg-white hover:bg-blue-100 ring-1 ring-blue-200 px-2.5 py-1 rounded-lg cursor-pointer">{a}</button>
                             ))}
                             <button onClick={props.onCancelSubstitute} className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 px-1.5 py-1 cursor-pointer flex items-center gap-0.5"><X className="h-3 w-3" />Cancel</button>
                           </div>
@@ -464,7 +464,7 @@ function QueueRow(props: {
                     return (
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
                         {alts.length > 0 && (
-                          <button onClick={() => props.onStartSubstitute(m)} className="flex items-center gap-1 text-[11px] font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-2.5 py-1 rounded-lg cursor-pointer"><Repeat className="h-3 w-3" />Substitute ({alts.length})</button>
+                          <button onClick={() => props.onStartSubstitute(m)} className="flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg cursor-pointer"><Repeat className="h-3 w-3" />Substitute ({alts.length})</button>
                         )}
                         {m.supply !== "order_raised" && (
                           <button onClick={() => props.onOrder(m)} className="flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg cursor-pointer"><ShoppingCart className="h-3 w-3" />Order from inventory manager</button>
@@ -506,7 +506,7 @@ function ActionBtn({ onClick, children, icon: Icon, tone }: { onClick: () => voi
     <button onClick={onClick}
       className={cn("flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl cursor-pointer transition-all whitespace-nowrap",
         tone === "ghost" && "text-slate-600 bg-slate-100 hover:bg-slate-200")}
-      style={tone === "brand" ? { background: "linear-gradient(135deg,#EC4899,#8B5CF6)", color: "#fff", boxShadow: "0 2px 8px rgba(236,72,153,0.25)" } : undefined}>
+      style={tone === "brand" ? { background: "linear-gradient(135deg,#EC4899,#2563EB)", color: "#fff", boxShadow: "0 2px 8px rgba(236,72,153,0.25)" } : undefined}>
       <Icon className="h-3.5 w-3.5" />{children}
     </button>
   )

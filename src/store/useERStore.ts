@@ -5,6 +5,7 @@ import { useAdmissionStore } from './useAdmissionStore'
 import { useAuditStore } from './useAuditStore'
 import { useMortuaryStore } from './useMortuaryStore'
 import { usePatientStore } from './usePatientStore'
+import { useFamilyTokenStore } from './useFamilyTokenStore'
 import {
   news2 as calcNEWS2,
   qsofa as calcQSOFA,
@@ -336,10 +337,15 @@ export const useERStore = create<ERState>()(persist((set, get) => ({
     //     phone, defer until ID captured.
     const smsTarget = input.attendantPhone || input.phone
     if (smsTarget && !isTemp) {
+      // Consented, time-boxed tracking token so the SMS link (not the bare
+      // UHID) is the credential for the public family page.
+      const trackToken = useFamilyTokenStore.getState().issue(uhid, displayName, {
+        consent: true, issuedBy: 'ER-DESK',
+      })
       useNotificationStore.getState().add({
         type: 'system', priority: 'medium',
         title: `Welcome to Kailash · UHID ${uhid}`,
-        body: `${displayName} registered at Emergency · ${new Date(arrivedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}. View live status: kailash.in/p/${uhid.toLowerCase()}. SMS sent to ${smsTarget}.`,
+        body: `${displayName} registered at Emergency · ${new Date(arrivedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}. View live status: kailash.in/p/${uhid.toLowerCase()}?t=${trackToken}. SMS sent to ${smsTarget}.`,
         targetRole: 'patient',
         patientName: displayName,
         patientPhone: smsTarget,

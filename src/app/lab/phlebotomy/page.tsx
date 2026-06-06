@@ -17,7 +17,7 @@ const SOURCE_TINT: Record<LabSource, string> = {
   OPD: 'bg-blue-50 text-blue-700 border-blue-200',
   IPD: 'bg-indigo-50 text-indigo-700 border-indigo-200',
   ICU: 'bg-red-50 text-red-700 border-red-200',
-  OT:  'bg-purple-50 text-purple-700 border-purple-200',
+  OT:  'bg-blue-50 text-blue-700 border-blue-200',
   ER:  'bg-orange-50 text-orange-700 border-orange-200',
 }
 const PRIORITY_RANK: Record<Priority, number> = { STAT: 0, Urgent: 1, Routine: 2 }
@@ -136,7 +136,7 @@ export default function PhlebotomyBench() {
         {[
           { label: 'In queue', val: queue.length, tint: 'bg-amber-50 text-amber-700 border-amber-200' },
           { label: 'STAT priority', val: statCount, tint: 'bg-red-50 text-red-700 border-red-200' },
-          { label: 'Currently calling', val: calledOrderId ? '1' : '—', tint: 'bg-violet-50 text-violet-700 border-violet-200' },
+          { label: 'Currently calling', val: calledOrderId ? '1' : '—', tint: 'bg-blue-50 text-blue-700 border-blue-200' },
           { label: 'My collections today', val: orders.flatMap(o => o.specimens).filter(s => s.collectedBy === meName).length, tint: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
         ].map(s => (
           <div key={s.label} className={cn("rounded-xl border p-3", s.tint)}>
@@ -168,7 +168,7 @@ export default function PhlebotomyBench() {
                 <motion.div key={o.id} layout
                   initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                   className={cn("rounded-xl bg-white border p-4 flex items-start gap-3 flex-wrap",
-                    called ? 'border-violet-300 ring-2 ring-violet-100'
+                    called ? 'border-blue-300 ring-2 ring-blue-100'
                     : top ? 'border-amber-200 ring-2 ring-amber-100'
                     : 'border-slate-200')}>
                   <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-500 to-red-500 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
@@ -182,7 +182,7 @@ export default function PhlebotomyBench() {
                       {o.wardBed && <span className="text-[11px] text-slate-500">· {o.wardBed}</span>}
                       <span className={cn("text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded", PRIORITY_TINT[priority])}>{priority}</span>
                       {called && (
-                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-violet-100 text-violet-700 flex items-center gap-1">
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-700 flex items-center gap-1">
                           <Volume2 className="h-2.5 w-2.5" />Called
                         </span>
                       )}

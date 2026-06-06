@@ -67,9 +67,9 @@ export default function OnlineConsultation() {
         </div>
       )}
 
-      <div className="rounded-2xl bg-violet-50 border border-violet-100 p-4 mb-5 flex items-start gap-3">
-        <Sparkles className="h-5 w-5 text-violet-600 flex-shrink-0 mt-0.5" />
-        <p className="text-[13px] text-violet-900 leading-relaxed">
+      <div className="rounded-2xl bg-blue-50 border border-blue-100 p-4 mb-5 flex items-start gap-3">
+        <Sparkles className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+        <p className="text-[13px] text-blue-900 leading-relaxed">
           Starting a consultation opens the full workspace with the call running in the corner — take notes, prescribe, order labs/scans, refer or admit, then <b>Complete consultation</b>, exactly like a face-to-face patient.
         </p>
       </div>
@@ -88,10 +88,10 @@ export default function OnlineConsultation() {
               {queue.map(p => {
                 const hist = p.history.filter(h => !/no significant|no known/i.test(h))
                 return (
-                  <tr key={p.id} className="border-b border-slate-50 last:border-0 hover:bg-violet-50/30 transition">
+                  <tr key={p.id} className="border-b border-slate-50 last:border-0 hover:bg-blue-50/30 transition">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white flex items-center justify-center font-bold text-[12.5px] flex-shrink-0">{initials(p.name)}</span>
+                        <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-500 text-white flex items-center justify-center font-bold text-[12.5px] flex-shrink-0">{initials(p.name)}</span>
                         <div className="min-w-0"><p className="text-[13.5px] font-bold text-slate-900 truncate">{p.name}</p><p className="text-[11.5px] text-slate-400">{p.age}y · {p.gender}</p></div>
                       </div>
                     </td>
@@ -102,7 +102,7 @@ export default function OnlineConsultation() {
                       <div className="flex flex-wrap gap-1">{hist.length ? hist.map(h => <span key={h} className="text-[10.5px] font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full">{h}</span>) : <span className="text-slate-300 text-[12px]">—</span>}</div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-[11.5px] text-slate-500">{p.vitals ? `${p.vitals.bp} · SpO₂ ${p.vitals.spo2}` : <span className="text-amber-500">pending</span>}</td>
-                    <td className="px-4 py-3 max-w-[180px]"><span className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full"><Sparkles className="h-3 w-3" /> <span className="truncate">{briefFor(p)}</span></span></td>
+                    <td className="px-4 py-3 max-w-[180px]"><span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full"><Sparkles className="h-3 w-3" /> <span className="truncate">{briefFor(p)}</span></span></td>
                     <td className="px-4 py-3">{p.triageLevel && <span className={cn("text-[11px] font-bold px-2 py-0.5 rounded-full", TRIAGE_TINT[p.triageLevel])}>{p.triageLevel}</span>}</td>
                     <td className="px-4 py-3 text-right">
                       <button onClick={() => start(p)} className="inline-flex items-center justify-center gap-1.5 px-3 h-9 bg-blue-600 text-white text-[12px] font-bold rounded-lg hover:bg-blue-700 transition active:scale-95 whitespace-nowrap"><Video className="h-3.5 w-3.5" /> Start</button>

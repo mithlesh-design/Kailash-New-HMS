@@ -122,7 +122,7 @@ export default function DisputesPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <KPI label="Patient disputes" value={tabCounts.patient} tint={tabCounts.patient > 0 ? "bg-red-50 border-red-200 text-red-700" : "bg-slate-50 border-slate-200 text-slate-600"} />
         <KPI label="Vendor disputes" value={tabCounts.vendor} tint={tabCounts.vendor > 0 ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-slate-50 border-slate-200 text-slate-600"} />
-        <KPI label="AI flags (cross-bill)" value={tabCounts.ai_flags} tint={tabCounts.ai_flags > 0 ? "bg-violet-50 border-violet-200 text-violet-700" : "bg-slate-50 border-slate-200 text-slate-600"} />
+        <KPI label="AI flags (cross-bill)" value={tabCounts.ai_flags} tint={tabCounts.ai_flags > 0 ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-slate-50 border-slate-200 text-slate-600"} />
         <KPI label="Total open" value={tabCounts.patient + tabCounts.vendor + tabCounts.ai_flags}
           tint="bg-indigo-50 border-indigo-200 text-indigo-700" />
       </div>
@@ -226,28 +226,28 @@ export default function DisputesPage() {
         <div className="space-y-2">
           {aiDuplicateFlags.length === 0 ? (
             <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
-              <Sparkles className="h-10 w-10 text-violet-300 mx-auto mb-2" />
+              <Sparkles className="h-10 w-10 text-blue-300 mx-auto mb-2" />
               <p className="text-sm font-bold text-slate-500">No AI duplicate-charge flags detected</p>
             </div>
           ) : aiDuplicateFlags.map(({ bill, alerts }) => (
             <motion.div key={bill.id}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50/50 to-fuchsia-50/30 p-4">
+              className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50/50 to-blue-50/30 p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-3.5 w-3.5 text-violet-600" />
+                <Sparkles className="h-3.5 w-3.5 text-blue-600" />
                 <p className="text-sm font-bold text-slate-800">{bill.patientName}</p>
-                <span className="text-[10px] text-violet-400">· {bill.id}</span>
+                <span className="text-[10px] text-blue-400">· {bill.id}</span>
               </div>
               <div className="space-y-1">
                 {alerts.map(a => (
-                  <p key={a.groupKey} className="text-[11px] text-violet-700 flex items-start gap-1.5">
+                  <p key={a.groupKey} className="text-[11px] text-blue-700 flex items-start gap-1.5">
                     <ShieldAlert className="h-3 w-3 flex-shrink-0 mt-0.5" />
                     <span><b>{a.description}</b> — {a.reason} · {fmtINR(a.totalAmount)}</span>
                   </p>
                 ))}
               </div>
               <Link href={`/billing/patient/${bill.patientId}`}
-                className="text-[11px] font-bold text-violet-700 hover:underline mt-2 inline-flex items-center gap-1">
+                className="text-[11px] font-bold text-blue-700 hover:underline mt-2 inline-flex items-center gap-1">
                 View bill <ChevronRight className="h-3 w-3" />
               </Link>
             </motion.div>

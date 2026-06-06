@@ -91,11 +91,11 @@ export function PredictiveOpsCockpit({ className }: { className?: string }) {
 
   return (
     <section className={`rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-sm overflow-hidden ${className ?? ''}`}>
-      <header className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-blue-50/60 to-violet-50/40">
-        <Sparkles className="h-4 w-4 text-violet-600" />
+      <header className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-blue-50/60 to-blue-50/40">
+        <Sparkles className="h-4 w-4 text-blue-600" />
         <h3 className="text-[14px] font-semibold text-slate-900">Predictive Operations Cockpit</h3>
         <span className="text-[11px] text-slate-500">Live forecast over current state</span>
-        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-violet-700">
+        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-blue-700">
           <Sparkles className="h-3 w-3" /> HITL — accept or dismiss
         </span>
       </header>
@@ -128,17 +128,17 @@ export function PredictiveOpsCockpit({ className }: { className?: string }) {
                     {p.metric.deltaPct > 0 ? '+' : ''}{p.metric.deltaPct}%
                   </span>
                 ) : null}
-                <span className="ml-auto text-[10.5px] font-mono text-violet-700">{Math.round(p.confidence * 100)}% conf</span>
+                <span className="ml-auto text-[10.5px] font-mono text-blue-700">{Math.round(p.confidence * 100)}% conf</span>
               </div>
 
-              <ul className="text-[11.5px] text-slate-600 space-y-0.5 pl-3.5 list-disc marker:text-violet-400">
+              <ul className="text-[11.5px] text-slate-600 space-y-0.5 pl-3.5 list-disc marker:text-blue-400">
                 {p.drivers.map((d, i) => <li key={i}>{d}</li>)}
               </ul>
 
               <div className="rounded-lg bg-white/80 ring-1 ring-slate-200/70 px-2.5 py-2 mt-auto">
                 <p className="text-[10.5px] font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Suggested action</p>
                 <p className="text-[12px] text-slate-800 leading-snug flex items-start gap-1.5">
-                  <ArrowRight className="h-3 w-3 text-violet-500 mt-0.5 flex-shrink-0" /> {p.recommendation}
+                  <ArrowRight className="h-3 w-3 text-blue-500 mt-0.5 flex-shrink-0" /> {p.recommendation}
                 </p>
               </div>
 
@@ -152,7 +152,7 @@ export function PredictiveOpsCockpit({ className }: { className?: string }) {
                       <X className="h-3 w-3" /> Dismiss
                     </button>
                     <button type="button" onClick={() => accept(p)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-violet-600 hover:bg-violet-700 text-white ml-auto">
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-blue-600 hover:bg-blue-700 text-white ml-auto">
                       <Check className="h-3 w-3" /> Action
                     </button>
                   </>

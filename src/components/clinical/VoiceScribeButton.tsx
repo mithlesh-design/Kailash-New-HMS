@@ -140,8 +140,8 @@ export function VoiceScribeButton({ surface, context, onAccept, patientId, patie
       onClick={() => { setOpen(true); start() }}
       className={
         (compact
-          ? "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100 ring-1 ring-violet-200 "
-          : "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-semibold bg-violet-600 hover:bg-violet-700 text-white shadow-sm ") +
+          ? "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 ring-1 ring-blue-200 "
+          : "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm ") +
         (className ?? '')
       }
       aria-label={`Voice scribe — ${SURFACE_LABEL[surface]}`}
@@ -158,19 +158,19 @@ export function VoiceScribeButton({ surface, context, onAccept, patientId, patie
   const previewSoap = transcript ? toSOAP(transcript, context ?? {}) : ''
 
   return (
-    <div className="rounded-xl bg-gradient-to-br from-violet-50/80 to-blue-50/60 ring-1 ring-violet-200/60 overflow-hidden">
-      <header className="flex items-center gap-2 px-3 py-2 border-b border-violet-100/60">
-        <Wand2 className="h-3.5 w-3.5 text-violet-600" />
-        <h3 className="text-[12.5px] font-semibold text-violet-900">Voice scribe · {SURFACE_LABEL[surface]}</h3>
+    <div className="rounded-xl bg-gradient-to-br from-blue-50/80 to-blue-50/60 ring-1 ring-blue-200/60 overflow-hidden">
+      <header className="flex items-center gap-2 px-3 py-2 border-b border-blue-100/60">
+        <Wand2 className="h-3.5 w-3.5 text-blue-600" />
+        <h3 className="text-[12.5px] font-semibold text-blue-900">Voice scribe · {SURFACE_LABEL[surface]}</h3>
         {!supported ? <ReasoningChip compact tone="warn" title="Demo mock — Web Speech unavailable" /> : null}
-        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-violet-700">
+        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-blue-700">
           <Sparkles className="h-3 w-3" /> AI-SOAP structuring
         </span>
       </header>
 
       <div className="p-3 space-y-2.5">
         {listening ? (
-          <div className="flex items-center gap-3 px-2 py-3 rounded-lg bg-white/60 ring-1 ring-violet-100">
+          <div className="flex items-center gap-3 px-2 py-3 rounded-lg bg-white/60 ring-1 ring-blue-100">
             <span className="relative inline-flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75 animate-ping" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
@@ -190,10 +190,10 @@ export function VoiceScribeButton({ surface, context, onAccept, patientId, patie
         ) : null}
 
         {showResult && previewSoap ? (
-          <div className="rounded-lg bg-white p-2.5 ring-1 ring-violet-200/70 space-y-1">
+          <div className="rounded-lg bg-white p-2.5 ring-1 ring-blue-200/70 space-y-1">
             <div className="flex items-center gap-1.5">
-              <FileText className="h-3 w-3 text-violet-600" />
-              <p className="text-[10.5px] font-semibold text-violet-700 uppercase tracking-wide">AI-structured SOAP</p>
+              <FileText className="h-3 w-3 text-blue-600" />
+              <p className="text-[10.5px] font-semibold text-blue-700 uppercase tracking-wide">AI-structured SOAP</p>
               <ReasoningChip compact tone="ok" title="80% confidence" />
             </div>
             <pre className="text-[12px] text-slate-800 leading-relaxed whitespace-pre-wrap font-sans">{previewSoap}</pre>
@@ -201,13 +201,13 @@ export function VoiceScribeButton({ surface, context, onAccept, patientId, patie
         ) : null}
       </div>
 
-      <footer className="flex items-center gap-2 border-t border-violet-100/60 px-3 py-2 bg-white/60">
+      <footer className="flex items-center gap-2 border-t border-blue-100/60 px-3 py-2 bg-white/60">
         <span className="text-[10.5px] text-slate-500 mr-auto">HITL — accept / reject. Decision audited.</span>
         <button type="button" onClick={reject} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11.5px] font-semibold bg-white hover:bg-slate-50 text-slate-700 ring-1 ring-slate-200">
           <X className="h-3 w-3" /> Reject
         </button>
         <button type="button" onClick={accept} disabled={!showResult || !transcript}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50">
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50">
           <Check className="h-3 w-3" /> Use this note
         </button>
       </footer>

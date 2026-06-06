@@ -11,7 +11,7 @@ const TRANSITIONS: Record<InstrumentStatus, { next: InstrumentStatus; label: str
   dirty:        [{ next: 'clean',      label: 'Mark cleaned',  icon: Droplets,     tone: 'bg-blue-600 hover:bg-blue-700' }],
   clean:        [{ next: 'sterilizing', label: 'Send to cycle', icon: Activity,     tone: 'bg-amber-600 hover:bg-amber-700' }],
   sterilizing:  [],   // status flips automatically on completeCycle
-  ready:        [{ next: 'in_use',     label: 'Issue to OT',    icon: Box,          tone: 'bg-violet-600 hover:bg-violet-700' }],
+  ready:        [{ next: 'in_use',     label: 'Issue to OT',    icon: Box,          tone: 'bg-blue-600 hover:bg-blue-700' }],
   in_use:       [{ next: 'dirty',      label: 'Returned dirty', icon: CheckCircle2, tone: 'bg-slate-600 hover:bg-slate-700' }],
 }
 

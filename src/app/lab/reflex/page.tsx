@@ -35,14 +35,14 @@ export default function LabReflex() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-          <Sparkles className="h-6 w-6 text-violet-600" /> Reflex Tests
+          <Sparkles className="h-6 w-6 text-blue-600" /> Reflex Tests
         </h1>
         <p className="text-sm text-[#64748B] mt-1">AI-suggested follow-up tests triggered automatically when a result trips a rule · one-click to order</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: "Pending suggestions", value: pending.length, icon: Zap, fg: "text-violet-600", bg: "bg-violet-50" },
+          { label: "Pending suggestions", value: pending.length, icon: Zap, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Ordered today", value: ordered.length, icon: CheckCircle, fg: "text-emerald-600", bg: "bg-emerald-50" },
           { label: "Active rules", value: 5, icon: Activity, fg: "text-blue-600", bg: "bg-blue-50" },
         ].map(s => (
@@ -56,7 +56,7 @@ export default function LabReflex() {
       {/* Pending */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
-          <Zap className="h-4 w-4 text-violet-600" />
+          <Zap className="h-4 w-4 text-blue-600" />
           <h2 className="text-sm font-bold text-slate-800">Pending suggestions</h2>
           <span className="text-xs text-slate-400">{pending.length}</span>
         </div>
@@ -76,8 +76,8 @@ export default function LabReflex() {
                     <p className="text-sm font-semibold text-slate-800 flex items-center gap-2 flex-wrap">
                       <span className="font-bold">{s.patientName}</span>
                       <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
-                      <span className="text-violet-700">{cat?.name ?? s.code}</span>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-violet-100 text-violet-700">{cat?.bench ?? '?'}</span>
+                      <span className="text-blue-700">{cat?.name ?? s.code}</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">{cat?.bench ?? '?'}</span>
                     </p>
                     <p className="text-[11px] text-slate-500 mt-0.5"><b className="text-slate-700">{s.triggerSummary}</b> · {s.reason}</p>
                     <p className="text-[10px] text-slate-400 mt-0.5">suggested {timeAgo(s.createdAt)}</p>
@@ -89,7 +89,7 @@ export default function LabReflex() {
                     </button>
                     <button onClick={() => { orderReflex(s.id); toast.success(`Reflex ${cat?.name ?? s.code} ordered for ${s.patientName}`) }}
                       className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap"
-                      style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" }}>
+                      style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
                       <Zap className="h-3.5 w-3.5" /> Order reflex
                     </button>
                   </div>

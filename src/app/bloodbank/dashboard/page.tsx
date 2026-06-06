@@ -11,7 +11,7 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recha
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const
 
-const PIE_COLORS = ['#EF4444', '#F97316', '#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4', '#10B981', '#F59E0B']
+const PIE_COLORS = ['#EF4444', '#F97316', '#3B82F6', '#2563EB', '#EC4899', '#2563EB', '#10B981', '#F59E0B']
 
 const GROUP_COLORS: Record<string, string> = {
   'O+': 'bg-red-100 text-red-700 border-red-200',
@@ -20,8 +20,8 @@ const GROUP_COLORS: Record<string, string> = {
   'A-': 'bg-orange-50 text-orange-600 border-orange-100',
   'B+': 'bg-blue-100 text-blue-700 border-blue-200',
   'B-': 'bg-blue-50 text-blue-600 border-blue-100',
-  'AB+': 'bg-purple-100 text-purple-700 border-purple-200',
-  'AB-': 'bg-purple-50 text-purple-600 border-purple-100',
+  'AB+': 'bg-blue-100 text-blue-700 border-blue-200',
+  'AB-': 'bg-blue-50 text-blue-600 border-blue-100',
 }
 
 export default function BloodBankDashboard() {

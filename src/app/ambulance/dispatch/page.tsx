@@ -17,7 +17,7 @@ const NEXT_STAGE: Partial<Record<TripStatus, TripStatus>> = {
 const STAGE_TINT: Record<TripStatus, string> = {
   dispatched:  'bg-amber-100 text-amber-700',
   en_route:    'bg-blue-100 text-blue-700',
-  at_scene:    'bg-violet-100 text-violet-700',
+  at_scene:    'bg-blue-100 text-blue-700',
   transporting:'bg-indigo-100 text-indigo-700',
   completed:   'bg-green-100 text-green-700',
   cancelled:   'bg-slate-100 text-slate-500',
@@ -148,11 +148,11 @@ export default function AmbulanceDispatch() {
 
       {/* Fleet status with fuel log */}
       <div className="bg-white rounded-xl border border-slate-200 p-5">
-        <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2"><Truck className="h-4 w-4 text-violet-500" /> Fleet</h3>
+        <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2"><Truck className="h-4 w-4 text-blue-500" /> Fleet</h3>
         <div className="space-y-2">
           {vehicles.map(v => (
             <div key={v.id} className="rounded-xl bg-slate-50 p-3 flex items-center gap-3 flex-wrap">
-              <span className="h-9 w-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center"><Truck className="h-4 w-4" /></span>
+              <span className="h-9 w-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center"><Truck className="h-4 w-4" /></span>
               <div className="flex-1 min-w-0">
                 <p className="text-[13.5px] font-bold text-slate-900">{v.vehicleNumber} <span className="text-[11px] text-slate-500 font-normal">· {v.type}</span></p>
                 <p className="text-[11.5px] text-slate-500"><Phone className="inline h-3 w-3 mr-0.5" /> {v.driverName}{v.paramedicName ? ' + ' + v.paramedicName : ''}</p>

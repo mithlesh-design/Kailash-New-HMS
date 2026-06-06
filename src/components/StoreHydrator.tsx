@@ -28,6 +28,7 @@ import { useDoctorStatsStore } from "@/store/useDoctorStatsStore"
 import { useDrugMasterStore } from "@/store/useDrugMasterStore"
 import { useERStore } from "@/store/useERStore"
 import { useEmergencyStore } from "@/store/useEmergencyStore"
+import { useFamilyTokenStore } from "@/store/useFamilyTokenStore"
 import { useFeedbackStore } from "@/store/useFeedbackStore"
 import { useFollowupStore } from "@/store/useFollowupStore"
 import { useHousekeepingStore } from "@/store/useHousekeepingStore"
@@ -82,6 +83,7 @@ export function StoreHydrator() {
     useDrugMasterStore.persist.rehydrate()
     useERStore.persist.rehydrate()
     useEmergencyStore.persist.rehydrate()
+    useFamilyTokenStore.persist.rehydrate()
     useFeedbackStore.persist.rehydrate()
     useFollowupStore.persist.rehydrate()
     useHousekeepingStore.persist.rehydrate()
@@ -119,6 +121,11 @@ export function StoreHydrator() {
         // Idempotent — gated by a localStorage marker.
         const { seedAnilLegacyStores } = await import('@/lib/seed-legacy-stores')
         await seedAnilLegacyStores()
+        // Family-tracking tokens for the seeded demo patients so their public
+        // /p/<uhid> links open without first visiting an in-app share screen.
+        const fam = useFamilyTokenStore.getState()
+        if (!fam.get('PT-44012')) fam.issue('PT-44012', 'Anil Kumar Verma', { consent: true, issuedBy: 'seed' })
+        if (!fam.get('PT-20394')) fam.issue('PT-20394', 'Kiran Patil', { consent: true, issuedBy: 'seed' })
       } catch (err) {
         console.error('[StoreHydrator] mock-API bootstrap failed:', err)
       }

@@ -35,7 +35,7 @@ const STATUS_TINT: Record<TestStatus, string> = {
   collected:           'bg-amber-50 text-amber-700',
   on_bench:            'bg-amber-50 text-amber-700',
   in_progress:         'bg-blue-50 text-blue-700',
-  entered:             'bg-violet-50 text-violet-700',
+  entered:             'bg-blue-50 text-blue-700',
   verified:            'bg-emerald-50 text-emerald-700',
   released:            'bg-emerald-50 text-emerald-700',
   rejected:            'bg-red-50 text-red-700',
@@ -148,11 +148,11 @@ export default function PathologyPage() {
                 )}
 
                 {/* Plain-language AI summary */}
-                <div className={cn("rounded-2xl p-3 flex items-start gap-2.5", hasCritical ? "bg-red-50 border border-red-100" : "bg-violet-50 border border-violet-100")}>
-                  <Sparkles className={cn("h-4 w-4 flex-shrink-0 mt-0.5", hasCritical ? "text-red-600" : "text-violet-600")} />
+                <div className={cn("rounded-2xl p-3 flex items-start gap-2.5", hasCritical ? "bg-red-50 border border-red-100" : "bg-blue-50 border border-blue-100")}>
+                  <Sparkles className={cn("h-4 w-4 flex-shrink-0 mt-0.5", hasCritical ? "text-red-600" : "text-blue-600")} />
                   <div className="min-w-0">
-                    <p className={cn("text-[11px] font-bold", hasCritical ? "text-red-900" : "text-violet-900")}>What this means · AI explanation (not a diagnosis)</p>
-                    <p className={cn("text-[13px] mt-0.5", hasCritical ? "text-red-800" : "text-violet-800")}>{summary}</p>
+                    <p className={cn("text-[11px] font-bold", hasCritical ? "text-red-900" : "text-blue-900")}>What this means · AI explanation (not a diagnosis)</p>
+                    <p className={cn("text-[13px] mt-0.5", hasCritical ? "text-red-800" : "text-blue-800")}>{summary}</p>
                   </div>
                 </div>
               </div>

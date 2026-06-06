@@ -64,7 +64,7 @@ function ModeBadge({ mode }: { mode: Mode }) {
       <Building2 className="h-3 w-3" /> In-person
     </span>
   ) : (
-    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 flex items-center gap-1">
+    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 flex items-center gap-1">
       <Video className="h-3 w-3" /> Video
     </span>
   )
@@ -80,7 +80,7 @@ function ConsultCard({
   onReschedule: (id: string) => void
   onCancel: (id: string) => void
 }) {
-  const tint = c.mode === "in_person" ? "bg-teal-50 text-teal-600" : "bg-violet-50 text-violet-600"
+  const tint = c.mode === "in_person" ? "bg-teal-50 text-teal-600" : "bg-blue-50 text-blue-600"
   const Icon = c.mode === "in_person" ? Building2 : Video
   const cancelled = c.status === "Cancelled"
 

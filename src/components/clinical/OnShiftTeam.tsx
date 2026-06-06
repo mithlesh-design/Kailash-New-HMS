@@ -54,8 +54,8 @@ const ROLE_TINT: Record<string, string> = {
   doctor:    'bg-blue-50 text-blue-700',
   emergency: 'bg-red-50 text-red-700',
   nurse:     'bg-emerald-50 text-emerald-700',
-  ot:        'bg-purple-50 text-purple-700',
-  lab:       'bg-fuchsia-50 text-fuchsia-700',
+  ot:        'bg-blue-50 text-blue-700',
+  lab:       'bg-blue-50 text-blue-700',
   pharmacy:  'bg-pink-50 text-pink-700',
   radiology: 'bg-indigo-50 text-indigo-700',
 }
@@ -152,7 +152,7 @@ export function OnShiftTeam({
                 disabled={!onClickMember}
                 className={cn('w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition',
                   !onClickMember && 'cursor-default')}>
-                <span className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex items-center justify-center text-[11px] font-bold flex-shrink-0">
+                <span className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-500 text-white flex items-center justify-center text-[11px] font-bold flex-shrink-0">
                   {initials}
                 </span>
                 <div className="flex-1 min-w-0">

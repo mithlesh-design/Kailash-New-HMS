@@ -41,9 +41,9 @@ export function QuickPeekDrawer({ ip, onClose, onRound, onOpenChart, aiInsight }
           </div>
 
           {aiInsight && (
-            <div className="rounded-xl border border-violet-100 bg-violet-50/50 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-violet-600 mb-1">AI insight</p>
-              <p className="text-[12.5px] text-violet-900 leading-snug">{aiInsight}</p>
+            <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 mb-1">AI insight</p>
+              <p className="text-[12.5px] text-blue-900 leading-snug">{aiInsight}</p>
             </div>
           )}
 

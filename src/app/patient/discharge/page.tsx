@@ -171,11 +171,11 @@ export default function PatientDischarge() {
       {mine.dischargeInstructions && (
         <div>
           <h3 className="text-[15px] font-bold text-slate-900 px-1 mb-3">What to do at home</h3>
-          <div className="rounded-3xl bg-violet-50 ring-1 ring-violet-100 p-5 flex items-start gap-3">
-            <Sparkles className="h-5 w-5 text-violet-600 flex-shrink-0 mt-0.5" />
+          <div className="rounded-3xl bg-blue-50 ring-1 ring-blue-100 p-5 flex items-start gap-3">
+            <Sparkles className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-[11px] font-bold text-violet-700 uppercase tracking-wide">Recovery instructions</p>
-              <p className="text-[13px] text-violet-800 mt-1 leading-relaxed whitespace-pre-wrap">{mine.dischargeInstructions}</p>
+              <p className="text-[11px] font-bold text-blue-700 uppercase tracking-wide">Recovery instructions</p>
+              <p className="text-[13px] text-blue-800 mt-1 leading-relaxed whitespace-pre-wrap">{mine.dischargeInstructions}</p>
             </div>
           </div>
         </div>
@@ -210,7 +210,7 @@ export default function PatientDischarge() {
                 </span>}
               </p>
               <button onClick={() => toast.success('Discharge summary downloaded as PDF (mock)')}
-                className="flex items-center gap-1 text-[11px] font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-2.5 py-1 rounded-lg cursor-pointer">
+                className="flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg cursor-pointer">
                 <Download className="h-3 w-3" />Download
               </button>
             </div>

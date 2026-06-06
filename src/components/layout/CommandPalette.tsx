@@ -289,7 +289,7 @@ export function CommandPalette() {
               >
                 <span className={cn(
                   "h-6 w-6 rounded-md flex items-center justify-center flex-shrink-0",
-                  it.kind === "patient" ? "bg-violet-100 text-violet-700"
+                  it.kind === "patient" ? "bg-blue-100 text-blue-700"
                 : it.kind === "intent"  ? "bg-amber-100 text-amber-700"
                 : it.kind === "staff"   ? "bg-emerald-100 text-emerald-700"
                                          : "bg-blue-100 text-blue-700"

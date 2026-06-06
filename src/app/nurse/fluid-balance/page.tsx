@@ -147,7 +147,7 @@ export default function FluidBalancePage() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <WardSwitcher />
-          <div className="flex items-center gap-2 text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-full px-3 py-1.5">
+          <div className="flex items-center gap-2 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-3 py-1.5">
             <Sparkles className="h-3.5 w-3.5" /> AI fluid monitoring{totalAlerts > 0 ? ` · ${totalAlerts} alert${totalAlerts > 1 ? "s" : ""}` : ""}
           </div>
         </div>

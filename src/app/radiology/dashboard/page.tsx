@@ -133,10 +133,10 @@ export default function RadiologyOverview() {
           <p className="text-sm text-[#64748B] mt-1">Radiology incharge command center · pipeline by modality · critical-finding SLA · AI exception triage</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Link href="/radiology/inbox" className="flex items-center gap-1.5 text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-3 py-2 rounded-xl"><ClipboardList className="h-3.5 w-3.5" />Open Inbox</Link>
-          <Link href="/radiology/bench" className="flex items-center gap-1.5 text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-3 py-2 rounded-xl"><ScanLine className="h-3.5 w-3.5" />Open Bench</Link>
+          <Link href="/radiology/inbox" className="flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-xl"><ClipboardList className="h-3.5 w-3.5" />Open Inbox</Link>
+          <Link href="/radiology/bench" className="flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-xl"><ScanLine className="h-3.5 w-3.5" />Open Bench</Link>
           <Link href="/radiology/reading" className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl"
-            style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" }}>
+            style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
             <FileText className="h-3.5 w-3.5" />Reading Room
           </Link>
         </div>
@@ -149,7 +149,7 @@ export default function RadiologyOverview() {
       <div className="bg-white rounded-xl border border-slate-200 p-4">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-violet-600" />Order-to-release journey
+            <Activity className="h-4 w-4 text-blue-600" />Order-to-release journey
           </h2>
           <p className="text-[11px] text-slate-500">Order → schedule → arrival → bench → read → verify → release</p>
         </div>
@@ -158,7 +158,7 @@ export default function RadiologyOverview() {
             { label: 'Ordered',     sub: 'Needs slot',       count: m.kpis.orderedOnly,    color: 'border-amber-200 bg-amber-50',     icon: ClipboardList, fg: 'text-amber-700',     href: '/radiology/schedule', cta: 'Book slot' },
             { label: 'Scheduled',   sub: 'Awaiting arrival', count: m.kpis.scheduledOnly,  color: 'border-cyan-200 bg-cyan-50',       icon: Calendar,      fg: 'text-cyan-700',      href: '/radiology/arrival',  cta: 'Check in' },
             { label: 'Arrived',     sub: 'Ready for scan',   count: m.kpis.arrivedOnly,    color: 'border-blue-200 bg-blue-50',       icon: UserCheck,     fg: 'text-blue-700',      href: '/radiology/bench',    cta: 'Acquire' },
-            { label: 'Acquired',    sub: 'Pending read',     count: m.kpis.pendingRead,    color: 'border-violet-200 bg-violet-50',   icon: ScanLine,      fg: 'text-violet-700',    href: '/radiology/reading',  cta: 'Read' },
+            { label: 'Acquired',    sub: 'Pending read',     count: m.kpis.pendingRead,    color: 'border-blue-200 bg-blue-50',   icon: ScanLine,      fg: 'text-blue-700',    href: '/radiology/reading',  cta: 'Read' },
             { label: 'Reported',    sub: 'Pending verify',   count: m.kpis.pendingVerify,  color: 'border-pink-200 bg-pink-50',       icon: ShieldCheck,   fg: 'text-pink-700',      href: '/radiology/verification', cta: 'Verify' },
             { label: 'Released',    sub: 'Today',            count: m.kpis.releasedToday,  color: 'border-emerald-200 bg-emerald-50', icon: Send,          fg: 'text-emerald-700',   href: '/radiology/inbox',    cta: 'View inbox' },
             { label: 'Critical CB', sub: 'Awaiting callback',count: m.kpis.critPending,    color: m.kpis.critPending > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: Phone, fg: m.kpis.critPending > 0 ? 'text-red-700' : 'text-slate-400', href: '#critical-callback', cta: 'Log callback' },
@@ -186,7 +186,7 @@ export default function RadiologyOverview() {
         {[
           { label: "Ordered / scheduled", value: m.kpis.ordered, icon: ClipboardList, fg: "text-amber-600", bg: "bg-amber-50" },
           { label: "On bench", value: m.kpis.onBench, icon: ScanLine, fg: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Pending read", value: m.kpis.pendingRead, icon: Hourglass, fg: "text-violet-600", bg: "bg-violet-50" },
+          { label: "Pending read", value: m.kpis.pendingRead, icon: Hourglass, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Pending verify", value: m.kpis.pendingVerify, icon: ShieldCheck, fg: "text-pink-600", bg: "bg-pink-50" },
           { label: "Released today", value: m.kpis.releasedToday, icon: PackageCheck, fg: "text-emerald-600", bg: "bg-emerald-50" },
           { label: "TAT breaches", value: m.kpis.tatBreaches, icon: AlertTriangle, fg: "text-orange-600", bg: "bg-orange-50", action: escalateRadiologyTat, actionLabel: "Escalate" },
@@ -223,7 +223,7 @@ export default function RadiologyOverview() {
                     <div className="mt-2 space-y-0.5">
                       {counts.scheduled + counts.ordered > 0 && <p className="text-[10px] text-slate-500"><b>{counts.scheduled + counts.ordered}</b> awaiting</p>}
                       {counts.arrived + counts.acquiring > 0 && <p className="text-[10px] text-amber-600"><b>{counts.arrived + counts.acquiring}</b> on bench</p>}
-                      {counts.acquired > 0 && <p className="text-[10px] text-violet-600"><b>{counts.acquired}</b> awaiting read</p>}
+                      {counts.acquired > 0 && <p className="text-[10px] text-blue-600"><b>{counts.acquired}</b> awaiting read</p>}
                       {counts.reading > 0 && <p className="text-[10px] text-blue-600"><b>{counts.reading}</b> being read</p>}
                       {counts.reported > 0 && <p className="text-[10px] text-pink-600"><b>{counts.reported}</b> pending verify</p>}
                     </div>
@@ -256,7 +256,7 @@ export default function RadiologyOverview() {
                     {callbackId === s.id ? (
                       <div className="flex items-center gap-2 flex-wrap">
                         <input value={callbackTo} onChange={e => setCallbackTo(e.target.value)} placeholder={`Call ${s.doctorName}…`}
-                          className="w-40 h-7 px-2 text-[11px] rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-200" />
+                          className="w-40 h-7 px-2 text-[11px] rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-200" />
                         <button onClick={() => onLogCallback(s.id, s.patientName)}
                           className="text-[11px] font-bold text-white bg-red-600 hover:bg-red-700 px-2.5 py-1 rounded-lg cursor-pointer">Confirm log</button>
                         <button onClick={() => { setCallbackId(null); setCallbackTo("") }}
@@ -282,14 +282,14 @@ export default function RadiologyOverview() {
                   <h2 className="text-sm font-bold text-slate-800">Pending verification</h2>
                   <span className="text-xs text-slate-400">{m.reported.length}</span>
                 </div>
-                <Link href="/radiology/verification" className="text-xs font-bold text-violet-700 hover:underline flex items-center gap-1">Open Verification <ArrowRight className="h-3 w-3" /></Link>
+                <Link href="/radiology/verification" className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1">Open Verification <ArrowRight className="h-3 w-3" /></Link>
               </div>
               <div className="divide-y divide-slate-100">
                 {m.reported.slice(0, 5).map(s => (
                   <div key={s.id} className="px-4 py-2.5 text-sm">
                     <span className="font-bold text-slate-800">{s.patientName}</span>
                     <span className="text-slate-400 mx-2">·</span>
-                    <span className="text-violet-700">{s.name}</span>
+                    <span className="text-blue-700">{s.name}</span>
                     <span className="text-slate-400 mx-2">·</span>
                     <span className="text-[11px] text-slate-500">read by {s.readingBy?.name ?? "—"}</span>
                   </div>
@@ -312,7 +312,7 @@ export default function RadiologyOverview() {
                     <div key={name}>
                       <p className="text-xs text-slate-600 flex items-center justify-between"><span>{name}</span><b>{n}</b></p>
                       <div className="h-1.5 mt-1 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-violet-500" style={{ width: `${(n / maxLoad) * 100}%` }} />
+                        <div className="h-full bg-blue-500" style={{ width: `${(n / maxLoad) * 100}%` }} />
                       </div>
                     </div>
                   ))}
@@ -321,14 +321,14 @@ export default function RadiologyOverview() {
             })()}
           </div>
 
-          <div className="rounded-xl border border-violet-200 p-4" style={{ background: "linear-gradient(135deg,rgba(139,92,246,0.06),rgba(236,72,153,0.04))" }}>
-            <h2 className="text-sm font-bold flex items-center gap-2 mb-2 text-violet-800"><Sparkles className="h-4 w-4 text-violet-600" />AI exception triage</h2>
+          <div className="rounded-xl border border-blue-200 p-4" style={{ background: "linear-gradient(135deg,rgba(37,99,235,0.06),rgba(236,72,153,0.04))" }}>
+            <h2 className="text-sm font-bold flex items-center gap-2 mb-2 text-blue-800"><Sparkles className="h-4 w-4 text-blue-600" />AI exception triage</h2>
             {m.overOverdue.length === 0 ? (
               <p className="text-xs text-slate-500">No exceptions. Pipeline is healthy.</p>
             ) : (
               <div className="space-y-2 text-xs">
                 {m.overOverdue.map(s => (
-                  <p key={s.id} className="text-violet-700">
+                  <p key={s.id} className="text-blue-700">
                     <Clock className="h-3 w-3 inline -mt-0.5 mr-1" />
                     <b>{s.patientName}</b> · {s.name} · <b>{minsElapsed(s.orderedAt)}m</b> elapsed (TAT {s.expectedTATmin}m) — likely stuck
                   </p>
@@ -338,9 +338,9 @@ export default function RadiologyOverview() {
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 flex items-center gap-1.5"><CheckCircle className="h-3 w-3 text-emerald-500" />Verification queue: <Link href="/radiology/verification" className="font-bold text-violet-700 hover:underline">open</Link></p>
-            <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1"><FileText className="h-3 w-3 text-violet-500" />Templates: <Link href="/radiology/templates" className="font-bold text-violet-700 hover:underline">open</Link></p>
-            <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1"><ScanLine className="h-3 w-3 text-blue-500" />DICOM viewer: <Link href="/radiology/viewer" className="font-bold text-violet-700 hover:underline">open</Link></p>
+            <p className="text-xs text-slate-500 flex items-center gap-1.5"><CheckCircle className="h-3 w-3 text-emerald-500" />Verification queue: <Link href="/radiology/verification" className="font-bold text-blue-700 hover:underline">open</Link></p>
+            <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1"><FileText className="h-3 w-3 text-blue-500" />Templates: <Link href="/radiology/templates" className="font-bold text-blue-700 hover:underline">open</Link></p>
+            <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1"><ScanLine className="h-3 w-3 text-blue-500" />DICOM viewer: <Link href="/radiology/viewer" className="font-bold text-blue-700 hover:underline">open</Link></p>
           </div>
         </div>
       </div>

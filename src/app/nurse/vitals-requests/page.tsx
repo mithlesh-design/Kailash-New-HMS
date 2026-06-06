@@ -65,7 +65,7 @@ export default function VitalsRequestsPage() {
           <h1 className="text-2xl font-bold text-[#0F172A]">Vitals Requests</h1>
           <p className="text-sm text-[#64748B] mt-1">OPD patients sent by reception for vitals before consultation</p>
         </div>
-        <div className="flex items-center gap-2 text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-full px-3 py-1.5">
+        <div className="flex items-center gap-2 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-3 py-1.5">
           <Sparkles className="h-3.5 w-3.5" /> Auto-prioritised by acuity · {queue.length} waiting
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function VitalsRequestsPage() {
                   <button
                     onClick={() => setEditing(p)}
                     className="flex items-center gap-1.5 text-sm font-bold text-white px-4 py-2 rounded-xl cursor-pointer transition-all flex-shrink-0"
-                    style={{ background: "linear-gradient(135deg,#16A34A,#0D9488)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}
+                    style={{ background: "linear-gradient(135deg,#16A34A,#1E3A8A)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}
                   >
                     {profileDone(p.id) ? <><HeartPulse className="h-4 w-4" /> Record Vitals</> : <><UserPlus className="h-4 w-4" /> Complete profile &amp; vitals</>}
                   </button>

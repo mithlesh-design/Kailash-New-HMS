@@ -48,8 +48,8 @@ const maxCount = Math.max(...WEEKLY.map(w => w.count))
 
 const DEPT_DATA = [
   { dept: 'General Medicine', count: 245, color: '#2563EB', pct: 40 },
-  { dept: 'Cardiology',       count: 128, color: '#0EA5E9', pct: 21 },
-  { dept: 'Orthopedics',      count: 96,  color: '#8B5CF6', pct: 16 },
+  { dept: 'Cardiology',       count: 128, color: '#2563EB', pct: 21 },
+  { dept: 'Orthopedics',      count: 96,  color: '#2563EB', pct: 16 },
   { dept: 'Paediatrics',      count: 87,  color: '#22C55E', pct: 14 },
   { dept: 'ENT',              count: 64,  color: '#F59E0B', pct: 11 },
 ]
@@ -63,7 +63,7 @@ const KPI = [
   {
     label: 'Avg Wait Time', value: '18m', sub: 'Down from 32 min',
     trend: '−44%', up: true, icon: Clock, color: 'text-sky-600',
-    cardBg: 'bg-sky-50/70', iconBg: 'bg-white', labelColor: 'text-sky-800/60', ringColor: '#0EA5E9', ring: 72,
+    cardBg: 'bg-sky-50/70', iconBg: 'bg-white', labelColor: 'text-sky-800/60', ringColor: '#2563EB', ring: 72,
   },
   {
     label: 'Revenue Today', value: '₹1.24L', sub: 'Billing + Pharmacy',
@@ -72,8 +72,8 @@ const KPI = [
   },
   {
     label: 'AI Assist Rate', value: '91%', sub: 'Doctor adoption',
-    trend: '+5%', up: true, icon: Sparkles, color: 'text-purple-600',
-    cardBg: 'bg-purple-50/70', iconBg: 'bg-white', labelColor: 'text-purple-800/60', ringColor: '#8B5CF6', ring: 91,
+    trend: '+5%', up: true, icon: Sparkles, color: 'text-blue-600',
+    cardBg: 'bg-blue-50/70', iconBg: 'bg-white', labelColor: 'text-blue-800/60', ringColor: '#2563EB', ring: 91,
   },
 ]
 
@@ -323,10 +323,10 @@ export default function AdminDashboard() {
               <p className="text-[10px] text-red-600 mt-0.5">{cashWidget.overdueCount} overdue</p>
             )}
           </div>
-          <div className="rounded-lg bg-violet-50 border border-violet-200 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-violet-700">Payroll due</p>
-            <p className="text-base font-black text-violet-700 mt-1 tabular-nums">{fmtINRkLocal(cashWidget.totalSalaryDue)}</p>
-            <p className="text-[10px] text-violet-600 mt-0.5">{cashWidget.activeStaffCount} staff</p>
+          <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-blue-700">Payroll due</p>
+            <p className="text-base font-black text-blue-700 mt-1 tabular-nums">{fmtINRkLocal(cashWidget.totalSalaryDue)}</p>
+            <p className="text-[10px] text-blue-600 mt-0.5">{cashWidget.activeStaffCount} staff</p>
           </div>
         </div>
       </div>
@@ -462,7 +462,7 @@ export default function AdminDashboard() {
             {[
               { label: 'Patients Today', value: patients.length, sub: 'Active registrations', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
               { label: 'Avg Wait Time', value: '18m', sub: 'Down from 32m', icon: Clock, color: 'text-sky-600', bg: 'bg-sky-50 border-sky-200' },
-              { label: 'Walk-in Rate', value: '62%', sub: 'vs appointments', icon: Activity, color: 'text-violet-600', bg: 'bg-violet-50 border-violet-200' },
+              { label: 'Walk-in Rate', value: '62%', sub: 'vs appointments', icon: Activity, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
               { label: 'Pending Admissions', value: pendingAdmissions.length, sub: 'Awaiting bed assignment', icon: BedDouble, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
             ].map(({ label, value, sub, icon: Icon, color, bg }) => (
               <Card key={label} className={cn("p-4 border", bg)}>
@@ -494,7 +494,7 @@ export default function AdminDashboard() {
               { label: 'Bed Occupancy', value: `${Math.round((occupiedBeds / totalBeds) * 100)}%`, sub: `${occupiedBeds}/${totalBeds} beds`, icon: BedDouble, color: occupiedBeds / totalBeds > 0.85 ? 'text-red-600' : 'text-green-600', bg: occupiedBeds / totalBeds > 0.85 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200' },
               { label: 'Discharge Queue', value: dueDischargeToday, sub: 'Expected today', icon: CheckCircle, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
               { label: 'Avg LOS', value: `${qualityMetrics.avgLOS}d`, sub: 'Target: ≤5 days', icon: Clock, color: qualityMetrics.avgLOS > 5 ? 'text-amber-600' : 'text-green-600', bg: qualityMetrics.avgLOS > 5 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200' },
-              { label: 'Pending Admissions', value: pendingAdmissions.length, sub: 'Awaiting bed', icon: Users, color: 'text-violet-600', bg: 'bg-violet-50 border-violet-200' },
+              { label: 'Pending Admissions', value: pendingAdmissions.length, sub: 'Awaiting bed', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
             ].map(({ label, value, sub, icon: Icon, color, bg }) => (
               <Card key={label} className={cn("p-4 border", bg)}>
                 <div className="flex items-center gap-2 mb-2"><Icon className={cn("h-5 w-5", color)} /><span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</span></div>
@@ -859,7 +859,7 @@ export default function AdminDashboard() {
                         msg.from === 'patient'
                           ? 'bg-slate-100 text-slate-800'
                           : msg.from === 'human_agent'
-                          ? 'bg-purple-100 text-purple-900'
+                          ? 'bg-blue-100 text-blue-900'
                           : 'bg-green-100 text-green-900'
                       }`}>
                         {msg.from !== 'patient' && (
@@ -1049,13 +1049,13 @@ export default function AdminDashboard() {
           </div>
 
           {/* AI engine status */}
-          <div className="mt-5 p-4 rounded-xl border border-purple-100 bg-purple-50 flex items-start gap-3 shadow-sm">
-            <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center shadow-sm border border-purple-100 flex-shrink-0">
-              <Sparkles className="h-4 w-4 text-purple-600" />
+          <div className="mt-5 p-4 rounded-xl border border-blue-100 bg-blue-50 flex items-start gap-3 shadow-sm">
+            <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center shadow-sm border border-blue-100 flex-shrink-0">
+              <Sparkles className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-bold text-purple-900 mb-0.5">AI Engine Active</p>
-              <p className="text-xs font-medium text-purple-700/70">
+              <p className="text-sm font-bold text-blue-900 mb-0.5">AI Engine Active</p>
+              <p className="text-xs font-medium text-blue-700/70">
                 Operating at 91% efficiency. Triage models are currently prioritizing emergency cases automatically.
               </p>
             </div>

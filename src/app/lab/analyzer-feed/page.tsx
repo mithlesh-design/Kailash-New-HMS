@@ -27,7 +27,7 @@ const ANALYZERS: { name: string; bench: Bench; vendor: string }[] = [
 
 const SOURCE_TINT: Record<LabSource, string> = {
   OPD: 'bg-blue-50 text-blue-700', IPD: 'bg-indigo-50 text-indigo-700',
-  ICU: 'bg-red-50 text-red-700', OT: 'bg-purple-50 text-purple-700', ER: 'bg-orange-50 text-orange-700',
+  ICU: 'bg-red-50 text-red-700', OT: 'bg-blue-50 text-blue-700', ER: 'bg-orange-50 text-orange-700',
 }
 const PRIORITY_TINT: Record<Priority, string> = {
   STAT: 'bg-red-100 text-red-700', Urgent: 'bg-amber-100 text-amber-700', Routine: 'bg-slate-100 text-slate-600',
@@ -189,7 +189,7 @@ export default function AnalyzerFeedPage() {
           return (
             <div key={a.name} className="rounded-xl bg-white border border-slate-200 overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2 flex-wrap"
-                style={{ background: items.length > 0 ? 'linear-gradient(135deg,#EEF2FF,#FAF5FF)' : '#F8FAFC' }}>
+                style={{ background: items.length > 0 ? 'linear-gradient(135deg,#EEF2FF,#F5F8FF)' : '#F8FAFC' }}>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
                     <Activity className="h-3.5 w-3.5 text-indigo-600" />

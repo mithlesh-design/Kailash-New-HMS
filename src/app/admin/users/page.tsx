@@ -37,11 +37,11 @@ const ROLE_TINT: Record<string, string> = {
   doctor: 'bg-blue-50 text-blue-700',
   nurse: 'bg-emerald-50 text-emerald-700',
   emergency: 'bg-red-50 text-red-700',
-  ot: 'bg-purple-50 text-purple-700',
+  ot: 'bg-blue-50 text-blue-700',
   radiology: 'bg-indigo-50 text-indigo-700',
-  lab: 'bg-fuchsia-50 text-fuchsia-700',
+  lab: 'bg-blue-50 text-blue-700',
   pharmacy: 'bg-pink-50 text-pink-700',
-  admin: 'bg-violet-50 text-violet-700',
+  admin: 'bg-blue-50 text-blue-700',
   quality: 'bg-cyan-50 text-cyan-700',
   audit_officer: 'bg-indigo-50 text-indigo-700',
 }
@@ -295,7 +295,7 @@ export default function StaffManagementPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex items-center justify-center text-[12px] font-bold flex-shrink-0">{initials}</span>
+                      <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 text-white flex items-center justify-center text-[12px] font-bold flex-shrink-0">{initials}</span>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-slate-900 truncate">{m.name}</p>
                         <p className="text-[11px] text-slate-400 truncate">{m.id} · {m.employeeId}</p>

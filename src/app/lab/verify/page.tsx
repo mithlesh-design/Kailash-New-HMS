@@ -14,6 +14,7 @@ import {
 import { LAB_CATALOG, type Priority, type Bench } from "@/lib/labCatalog"
 import { useAuthStore } from "@/store/useAuthStore"
 import { notifyAndAudit } from "@/lib/notifyAndAudit"
+import { LabAnomalyPanel } from "@/components/lab/LabAnomalyPanel"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -32,7 +33,7 @@ const PRIORITY_TINT: Record<Priority, string> = {
 }
 const SOURCE_TINT: Record<LabSource, string> = {
   OPD: 'bg-blue-50 text-blue-700', IPD: 'bg-indigo-50 text-indigo-700',
-  ICU: 'bg-red-50 text-red-700', OT: 'bg-purple-50 text-purple-700', ER: 'bg-orange-50 text-orange-700',
+  ICU: 'bg-red-50 text-red-700', OT: 'bg-blue-50 text-blue-700', ER: 'bg-orange-50 text-orange-700',
 }
 const BENCH_LABEL: Record<Bench, string> = {
   HEMA: 'Hematology', BIOCHEM: 'Biochemistry', IMMUNO: 'Immunology',
@@ -138,9 +139,9 @@ export default function VerifyQueue() {
 
       {/* KPIs */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-violet-200 bg-violet-50 p-3">
-          <p className="text-2xl font-bold text-violet-700">{enteredCount}</p>
-          <p className="text-xs font-semibold text-violet-700 mt-1">Pending verification</p>
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-3">
+          <p className="text-2xl font-bold text-blue-700">{enteredCount}</p>
+          <p className="text-xs font-semibold text-blue-700 mt-1">Pending verification</p>
         </div>
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
           <p className="text-2xl font-bold text-emerald-700">{verifiedCount}</p>
@@ -150,6 +151,13 @@ export default function VerifyQueue() {
           <p className="text-2xl font-bold text-red-700">{criticalCount}</p>
           <p className="text-xs font-semibold text-red-700 mt-1">Critical values in queue</p>
         </div>
+      </div>
+
+      {/* AI anomaly scan (Track B) */}
+      <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <h2 className="text-sm font-bold text-slate-700 mb-1">AI second-read</h2>
+        <p className="text-xs text-slate-500 mb-3">Scan the released panel for out-of-range values; accept to escalate criticals to the ordering doctor.</p>
+        <LabAnomalyPanel />
       </div>
 
       {/* Queue */}

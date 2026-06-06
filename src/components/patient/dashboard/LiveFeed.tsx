@@ -12,8 +12,8 @@ const ICON: Record<LiveEventType, React.ElementType> = {
 const TINT: Record<LiveEventType, string> = {
   progress: "bg-blue-50 text-blue-600",
   call: "bg-emerald-50 text-emerald-600",
-  result: "bg-violet-50 text-violet-600",
-  ai: "bg-fuchsia-50 text-fuchsia-600",
+  result: "bg-blue-50 text-blue-600",
+  ai: "bg-blue-50 text-blue-600",
   message: "bg-sky-50 text-sky-600",
   info: "bg-slate-100 text-slate-500",
 }

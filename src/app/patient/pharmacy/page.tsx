@@ -89,12 +89,12 @@ export default function PharmacyPage() {
                     const unavailable = m.inStock === false
                     const substituted = !!m.substitutedFrom
                     return (
-                      <span key={i} className={cn("text-[12px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1", unavailable ? "bg-red-50 text-red-600" : substituted ? "bg-violet-50 text-violet-700" : "text-slate-600 bg-slate-100")}>
+                      <span key={i} className={cn("text-[12px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1", unavailable ? "bg-red-50 text-red-600" : substituted ? "bg-blue-50 text-blue-700" : "text-slate-600 bg-slate-100")}>
                         {m.name} ×{m.quantity}
                         {m.supply === "advised_outside" && <span className="text-[10px] font-bold text-amber-700">· buy from outside</span>}
                         {m.supply === "order_raised" && <span className="text-[10px] font-bold text-blue-700">· being arranged</span>}
                         {unavailable && (m.supply ?? "pharmacy") === "pharmacy" && <span className="text-[10px] font-bold text-red-600">· not in stock</span>}
-                        {substituted && <span className="text-[10px] font-bold text-violet-700">· substituted (was {m.substitutedFrom})</span>}
+                        {substituted && <span className="text-[10px] font-bold text-blue-700">· substituted (was {m.substitutedFrom})</span>}
                       </span>
                     )
                   })}
@@ -206,7 +206,7 @@ export default function PharmacyPage() {
       {/* Pharmacy bills */}
       <div className="rounded-3xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] p-5">
         <h3 className="text-[15px] font-bold text-slate-900 flex items-center gap-2 mb-3">
-          <span className="h-10 w-10 rounded-2xl bg-violet-50 flex items-center justify-center flex-shrink-0"><Receipt className="h-5 w-5 text-violet-600" /></span>
+          <span className="h-10 w-10 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0"><Receipt className="h-5 w-5 text-blue-600" /></span>
           Pharmacy bills
         </h3>
         <div className="rounded-2xl bg-slate-50 p-4 space-y-2">

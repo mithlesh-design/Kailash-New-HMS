@@ -26,6 +26,8 @@ import { Avatar } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { OrderSetPicker } from "@/components/doctor/OrderSetPicker"
+import { materializeOrderSet, type OrderSetDef } from "@/lib/clinicalOrderSets"
 import type { Patient } from "@/store/usePatientStore"
 import { toast } from "sonner"
 import { checkRx, type RxWarning } from "@/lib/drugSafety"
@@ -47,13 +49,13 @@ const TRIAGE_GRADIENTS: Record<string, { gradient: string; shadow: string }> = {
   Critical: { gradient: 'linear-gradient(135deg,#EF4444,#DC2626)', shadow: 'rgba(239,68,68,0.35)' },
   High:     { gradient: 'linear-gradient(135deg,#F97316,#EA580C)', shadow: 'rgba(249,115,22,0.30)' },
   Medium:   { gradient: 'linear-gradient(135deg,#F59E0B,#D97706)', shadow: 'rgba(245,158,11,0.25)' },
-  Low:      { gradient: 'linear-gradient(135deg,#10B981,#0D9488)', shadow: 'rgba(16,185,129,0.20)' },
+  Low:      { gradient: 'linear-gradient(135deg,#10B981,#1E3A8A)', shadow: 'rgba(16,185,129,0.20)' },
 }
 
 const ORDER_STYLES: Record<string, { gradient: string; glow: string; light: string; text: string }> = {
-  lab:       { gradient: 'linear-gradient(135deg,#8B5CF6,#7C3AED)', glow: 'rgba(139,92,246,0.25)', light: '#FAF5FF', text: '#7C3AED' },
+  lab:       { gradient: 'linear-gradient(135deg,#2563EB,#1E3A8A)', glow: 'rgba(37,99,235,0.25)', light: '#F5F8FF', text: '#1E3A8A' },
   radiology: { gradient: 'linear-gradient(135deg,#6366F1,#4F46E5)', glow: 'rgba(99,102,241,0.25)', light: '#EEF2FF', text: '#4F46E5' },
-  referral:  { gradient: 'linear-gradient(135deg,#0D9488,#0891B2)', glow: 'rgba(13,148,136,0.25)', light: '#F0FDFA', text: '#0D9488' },
+  referral:  { gradient: 'linear-gradient(135deg,#1E3A8A,#2563EB)', glow: 'rgba(30,58,138,0.25)', light: '#F0FDFA', text: '#1E3A8A' },
   admission: { gradient: 'linear-gradient(135deg,#EF4444,#DC2626)', glow: 'rgba(239,68,68,0.25)', light: '#FEF2F2', text: '#DC2626' },
 }
 
@@ -68,7 +70,7 @@ function QueueEntry({ patient, selected, onClick, delay }: { patient: Patient; s
       onClick={onClick}
       className="w-full text-left p-3 rounded-2xl transition-all duration-200 cursor-pointer flex items-center gap-3"
       style={selected ? {
-        background: 'linear-gradient(135deg, rgba(37,99,235,0.08), rgba(8,145,178,0.04))',
+        background: 'linear-gradient(135deg, rgba(37,99,235,0.08), rgba(37,99,235,0.04))',
         boxShadow: '0 0 0 1.5px rgba(37,99,235,0.3), 0 4px 16px rgba(37,99,235,0.10)',
       } : {
         background: 'white',
@@ -88,8 +90,8 @@ function QueueEntry({ patient, selected, onClick, delay }: { patient: Patient; s
       <div
         className="px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0"
         style={{
-          background: patient.queueStatus === 'consulting' ? 'rgba(139,92,246,0.12)' : patient.queueStatus === 'vitals' ? 'rgba(245,158,11,0.12)' : '#F8FAFC',
-          color: patient.queueStatus === 'consulting' ? '#7C3AED' : patient.queueStatus === 'vitals' ? '#D97706' : '#94A3B8',
+          background: patient.queueStatus === 'consulting' ? 'rgba(37,99,235,0.12)' : patient.queueStatus === 'vitals' ? 'rgba(245,158,11,0.12)' : '#F8FAFC',
+          color: patient.queueStatus === 'consulting' ? '#1E3A8A' : patient.queueStatus === 'vitals' ? '#D97706' : '#94A3B8',
         }}
       >
         {patient.queueStatus}
@@ -304,6 +306,36 @@ export default function DoctorDashboard() {
     })
     if (isOnlineConsult) {
       toast.success(`Online consultation complete — ${currentPatient.name}`)
+    } else if (admissionOrder && !admissionOrder.sent) {
+      // Track A auto-stage — a staged admission (e.g. from an order set) routes
+      // straight to the bed manager on consult completion, carrying the orders
+      // bundle, instead of needing a separate "Send Admission" click.
+      requestAdmission({
+        patientId: currentPatient.id,
+        patientName: currentPatient.name,
+        patientAge: currentPatient.age,
+        patientGender: currentPatient.gender,
+        diagnosis: diagnosis.trim() || admissionOrder.reason,
+        admissionType: admissionOrder.admissionType,
+        bedTypePreference: admissionOrder.bedTypePreference,
+        reason: admissionOrder.reason,
+        requestedBy: currentPatient.doctor,
+        department: currentPatient.department,
+        triageLevel: currentPatient.triageLevel,
+        payerType: 'General',
+        bundle: {
+          prescriptions: prescriptions.map(p => ({ medicine: p.medicine, dosage: p.dosage, duration: p.duration, instructions: p.instructions })),
+          labOrders: labOrders.map(o => ({ testName: o.testName, priority: o.priority })),
+          radiologyOrders: radiologyOrders.map(o => ({ scanType: o.scanType, bodyPart: o.bodyPart, priority: o.priority })),
+          allergies: admAllergies,
+          comorbidities: admComorbidities,
+          specialInstructions: admSpecialInstructions,
+          urgency: admUrgency,
+        },
+      })
+      markAdmissionSent()
+      updateStatus(currentPatient.id, 'done')
+      toast.success(`Consultation complete — ${currentPatient.name} → Admission requested (${admissionOrder.admissionType})`)
     } else {
       const next = (isPharmacySent || prescriptions.length > 0) ? 'pharmacy' : 'billing'
       updateStatus(currentPatient.id, next)
@@ -317,6 +349,26 @@ export default function DoctorDashboard() {
     addPrescription({ id: Math.random().toString(36), medicine: name, dosage, duration, instructions: frequency })
     setMedSearch("")
     setShowDrugs(false)
+  }
+
+  // Track A — apply a protocol bundle in one tap. Stages into the local
+  // consultation workspace; the doctor still reviews and sends each panel
+  // through the existing safety-gated actions (nothing dispatches here).
+  const applyOrderSet = (def: OrderSetDef) => {
+    if (!currentPatient) { toast.error("Select a patient first"); return }
+    const m = materializeOrderSet(def)
+    if (!diagnosis.trim()) setDiagnosis(m.diagnosis)
+    m.prescriptions.forEach((p, i) => addPrescription({ id: `RX-${Date.now()}-${i}`, ...p }))
+    m.labs.forEach(l => addLabOrder(l))
+    m.imaging.forEach(im => addRadiologyOrder(im))
+    if (m.admission) setAdmissionOrder(m.admission)
+    const summary = [
+      m.labs.length && `${m.labs.length} lab`,
+      m.imaging.length && `${m.imaging.length} imaging`,
+      m.prescriptions.length && `${m.prescriptions.length} Rx`,
+      m.admission && 'admission',
+    ].filter(Boolean).join(' · ')
+    toast.success(`${def.label} staged`, { description: `${summary} — review and send below.` })
   }
 
   const sendRx = () => {
@@ -495,7 +547,7 @@ export default function DoctorDashboard() {
           <div className="grid grid-cols-3 gap-2 mb-4 sm:gap-2">
             {[
               { label: "Total", value: mine.length, gradient: 'linear-gradient(135deg,#334155,#0F172A)' },
-              { label: "Seen",  value: seen,             gradient: 'linear-gradient(135deg,#16A34A,#0D9488)' },
+              { label: "Seen",  value: seen,             gradient: 'linear-gradient(135deg,#16A34A,#1E3A8A)' },
               { label: "Queue", value: queue.length,     gradient: 'linear-gradient(135deg,#F59E0B,#EA580C)' },
             ].map(({ label, value, gradient }) => (
               <div
@@ -637,13 +689,13 @@ export default function DoctorDashboard() {
             <div className="flex items-center justify-between rounded-2xl px-5 py-3" style={{ background: 'white', boxShadow: '0 1px 4px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}>
               <span className="text-[13px] font-semibold flex items-center gap-2" style={{ color: '#64748B' }}>
                 {isOnlineConsult
-                  ? <><Video className="h-4 w-4 text-violet-600" /> In <b className="text-violet-700">online</b> consultation with {currentPatient.name.split(' ')[0]}</>
-                  : <><span className="h-2 w-2 rounded-full bg-violet-500 animate-pulse" /> In consultation with {currentPatient.name.split(' ')[0]}</>}
+                  ? <><Video className="h-4 w-4 text-blue-600" /> In <b className="text-blue-700">online</b> consultation with {currentPatient.name.split(' ')[0]}</>
+                  : <><span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" /> In consultation with {currentPatient.name.split(' ')[0]}</>}
                 <span className="ml-1 text-[12px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Fee ₹{consultFee}</span>
               </span>
               <button onClick={completeConsult}
                 className="h-9 px-4 rounded-xl font-bold text-[13px] text-white flex items-center gap-2 active:scale-[0.98] transition"
-                style={{ background: 'linear-gradient(135deg,#16A34A,#0D9488)', boxShadow: '0 4px 12px rgba(22,163,74,0.30)' }}>
+                style={{ background: 'linear-gradient(135deg,#16A34A,#1E3A8A)', boxShadow: '0 4px 12px rgba(22,163,74,0.30)' }}>
                 <CheckCircle2 className="h-4 w-4" /> Complete consultation <ArrowRight className="h-4 w-4" />
               </button>
             </div>
@@ -676,20 +728,20 @@ export default function DoctorDashboard() {
               {/* History — leads with an AI crux, "View more" reveals detail + past visits */}
               <div className="p-5 rounded-2xl" style={{ background: 'white', boxShadow: '0 1px 4px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)' }}>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="h-7 w-7 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg,#0D9488,#0891B2)', boxShadow: '0 2px 6px rgba(15,23,42,0.15)' }}>
+                  <div className="h-7 w-7 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg,#1E3A8A,#2563EB)', boxShadow: '0 2px 6px rgba(15,23,42,0.15)' }}>
                     <FileText className="h-3.5 w-3.5 text-white" />
                   </div>
                   <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: '#94A3B8' }}>History</h3>
                 </div>
 
                 {/* AI crux */}
-                <div className="rounded-xl p-3 mb-3" style={{ background: 'linear-gradient(135deg,#FAF5FF,#F5F3FF)', border: '1px solid rgba(139,92,246,0.12)' }}>
-                  <p className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 mb-1" style={{ color: '#7C3AED' }}><Sparkles className="h-3 w-3" /> AI brief</p>
+                <div className="rounded-xl p-3 mb-3" style={{ background: 'linear-gradient(135deg,#F5F8FF,#F5F8FF)', border: '1px solid rgba(37,99,235,0.12)' }}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 mb-1" style={{ color: '#1E3A8A' }}><Sparkles className="h-3 w-3" /> AI brief</p>
                   <p className="text-[13px] font-medium leading-snug" style={{ color: '#5B21B6' }}>{historyBrief(currentPatient)}</p>
                 </div>
 
                 {/* View more */}
-                <button onClick={() => setHistoryOpen(o => !o)} className="text-[12px] font-bold flex items-center gap-1 cursor-pointer" style={{ color: '#0D9488' }}>
+                <button onClick={() => setHistoryOpen(o => !o)} className="text-[12px] font-bold flex items-center gap-1 cursor-pointer" style={{ color: '#1E3A8A' }}>
                   {historyOpen ? <>Show less <ChevronUp className="h-3.5 w-3.5" /></> : <>View detailed history <ChevronDown className="h-3.5 w-3.5" /></>}
                 </button>
 
@@ -700,7 +752,7 @@ export default function DoctorDashboard() {
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#94A3B8' }}>Past medical history</p>
                           {currentPatient.history.length ? currentPatient.history.map((h, i) => (
-                            <div key={i} className="flex items-start gap-2.5"><div className="h-1.5 w-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: '#0D9488' }} /><p className="text-sm font-medium text-[#334155]">{h}</p></div>
+                            <div key={i} className="flex items-start gap-2.5"><div className="h-1.5 w-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: '#1E3A8A' }} /><p className="text-sm font-medium text-[#334155]">{h}</p></div>
                           )) : <p className="text-sm italic" style={{ color: '#94A3B8' }}>No significant history</p>}
                         </div>
                         <div>
@@ -726,7 +778,7 @@ export default function DoctorDashboard() {
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#2563EB,#0891B2)', boxShadow: '0 2px 6px rgba(37,99,235,0.25)' }}>
+                  <div className="h-7 w-7 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#2563EB,#2563EB)', boxShadow: '0 2px 6px rgba(37,99,235,0.25)' }}>
                     <Activity className="h-3.5 w-3.5 text-white" />
                   </div>
                   <h3 className="text-sm font-bold text-[#0F172A]">Consultation Notes</h3>
@@ -767,6 +819,9 @@ export default function DoctorDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* ── QUICK ORDER SETS (Track A) ── */}
+            <OrderSetPicker onApply={applyOrderSet} disabled={!currentPatient} />
 
             {/* ── ORDER PANELS ── */}
             <OrderPanel title="Order Lab Tests" icon={FlaskConical} styleKey="lab">
@@ -1034,7 +1089,7 @@ export default function DoctorDashboard() {
                               <span>{prescriptions.length} prescription(s) · {labOrders.length} lab order(s) · {radiologyOrders.length} radiology order(s)</span>
                             </div>
                             <div className="flex items-center gap-2 text-xs font-medium text-[#334155]">
-                              <div className="h-1.5 w-1.5 rounded-full bg-purple-500 flex-shrink-0" />
+                              <div className="h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />
                               <span>Diagnosis: {diagnosis || '(not set)'}</span>
                             </div>
                             <div className="flex items-center gap-2 text-xs font-medium" style={{ color: '#16A34A' }}>
@@ -1066,13 +1121,13 @@ export default function DoctorDashboard() {
             <div
               className="rounded-2xl p-4"
               style={{
-                background: 'linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%)',
-                border: '1px solid rgba(139,92,246,0.10)',
-                boxShadow: '0 4px 16px rgba(139,92,246,0.10)',
+                background: 'linear-gradient(135deg, #F5F8FF 0%, #F5F8FF 100%)',
+                border: '1px solid rgba(37,99,235,0.10)',
+                boxShadow: '0 4px 16px rgba(37,99,235,0.10)',
               }}
             >
               <div className="flex items-center gap-2 mb-4">
-                <div className="h-7 w-7 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#7C3AED,#6366F1)', boxShadow: '0 3px 8px rgba(124,58,237,0.30)' }}>
+                <div className="h-7 w-7 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#1E3A8A,#6366F1)', boxShadow: '0 3px 8px rgba(30,58,138,0.30)' }}>
                   <Bot className="h-3.5 w-3.5 text-white" />
                 </div>
                 <span className="font-bold text-sm text-[#0F172A]">AI Assistant</span>
@@ -1091,10 +1146,10 @@ export default function DoctorDashboard() {
                     style={{
                       background: 'rgba(255,255,255,0.7)',
                       color: '#5B21B6',
-                      boxShadow: '0 1px 4px rgba(139,92,246,0.10)',
+                      boxShadow: '0 1px 4px rgba(37,99,235,0.10)',
                     }}
-                    onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(139,92,246,0.20)'}
-                    onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 1px 4px rgba(139,92,246,0.10)'}
+                    onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(37,99,235,0.20)'}
+                    onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 1px 4px rgba(37,99,235,0.10)'}
                   >
                     <span className="font-semibold leading-tight pr-2">{s}</span>
                     <Plus className="h-3.5 w-3.5 flex-shrink-0 opacity-60 group-hover:opacity-100" />
@@ -1103,7 +1158,7 @@ export default function DoctorDashboard() {
               </AnimatePresence>
               {aiSuggestions.length === 0 && (
                 <div className="text-center py-3">
-                  <CheckCircle2 className="h-5 w-5 mx-auto mb-1" style={{ color: '#C4B5FD' }} />
+                  <CheckCircle2 className="h-5 w-5 mx-auto mb-1" style={{ color: '#93C5FD' }} />
                   <p className="text-xs font-medium" style={{ color: '#9CA3AF' }}>No new suggestions</p>
                 </div>
               )}
@@ -1116,7 +1171,7 @@ export default function DoctorDashboard() {
             >
               <div className="p-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(15,23,42,0.05)' }}>
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="h-7 w-7 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#2563EB,#0891B2)', boxShadow: '0 3px 8px rgba(37,99,235,0.25)' }}>
+                  <div className="h-7 w-7 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#2563EB,#2563EB)', boxShadow: '0 3px 8px rgba(37,99,235,0.25)' }}>
                     <Pill className="h-3.5 w-3.5 text-white" />
                   </div>
                   <span className="font-bold text-sm text-[#0F172A]">Prescriptions</span>
@@ -1129,12 +1184,12 @@ export default function DoctorDashboard() {
 
                 {diagnosis && prescriptions.length === 0 && (
                   <div className="mb-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1" style={{ color: '#7C3AED' }}>
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1" style={{ color: '#1E3A8A' }}>
                       <Sparkles className="h-3 w-3" /> AI Suggests
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {['Paracetamol 500mg','Amoxicillin 500mg','Pantoprazole 40mg'].map(drug => (
-                        <button key={drug} onClick={() => addMed(drug)} className="text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer transition-all" style={{ background: 'rgba(124,58,237,0.08)', color: '#7C3AED' }}>
+                        <button key={drug} onClick={() => addMed(drug)} className="text-[10px] font-semibold px-2 py-1 rounded-full cursor-pointer transition-all" style={{ background: 'rgba(30,58,138,0.08)', color: '#1E3A8A' }}>
                           + {drug}
                         </button>
                       ))}
@@ -1267,10 +1322,10 @@ export default function DoctorDashboard() {
                   disabled={prescriptions.length === 0 || isPharmacySent}
                   className="w-full h-11 rounded-xl font-bold text-sm flex items-center justify-center gap-2 text-white transition-all cursor-pointer disabled:opacity-50"
                   style={isPharmacySent ? {
-                    background: 'linear-gradient(135deg,#16A34A,#0D9488)',
+                    background: 'linear-gradient(135deg,#16A34A,#1E3A8A)',
                     boxShadow: '0 4px 12px rgba(22,163,74,0.30)',
                   } : {
-                    background: 'linear-gradient(135deg,#2563EB,#0891B2)',
+                    background: 'linear-gradient(135deg,#2563EB,#2563EB)',
                     boxShadow: '0 4px 12px rgba(37,99,235,0.30)',
                   }}
                 >

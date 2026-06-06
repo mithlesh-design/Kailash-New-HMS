@@ -66,11 +66,11 @@ export function DaySummaryCard({ doctorId, doctorName, className }: Props) {
 
   return (
     <div className={`rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-sm overflow-hidden ${className ?? ''}`}>
-      <header className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-violet-50/60 to-blue-50/60">
-        <Sparkles className="h-4 w-4 text-violet-600" />
+      <header className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-blue-50/60 to-blue-50/60">
+        <Sparkles className="h-4 w-4 text-blue-600" />
         <h3 className="text-[14px] font-semibold text-slate-900">Day in review</h3>
         <span className="text-[11px] text-slate-500">{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })}</span>
-        <span className="text-[10px] font-mono text-violet-700 ml-auto">85% confidence</span>
+        <span className="text-[10px] font-mono text-blue-700 ml-auto">85% confidence</span>
         <button
           type="button"
           onClick={() => setDismissed(true)}
@@ -104,7 +104,7 @@ export function DaySummaryCard({ doctorId, doctorName, className }: Props) {
           <ul className="space-y-1.5">
             {summary.recommendations.map((r, i) => (
               <li key={i} className="text-[12.5px] text-slate-700 flex gap-2">
-                <TrendingUp className="h-3 w-3 text-violet-500 mt-0.5 flex-shrink-0" />
+                <TrendingUp className="h-3 w-3 text-blue-500 mt-0.5 flex-shrink-0" />
                 <span>{r}</span>
               </li>
             ))}
@@ -127,7 +127,7 @@ export function DaySummaryCard({ doctorId, doctorName, className }: Props) {
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-violet-600 hover:bg-violet-700 text-white"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-blue-600 hover:bg-blue-700 text-white"
         >
           <Check className="h-3 w-3" /> Got it
         </button>

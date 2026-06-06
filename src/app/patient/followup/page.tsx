@@ -70,7 +70,7 @@ export default function FollowUpPage() {
       </div>
 
       {/* Patient + visit header */}
-      <div className="rounded-3xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white p-5 shadow-[0_10px_30px_rgba(99,102,241,0.3)]">
+      <div className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-5 shadow-[0_10px_30px_rgba(99,102,241,0.3)]">
         <div className="flex items-center gap-2 text-[12px] font-semibold text-white/80 mb-1">
           {mode === 'video' ? <Video className="h-4 w-4" /> : <Building2 className="h-4 w-4" />}
           {mode === 'video' ? 'Video consultation' : 'In-person OPD visit'} · today
@@ -80,15 +80,15 @@ export default function FollowUpPage() {
       </div>
 
       {/* AI visit summary */}
-      <div className="rounded-3xl bg-violet-50 border border-violet-100 p-5">
+      <div className="rounded-3xl bg-blue-50 border border-blue-100 p-5">
         <div className="flex items-center gap-2 mb-2">
-          <span className="h-9 w-9 rounded-2xl bg-violet-100 flex items-center justify-center flex-shrink-0"><Sparkles className="h-4.5 w-4.5 text-violet-600" /></span>
+          <span className="h-9 w-9 rounded-2xl bg-blue-100 flex items-center justify-center flex-shrink-0"><Sparkles className="h-4.5 w-4.5 text-blue-600" /></span>
           <div>
-            <p className="text-[14px] font-bold text-violet-900">Your visit, in plain language</p>
-            <p className="text-[12px] text-violet-500">AI summary · reviewed by your doctor</p>
+            <p className="text-[14px] font-bold text-blue-900">Your visit, in plain language</p>
+            <p className="text-[12px] text-blue-500">AI summary · reviewed by your doctor</p>
           </div>
         </div>
-        <p className="text-[13.5px] text-violet-800 leading-relaxed">
+        <p className="text-[13.5px] text-blue-800 leading-relaxed">
           You came in with fever and fatigue. Your doctor examined you, ordered a few tests to be safe, and started you on
           medicines to manage your blood sugar and blood pressure. Most likely this is a minor infection. Take your medicines
           on time, watch for the symptoms below, and come back for your follow-up.

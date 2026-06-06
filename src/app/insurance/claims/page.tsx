@@ -48,11 +48,11 @@ function ValidationPanel({ claim, onClose }: { claim: InsuranceClaim; onClose: (
   return (
     <motion.div
       initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-      className="mt-3 rounded-xl border border-violet-200 overflow-hidden"
+      className="mt-3 rounded-xl border border-blue-200 overflow-hidden"
     >
       <div className="flex items-center justify-between px-4 py-3" style={{ background: 'linear-gradient(135deg,#7C3AED15,#4F46E510)' }}>
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-violet-600" />
+          <Sparkles className="h-4 w-4 text-blue-600" />
           <span className="text-sm font-bold text-slate-900">AI Claim Validation</span>
           {errorCount > 0 && <span className="text-[11px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full">{errorCount} error{errorCount > 1 ? 's' : ''}</span>}
           {warnCount > 0 && <span className="text-[11px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">{warnCount} warning{warnCount > 1 ? 's' : ''}</span>}
@@ -104,7 +104,7 @@ function ValidationPanel({ claim, onClose }: { claim: InsuranceClaim; onClose: (
           <button
             onClick={handleSubmit}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white cursor-pointer"
-            style={{ background: 'linear-gradient(135deg,#0891B2,#0E7490)', boxShadow: '0 2px 8px rgba(8,145,178,0.3)' }}
+            style={{ background: 'linear-gradient(135deg,#2563EB,#1E3A8A)', boxShadow: '0 2px 8px rgba(37,99,235,0.3)' }}
           >
             <Send className="h-4 w-4" /> Submit to TPA
           </button>
@@ -339,7 +339,7 @@ export default function InsuranceClaimsPage() {
                       }}
                       disabled={validatingId === claim.id}
                       className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white cursor-pointer disabled:opacity-60 transition-all"
-                      style={{ background: 'linear-gradient(135deg,#7C3AED,#4F46E5)', boxShadow: '0 2px 8px rgba(124,58,237,0.2)' }}
+                      style={{ background: 'linear-gradient(135deg,#1E3A8A,#4F46E5)', boxShadow: '0 2px 8px rgba(30,58,138,0.2)' }}
                     >
                       {validatingId === claim.id
                         ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Validating…</>
@@ -438,11 +438,11 @@ export default function InsuranceClaimsPage() {
                       ))}
                     </div>
                     {claim.aiDenialRisk && (
-                      <div className="px-4 py-3 bg-violet-50/40 border-t border-violet-100 text-xs">
-                        <p className="font-bold text-violet-800 flex items-center gap-1.5">
+                      <div className="px-4 py-3 bg-blue-50/40 border-t border-blue-100 text-xs">
+                        <p className="font-bold text-blue-800 flex items-center gap-1.5">
                           <ShieldAlert className="h-3.5 w-3.5" />AI denial-risk · {claim.aiDenialRisk.score}/100
                         </p>
-                        <ul className="mt-1 ml-5 list-disc text-violet-700 space-y-0.5">
+                        <ul className="mt-1 ml-5 list-disc text-blue-700 space-y-0.5">
                           {claim.aiDenialRisk.reasons.map((r, i) => <li key={i}>{r}</li>)}
                         </ul>
                       </div>

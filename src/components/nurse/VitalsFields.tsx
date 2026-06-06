@@ -108,7 +108,7 @@ export function VitalsAiPanel({ news, anomalies }: { news: News2; anomalies: Ano
   return (
     <section className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Activity className="h-4 w-4 text-violet-600" />
+        <Activity className="h-4 w-4 text-blue-600" />
         <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">AI early-warning</span>
         <span className={`ml-auto text-xs font-bold px-2.5 py-1 rounded-full border ${bandStyle(news.band)}`}>
           NEWS {news.score} · {news.band.toUpperCase()}{news.partial ? " (partial)" : ""}

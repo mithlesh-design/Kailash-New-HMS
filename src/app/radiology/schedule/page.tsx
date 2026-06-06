@@ -17,7 +17,7 @@ import { toast } from "sonner"
 
 const MODALITY_TINT: Record<Modality, string> = {
   XR: 'bg-blue-50 text-blue-700 border-blue-200',
-  CT: 'bg-violet-50 text-violet-700 border-violet-200',
+  CT: 'bg-blue-50 text-blue-700 border-blue-200',
   MRI: 'bg-indigo-50 text-indigo-700 border-indigo-200',
   US: 'bg-cyan-50 text-cyan-700 border-cyan-200',
   MAMMO: 'bg-pink-50 text-pink-700 border-pink-200',
@@ -25,7 +25,7 @@ const MODALITY_TINT: Record<Modality, string> = {
 }
 const SOURCE_TINT: Record<RadSource, string> = {
   OPD: 'bg-blue-50 text-blue-700', IPD: 'bg-indigo-50 text-indigo-700',
-  ICU: 'bg-red-50 text-red-700', OT: 'bg-purple-50 text-purple-700', ER: 'bg-orange-50 text-orange-700',
+  ICU: 'bg-red-50 text-red-700', OT: 'bg-blue-50 text-blue-700', ER: 'bg-orange-50 text-orange-700',
 }
 const PRIORITY_TINT: Record<Priority, string> = {
   STAT: 'bg-red-100 text-red-700', Urgent: 'bg-amber-100 text-amber-700', Routine: 'bg-slate-100 text-slate-600',
@@ -117,14 +117,14 @@ export default function RadiologySchedulePage() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Calendar className="h-6 w-6 text-violet-600" />Scheduling desk
+            <Calendar className="h-6 w-6 text-blue-600" />Scheduling desk
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             Assign slots · prep instructions · contrast consent · the patient becomes "scheduled" and shows on arrival desk
           </p>
         </div>
         <select value={modalityFilter} onChange={e => setModalityFilter(e.target.value as 'all' | Modality)}
-          className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-200">
+          className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200">
           <option value="all">All modalities</option>
           {(['XR', 'CT', 'MRI', 'US', 'MAMMO'] as Modality[]).map(m => (
             <option key={m} value={m}>{m}</option>
@@ -189,7 +189,7 @@ export default function RadiologySchedulePage() {
                     </div>
                     <button onClick={() => openBooking(s)}
                       className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white cursor-pointer transition-all"
-                      style={{ background: 'linear-gradient(135deg,#8B5CF6,#EC4899)', boxShadow: '0 2px 8px rgba(139,92,246,0.25)' }}>
+                      style={{ background: 'linear-gradient(135deg,#2563EB,#EC4899)', boxShadow: '0 2px 8px rgba(37,99,235,0.25)' }}>
                       <Calendar className="h-3.5 w-3.5" />Book slot
                     </button>
                   </div>
@@ -238,7 +238,7 @@ export default function RadiologySchedulePage() {
                     {slots.map(s => (
                       <button key={s.iso} type="button" onClick={() => setSlotIso(s.iso)}
                         className={cn("py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border",
-                          slotIso === s.iso ? 'bg-violet-600 text-white border-violet-600 ring-2 ring-violet-200' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50')}>
+                          slotIso === s.iso ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50')}>
                         {s.label}
                       </button>
                     ))}
@@ -282,7 +282,7 @@ export default function RadiologySchedulePage() {
                   Cancel
                 </button>
                 <button onClick={confirm} disabled={!canBook}
-                  className="flex-1 h-10 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold cursor-pointer disabled:opacity-50">
+                  className="flex-1 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold cursor-pointer disabled:opacity-50">
                   Confirm booking
                 </button>
               </div>

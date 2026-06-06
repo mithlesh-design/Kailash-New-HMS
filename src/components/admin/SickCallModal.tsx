@@ -238,8 +238,8 @@ export function SickCallModal({ open, onClose, defaults }: SickCallModalProps) {
                       </p>
                     </div>
                     <div className="flex items-center gap-2 mb-1">
-                      <Sparkles className="h-4 w-4 text-violet-600" />
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-violet-700">
+                      <Sparkles className="h-4 w-4 text-blue-600" />
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-blue-700">
                         Ranked candidates ({candidates.length}) · click one to assign
                       </p>
                     </div>
@@ -257,7 +257,7 @@ export function SickCallModal({ open, onClose, defaults }: SickCallModalProps) {
                           <button key={c.staff.id} onClick={() => setPickedReplacement(c.staff.id)}
                             className={cn('w-full text-left rounded-xl border p-3 cursor-pointer transition',
                               pickedReplacement === c.staff.id
-                                ? 'border-violet-400 bg-violet-50/60 ring-2 ring-violet-200'
+                                ? 'border-blue-400 bg-blue-50/60 ring-2 ring-blue-200'
                                 : 'border-slate-200 hover:bg-slate-50')}>
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex-1 min-w-0">
@@ -272,7 +272,7 @@ export function SickCallModal({ open, onClose, defaults }: SickCallModalProps) {
                             </div>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {c.reasons.map((r, i) => (
-                                <span key={i} className="text-[10px] text-violet-700 bg-white border border-violet-100 px-1.5 py-0.5 rounded">{r}</span>
+                                <span key={i} className="text-[10px] text-blue-700 bg-white border border-blue-100 px-1.5 py-0.5 rounded">{r}</span>
                               ))}
                             </div>
                             {(c.staff.phone || c.staff.email) && (

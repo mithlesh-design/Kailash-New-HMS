@@ -20,14 +20,14 @@ const SHIFTS: ShiftType[] = ['Morning', 'Evening', 'Night', 'Off']
 const SHIFT_COLOR: Record<ShiftType, string> = {
   Morning: 'bg-amber-100 text-amber-800 border-amber-300',
   Evening: 'bg-blue-100 text-blue-800 border-blue-300',
-  Night:   'bg-violet-100 text-violet-800 border-violet-300',
+  Night:   'bg-blue-100 text-blue-800 border-blue-300',
   Off:     'bg-slate-50 text-slate-400 border-slate-200',
 }
 
 const SHIFT_DOT: Record<ShiftType, string> = {
   Morning: 'bg-amber-500',
   Evening: 'bg-blue-500',
-  Night:   'bg-violet-600',
+  Night:   'bg-blue-600',
   Off:     'bg-slate-200',
 }
 

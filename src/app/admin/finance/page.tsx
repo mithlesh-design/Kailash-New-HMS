@@ -225,7 +225,7 @@ export default function FinanceDashboard() {
         {/* Payer mix */}
         <div className="rounded-xl border border-slate-200 bg-white p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-violet-600" />Payer mix
+            <CreditCard className="h-4 w-4 text-blue-600" />Payer mix
           </h3>
           {(() => {
             const sorted = Array.from(revenueMetrics.payerMix.entries()).sort((a, b) => b[1] - a[1])
@@ -242,7 +242,7 @@ export default function FinanceDashboard() {
                         <b className="tabular-nums">{fmtINR(amt)} <span className="text-slate-400 text-[10px] ml-1">{pct.toFixed(0)}%</span></b>
                       </p>
                       <div className="h-1.5 mt-0.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-violet-500" style={{ width: `${pct}%` }} />
+                        <div className="h-full bg-blue-500" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   )
@@ -287,7 +287,7 @@ export default function FinanceDashboard() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-700">Overtime pay</span>
-              <b className="tabular-nums text-violet-700">{fmtINR(expenseMetrics.totalOT)}</b>
+              <b className="tabular-nums text-blue-700">{fmtINR(expenseMetrics.totalOT)}</b>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-700">Vendor paid this month</span>
@@ -307,7 +307,7 @@ export default function FinanceDashboard() {
       </div>
 
       {/* Reconciliation strip */}
-      <div className="rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50/50 to-violet-50/30 p-4">
+      <div className="rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50/50 to-blue-50/30 p-4">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="h-4 w-4 text-indigo-600" />
           <h3 className="text-sm font-bold text-indigo-800">Daily reconciliation · last 7 days</h3>

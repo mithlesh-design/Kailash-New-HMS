@@ -19,7 +19,7 @@ const SHIFTS: ShiftType[] = ['Morning', 'Evening', 'Night']
 const SHIFT_CONFIG: Record<ShiftType, { label: string; time: string; gradient: string; tint: string }> = {
   Morning: { label: 'Morning', time: '06:00 – 14:00', gradient: 'linear-gradient(135deg, #D97706, #F59E0B)', tint: 'bg-amber-50 text-amber-700 border-amber-200' },
   Evening: { label: 'Evening', time: '14:00 – 22:00', gradient: 'linear-gradient(135deg, #2563EB, #3B82F6)', tint: 'bg-blue-50 text-blue-700 border-blue-200' },
-  Night:   { label: 'Night',   time: '22:00 – 06:00', gradient: 'linear-gradient(135deg, #4C1D95, #7C3AED)', tint: 'bg-violet-50 text-violet-700 border-violet-200' },
+  Night:   { label: 'Night',   time: '22:00 – 06:00', gradient: 'linear-gradient(135deg, #4C1D95, #1E3A8A)', tint: 'bg-blue-50 text-blue-700 border-blue-200' },
   Off:     { label: 'Off',     time: '',              gradient: '',                                          tint: 'bg-slate-100 text-slate-400 border-slate-200' },
 }
 
@@ -39,10 +39,10 @@ const WARD_TINT: Record<string, string> = {
   'General Ward':'bg-blue-50 text-blue-700',
   'Cardiac Care':'bg-rose-50 text-rose-700',
   Maternity:     'bg-pink-50 text-pink-700',
-  Radiology:     'bg-violet-50 text-violet-700',
+  Radiology:     'bg-blue-50 text-blue-700',
   Pathology:     'bg-emerald-50 text-emerald-700',
   Microbiology:  'bg-teal-50 text-teal-700',
-  Pharmacy:      'bg-fuchsia-50 text-fuchsia-700',
+  Pharmacy:      'bg-blue-50 text-blue-700',
   OT:            'bg-sky-50 text-sky-700',
 }
 
@@ -254,23 +254,23 @@ export default function DutyAssignmentPage() {
 
       {/* AI suggestions */}
       {suggestedAssignments.length > 0 && (
-        <div className="rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50/40 p-4">
+        <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-50/40 p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="h-4 w-4 text-violet-600" />
-            <h3 className="text-sm font-bold text-violet-800">Suggested duty pairings</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wide text-violet-700 bg-violet-100 px-2 py-0.5 rounded">
+            <Sparkles className="h-4 w-4 text-blue-600" />
+            <h3 className="text-sm font-bold text-blue-800">Suggested duty pairings</h3>
+            <span className="text-[10px] font-bold uppercase tracking-wide text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
               {suggestedAssignments.length} candidates
             </span>
           </div>
           <div className="space-y-2">
             {suggestedAssignments.map(s => (
-              <div key={`${s.staffId}-${s.ward}`} className="rounded-lg bg-white border border-violet-100 p-3 flex items-center justify-between gap-3 flex-wrap">
+              <div key={`${s.staffId}-${s.ward}`} className="rounded-lg bg-white border border-blue-100 p-3 flex items-center justify-between gap-3 flex-wrap">
                 <div>
                   <p className="text-sm font-bold text-slate-800">{s.staffName} → {s.ward}</p>
                   <p className="text-[11px] text-slate-500">{s.reason}</p>
                 </div>
                 <button onClick={() => handleAssign(s.staffId, s.ward)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white cursor-pointer">
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
                   <CheckCircle className="h-3.5 w-3.5" />Accept
                 </button>
               </div>

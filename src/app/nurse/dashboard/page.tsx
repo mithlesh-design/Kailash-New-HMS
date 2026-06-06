@@ -18,6 +18,7 @@ import { useAuditStore } from "@/store/useAuditStore"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useHRStore } from "@/store/useHRStore"
 import { OnShiftTeam } from "@/components/clinical/OnShiftTeam"
+import { SepsisWatchPanel } from "@/components/nurse/SepsisWatchPanel"
 import { CareTeamPresenceCard } from "@/components/clinical/CareTeamPresenceCard"
 import { Activity, AlertCircle, Bed, Stethoscope, Clock, CheckCircle, Pill, Droplets, LogOut, ArrowDownToLine, FileText, ShieldAlert, Info, Video, VideoOff, Send, TrendingUp } from "lucide-react"
 import { Card } from "@/components/ui/card"
@@ -202,12 +203,22 @@ export default function NurseDashboard() {
         </div>
       </Card>
 
+      {/* AI Sepsis Watch (Track B) */}
+      <Card className="overflow-hidden shadow-sm p-5">
+        <div className="flex items-center gap-2 mb-1">
+          <ShieldAlert className="h-4 w-4 text-rose-600" />
+          <h2 className="text-sm font-bold text-slate-900">AI Sepsis Watch</h2>
+        </div>
+        <p className="text-xs text-slate-500 mb-3">Screen a deteriorating patient against qSOFA; accept to page the doctor and ICU for the Sepsis-6 bundle.</p>
+        <SepsisWatchPanel patientName={criticalPatients[0]?.name} />
+      </Card>
+
       {/* Incoming Transfers from OPD/IPD */}
       {incomingTransfers.length > 0 && (
         <Card className="overflow-hidden shadow-sm" style={{ border: '1px solid #BFDBFE' }}>
           <div className="px-5 py-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg,#EFF6FF,#DBEAFE)' }}>
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#2563EB,#0891B2)', boxShadow: '0 3px 8px rgba(37,99,235,0.25)' }}>
+              <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#2563EB,#2563EB)', boxShadow: '0 3px 8px rgba(37,99,235,0.25)' }}>
                 <ArrowDownToLine className="h-4 w-4 text-white" />
               </div>
               <div>
@@ -249,7 +260,7 @@ export default function NurseDashboard() {
                       {bundle && (
                         <button
                           onClick={() => setExpandedBundleId(isExpanded ? null : req.id)}
-                          className="p-1.5 rounded-lg text-purple-500 hover:bg-purple-50 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
                           title="View documents"
                         >
                           <FileText className="h-4 w-4" />
@@ -258,7 +269,7 @@ export default function NurseDashboard() {
                       <button
                         onClick={() => { markAdmitted(req.id); toast.success(`${req.patientName} marked as arrived`) }}
                         className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-1.5 rounded-xl cursor-pointer transition-all"
-                        style={{ background: 'linear-gradient(135deg,#16A34A,#0D9488)', boxShadow: '0 2px 8px rgba(22,163,74,0.25)' }}
+                        style={{ background: 'linear-gradient(135deg,#16A34A,#1E3A8A)', boxShadow: '0 2px 8px rgba(22,163,74,0.25)' }}
                       >
                         <CheckCircle className="h-3.5 w-3.5" /> Arrived
                       </button>
@@ -288,9 +299,9 @@ export default function NurseDashboard() {
                         )}
                         {bundle.prescriptions.length > 0 && (
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <Pill className="h-3.5 w-3.5 text-purple-500" />
+                            <Pill className="h-3.5 w-3.5 text-blue-500" />
                             {bundle.prescriptions.map((p, j) => (
-                              <span key={j} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">{p.medicine}</span>
+                              <span key={j} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">{p.medicine}</span>
                             ))}
                           </div>
                         )}
@@ -350,7 +361,7 @@ export default function NurseDashboard() {
                   <button
                     onClick={() => handleApproveCamera(req.id, req.patientName, req.wardRoom, req.patientId)}
                     className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-1.5 rounded-xl cursor-pointer transition-all"
-                    style={{ background: 'linear-gradient(135deg,#16A34A,#0D9488)', boxShadow: '0 2px 8px rgba(22,163,74,0.25)' }}
+                    style={{ background: 'linear-gradient(135deg,#16A34A,#1E3A8A)', boxShadow: '0 2px 8px rgba(22,163,74,0.25)' }}
                   >
                     <Video className="h-3.5 w-3.5" /> Approve
                   </button>
@@ -469,7 +480,7 @@ export default function NurseDashboard() {
                 (patient.ivDrips?.filter(d => d.status === 'Running') ?? []).length > 0) && (
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {patient.currentMedications?.filter(m => m.status === 'Active').map((med, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-700 bg-purple-50/80 px-2 py-0.5 rounded-full">
+                    <span key={i} className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50/80 px-2 py-0.5 rounded-full">
                       <Pill className="h-2.5 w-2.5" /> {med.name}
                     </span>
                   ))}

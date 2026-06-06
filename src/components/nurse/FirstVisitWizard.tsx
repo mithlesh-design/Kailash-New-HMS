@@ -168,8 +168,8 @@ export function FirstVisitWizard({ title, subtitle, meta, initial, onClose, onCo
       )
       case 5: return (
         <div className="space-y-4">
-          <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
-            <p className="flex items-center gap-2 text-xs font-bold text-violet-700 uppercase tracking-wider mb-1"><Sparkles className="h-4 w-4" /> AI risk snapshot</p>
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <p className="flex items-center gap-2 text-xs font-bold text-blue-700 uppercase tracking-wider mb-1"><Sparkles className="h-4 w-4" /> AI risk snapshot</p>
             <p className="text-sm font-semibold text-slate-800">{snapshot}</p>
           </div>
           <div>

@@ -244,15 +244,15 @@ export default function CoveragePage() {
 
       {/* Suggest depts without minimums */}
       {suggestableDepts.length > 0 && canWrite && (
-        <div className="rounded-xl border border-violet-200 bg-violet-50/40 p-4">
+        <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-violet-600" />
-            <h3 className="text-sm font-bold text-violet-800">Suggested · departments without coverage requirements</h3>
+            <Sparkles className="h-4 w-4 text-blue-600" />
+            <h3 className="text-sm font-bold text-blue-800">Suggested · departments without coverage requirements</h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {suggestableDepts.map(d => (
               <button key={d} onClick={() => { setNewDept({ ...newDept, department: d }); setShowAdd(true) }}
-                className="text-xs font-bold px-2.5 py-1 rounded-lg bg-white border border-violet-200 hover:bg-violet-100 text-violet-700 cursor-pointer">
+                className="text-xs font-bold px-2.5 py-1 rounded-lg bg-white border border-blue-200 hover:bg-blue-100 text-blue-700 cursor-pointer">
                 + {d}
               </button>
             ))}

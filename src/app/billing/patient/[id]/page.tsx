@@ -14,7 +14,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 
 const TYPE_CONFIG: Record<ChargeType, { label: string; color: string }> = {
   consultation: { label: 'Consultation',  color: 'text-blue-600 bg-blue-50' },
-  lab:          { label: 'Laboratory',    color: 'text-purple-600 bg-purple-50' },
+  lab:          { label: 'Laboratory',    color: 'text-blue-600 bg-blue-50' },
   radiology:    { label: 'Radiology',     color: 'text-indigo-600 bg-indigo-50' },
   pharmacy:     { label: 'Pharmacy',      color: 'text-pink-600 bg-pink-50' },
   ward:         { label: 'Ward / Room',   color: 'text-teal-600 bg-teal-50' },
@@ -146,7 +146,7 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
             { label: "Gross Total", value: bill.subtotal, color: "text-slate-900" },
             { label: "Discounts", value: -bill.discounts, color: "text-green-600" },
             { label: "Non-Payables", value: -bill.nonPayables, color: "text-orange-600" },
-            { label: "Insurance", value: -bill.insuranceCovered, color: "text-purple-600" },
+            { label: "Insurance", value: -bill.insuranceCovered, color: "text-blue-600" },
             { label: "Patient Due", value: bill.patientDue, color: "text-red-600 text-xl" },
           ].map(({ label, value, color }) => (
             <div key={label} className="text-center p-3 rounded-xl bg-slate-50 border border-slate-100">
@@ -174,7 +174,7 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
               onClick={handleGenerateAISuggestions}
               disabled={loadingAI}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white cursor-pointer disabled:opacity-60 transition-all"
-              style={{ background: 'linear-gradient(135deg,#7C3AED,#4F46E5)', boxShadow: '0 2px 8px rgba(124,58,237,0.3)' }}
+              style={{ background: 'linear-gradient(135deg,#1E3A8A,#4F46E5)', boxShadow: '0 2px 8px rgba(30,58,138,0.3)' }}
             >
               {loadingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               AI Suggest Charges
@@ -268,14 +268,14 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-white border border-violet-200 shadow-sm rounded-xl overflow-hidden"
+            className="bg-white border border-blue-200 shadow-sm rounded-xl overflow-hidden"
           >
             <div className="flex items-center justify-between px-5 py-4" style={{ background: 'linear-gradient(135deg,#7C3AED15,#4F46E510)' }}>
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-violet-600" />
+                <Sparkles className="h-5 w-5 text-blue-600" />
                 <span className="font-bold text-slate-900">AI Suggested Charges</span>
                 {aiSuggestions && (
-                  <span className="text-xs font-bold text-violet-600 bg-violet-100 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
                     {aiSuggestions.length - rejectedIndexes.size} of {aiSuggestions.length} selected
                   </span>
                 )}
@@ -287,7 +287,7 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
 
             {loadingAI && (
               <div className="flex items-center justify-center gap-3 py-10">
-                <Loader2 className="h-5 w-5 text-violet-500 animate-spin" />
+                <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
                 <span className="text-sm font-semibold text-slate-500">Analysing ward records and generating charges…</span>
               </div>
             )}
@@ -308,7 +308,7 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
                     return (
                       <div
                         key={i}
-                        className={cn("flex items-start gap-3 px-5 py-3 transition-colors", rejected ? "bg-slate-50 opacity-50" : "hover:bg-violet-50/30")}
+                        className={cn("flex items-start gap-3 px-5 py-3 transition-colors", rejected ? "bg-slate-50 opacity-50" : "hover:bg-blue-50/30")}
                       >
                         <button
                           onClick={() => toggleReject(i)}
@@ -317,7 +317,7 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
                         >
                           {rejected
                             ? <XCircle className="h-5 w-5 text-slate-300" />
-                            : <CheckCircle2 className="h-5 w-5 text-violet-500" />}
+                            : <CheckCircle2 className="h-5 w-5 text-blue-500" />}
                         </button>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-0.5">
@@ -350,7 +350,7 @@ export default function PatientBillPage({ params }: { params: Promise<{ id: stri
                       onClick={handleAcceptSelected}
                       disabled={rejectedIndexes.size === aiSuggestions.length}
                       className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white cursor-pointer disabled:opacity-50 transition-all"
-                      style={{ background: 'linear-gradient(135deg,#7C3AED,#4F46E5)', boxShadow: '0 2px 8px rgba(124,58,237,0.3)' }}
+                      style={{ background: 'linear-gradient(135deg,#1E3A8A,#4F46E5)', boxShadow: '0 2px 8px rgba(30,58,138,0.3)' }}
                     >
                       <CheckCircle2 className="h-4 w-4" />
                       Add Selected to Bill

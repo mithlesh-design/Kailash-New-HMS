@@ -14,7 +14,7 @@ const CONDITION_TINT: Record<string, string> = {
   Serious:            'bg-orange-50 text-orange-700 border-orange-200',
   Stable:             'bg-emerald-50 text-emerald-700 border-emerald-200',
   Improving:          'bg-blue-50 text-blue-700 border-blue-200',
-  'Discharge-ready':  'bg-violet-50 text-violet-700 border-violet-200',
+  'Discharge-ready':  'bg-blue-50 text-blue-700 border-blue-200',
 }
 
 const STAGE_LABEL: Record<string, string> = {

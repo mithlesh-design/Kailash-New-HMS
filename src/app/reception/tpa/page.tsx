@@ -56,12 +56,12 @@ export default function ReceptionTPA() {
             </div>
 
             {typeof c.aiProbability === 'number' && (
-              <div className="mt-3 rounded-xl bg-violet-50 border border-violet-100 p-2.5">
+              <div className="mt-3 rounded-xl bg-blue-50 border border-blue-100 p-2.5">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[12px] font-bold text-violet-900 flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> AI approval likelihood</span>
-                  <span className="text-[12px] font-bold text-violet-700">{c.aiProbability}%</span>
+                  <span className="text-[12px] font-bold text-blue-900 flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> AI approval likelihood</span>
+                  <span className="text-[12px] font-bold text-blue-700">{c.aiProbability}%</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-violet-100 overflow-hidden">
+                <div className="h-1.5 rounded-full bg-blue-100 overflow-hidden">
                   <div className={cn("h-full rounded-full", c.aiProbability >= 80 ? "bg-green-500" : c.aiProbability >= 50 ? "bg-amber-500" : "bg-red-500")} style={{ width: `${c.aiProbability}%` }} />
                 </div>
               </div>

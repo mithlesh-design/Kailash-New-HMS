@@ -65,7 +65,7 @@ export default function DoctorInbox() {
           <MessageSquare className="h-3.5 w-3.5" /> Messages {unreadMsgs > 0 && <span className="text-[11px] font-bold px-1.5 rounded-full bg-blue-100 text-blue-700">{unreadMsgs}</span>}
         </button>
         <button onClick={() => setTab('results')} className={cn("flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[13px] font-semibold transition", tab === 'results' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500")}>
-          <ClipboardCheck className="h-3.5 w-3.5" /> Results {results.length > 0 && <span className="text-[11px] font-bold px-1.5 rounded-full bg-violet-100 text-violet-700">{results.length}</span>}
+          <ClipboardCheck className="h-3.5 w-3.5" /> Results {results.length > 0 && <span className="text-[11px] font-bold px-1.5 rounded-full bg-blue-100 text-blue-700">{results.length}</span>}
         </button>
         <button onClick={() => setTab('alerts')} className={cn("flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[13px] font-semibold transition", tab === 'alerts' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500")}>
           <Bell className="h-3.5 w-3.5" /> Alerts {unreadAlerts > 0 && <span className="text-[11px] font-bold px-1.5 rounded-full bg-orange-100 text-orange-700">{unreadAlerts}</span>}
@@ -119,7 +119,7 @@ export default function DoctorInbox() {
 }
 
 const RESULT_SRC = {
-  lab: { label: 'Lab', icon: FlaskConical, tint: 'bg-violet-50 text-violet-700' },
+  lab: { label: 'Lab', icon: FlaskConical, tint: 'bg-blue-50 text-blue-700' },
   radiology: { label: 'Radiology', icon: ScanLine, tint: 'bg-indigo-50 text-indigo-700' },
   ipd: { label: 'Inpatient', icon: ClipboardCheck, tint: 'bg-rose-50 text-rose-700' },
 }

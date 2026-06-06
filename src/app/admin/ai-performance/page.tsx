@@ -30,7 +30,7 @@ const FEATURE_LABELS: Record<string, string> = {
   pre_brief: 'Pre-Brief',
 }
 
-const BAR_COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#06b6d4', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']
+const BAR_COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#2563EB', '#2563EB', '#ec4899', '#2563EB', '#f97316']
 
 export default function AiPerformancePage() {
   const getPerformanceReport = useFeedbackStore(s => s.getPerformanceReport)
@@ -56,10 +56,10 @@ export default function AiPerformancePage() {
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-5 border-t-4 border-t-purple-400">
+        <Card className="p-5 border-t-4 border-t-blue-400">
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-9 w-9 bg-purple-50 rounded-xl flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-purple-600" />
+            <div className="h-9 w-9 bg-blue-50 rounded-xl flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
             </div>
             <p className="text-sm font-semibold text-slate-500">Overall Acceptance</p>
           </div>

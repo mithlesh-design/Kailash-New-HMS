@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 const CONTACTS = [
   { icon: Phone, label: 'Hospital reception', value: '+91 80 1234 5678', tint: 'bg-blue-50 text-blue-600' },
   { icon: MessageSquareText, label: 'WhatsApp help desk', value: '+91 98765 00000', tint: 'bg-green-50 text-green-600' },
-  { icon: MapPin, label: 'Directions', value: 'Kailash Healthcare, MG Road', tint: 'bg-violet-50 text-violet-600' },
+  { icon: MapPin, label: 'Directions', value: 'Kailash Healthcare, MG Road', tint: 'bg-blue-50 text-blue-600' },
 ]
 
 const FAQ = [

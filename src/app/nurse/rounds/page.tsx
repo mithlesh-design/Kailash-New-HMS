@@ -38,7 +38,7 @@ declare global {
 
 const CATEGORY_META = {
   observation: { label: 'Observation',  icon: Activity,      color: 'text-blue-600',   bg: 'bg-blue-50/80',   badge: 'blue'    as const },
-  medication:  { label: 'Medication',   icon: Pill,          color: 'text-purple-600', bg: 'bg-purple-50/80', badge: 'muted'   as const },
+  medication:  { label: 'Medication',   icon: Pill,          color: 'text-blue-600', bg: 'bg-blue-50/80', badge: 'muted'   as const },
   test:        { label: 'Test Order',   icon: FlaskConical,  color: 'text-amber-600',  bg: 'bg-amber-50/80',  badge: 'warning' as const },
   instruction: { label: 'Instruction',  icon: ClipboardList, color: 'text-teal-600',   bg: 'bg-teal-50/80',   badge: 'teal'    as const },
 }
@@ -56,8 +56,8 @@ function AddMedicineForm({ onAdd, onCancel }: { onAdd: (m: { name: string; dosag
   const [f, setF] = useState({ name: '', dosage: '', frequency: '' })
   return (
     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-      className="bg-purple-50/70 rounded-xl p-4 space-y-3">
-      <p className="text-xs font-bold text-purple-700 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Add Medicine</p>
+      className="bg-blue-50/70 rounded-xl p-4 space-y-3">
+      <p className="text-xs font-bold text-blue-700 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Add Medicine</p>
       <div className="grid grid-cols-3 gap-2">
         {[
           { key: 'name', placeholder: 'Medicine name' },
@@ -66,13 +66,13 @@ function AddMedicineForm({ onAdd, onCancel }: { onAdd: (m: { name: string; dosag
         ].map(({ key, placeholder }) => (
           <input key={key} placeholder={placeholder} value={f[key as keyof typeof f]}
             onChange={e => setF(p => ({ ...p, [key]: e.target.value }))}
-            className="h-9 px-3 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm" />
+            className="h-9 px-3 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm" />
         ))}
       </div>
       <div className="flex gap-2">
         <button onClick={onCancel} className="flex-1 h-8 rounded-lg text-xs font-semibold text-slate-600 bg-white shadow-sm hover:bg-slate-50 cursor-pointer">Cancel</button>
         <button onClick={() => { if (f.name) { onAdd(f); onCancel() } }} disabled={!f.name}
-          className="flex-1 h-8 rounded-lg text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 cursor-pointer">
+          className="flex-1 h-8 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 cursor-pointer">
           Add Medicine
         </button>
       </div>
@@ -241,7 +241,7 @@ function NotesPanel({ patient }: { patient: PatientBed }) {
           <p className="text-sm font-bold text-slate-700">Doctor Rounds Note</p>
           <div className="flex items-center gap-2">
             {isAiThinking && (
-              <span className="flex items-center gap-1.5 text-[11px] font-bold text-purple-600 bg-purple-50/80 px-2.5 py-1 rounded-full">
+              <span className="flex items-center gap-1.5 text-[11px] font-bold text-blue-600 bg-blue-50/80 px-2.5 py-1 rounded-full">
                 <Sparkles className="h-3 w-3 animate-pulse" /> AI Categorizing...
               </span>
             )}
@@ -331,7 +331,7 @@ function NotesPanel({ patient }: { patient: PatientBed }) {
           {!quickAction && (
             <div className="flex gap-2 flex-wrap">
               <button onClick={() => setQuickAction('medicine')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-purple-700 bg-purple-50/80 hover:bg-purple-100 cursor-pointer transition-colors">
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-blue-700 bg-blue-50/80 hover:bg-blue-100 cursor-pointer transition-colors">
                 <Plus className="h-3.5 w-3.5" /> Medicine
               </button>
               <button onClick={() => setQuickAction('test')}
@@ -349,9 +349,9 @@ function NotesPanel({ patient }: { patient: PatientBed }) {
           {(pendingMedicines.length > 0 || pendingTests.length > 0 || pendingInstructions.length > 0) && (
             <div className="mt-3 space-y-2">
               {pendingMedicines.map((m, i) => (
-                <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-purple-50/70 text-xs">
-                  <span className="font-bold text-purple-700"><Pill className="h-3 w-3 inline mr-1" />{m.name} {m.dosage} — {m.frequency}</span>
-                  <button onClick={() => setPendingMedicines(p => p.filter((_, j) => j !== i))} className="text-purple-400 hover:text-red-500 cursor-pointer"><X className="h-3.5 w-3.5" /></button>
+                <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-blue-50/70 text-xs">
+                  <span className="font-bold text-blue-700"><Pill className="h-3 w-3 inline mr-1" />{m.name} {m.dosage} — {m.frequency}</span>
+                  <button onClick={() => setPendingMedicines(p => p.filter((_, j) => j !== i))} className="text-blue-400 hover:text-red-500 cursor-pointer"><X className="h-3.5 w-3.5" /></button>
                 </div>
               ))}
               {pendingTests.map((t, i) => (
@@ -406,7 +406,7 @@ function NotesPanel({ patient }: { patient: PatientBed }) {
                       </div>
                       {note.text && <p className="text-sm text-slate-800 font-medium">{note.text}</p>}
                       {note.medicines?.map((m, i) => (
-                        <p key={i} className="text-xs font-bold text-purple-700 mt-1"><Pill className="h-3 w-3 inline mr-1" />{m.name} {m.dosage} — {m.frequency}</p>
+                        <p key={i} className="text-xs font-bold text-blue-700 mt-1"><Pill className="h-3 w-3 inline mr-1" />{m.name} {m.dosage} — {m.frequency}</p>
                       ))}
                       {note.tests?.map((t, i) => (
                         <p key={i} className="text-xs font-bold text-amber-700 mt-1"><FlaskConical className="h-3 w-3 inline mr-1" />{t.name} ({t.urgency})</p>

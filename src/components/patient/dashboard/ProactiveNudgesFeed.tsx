@@ -28,7 +28,7 @@ const ICONS: Record<PatientNudge["kind"], React.ElementType> = {
 }
 const TONE_STYLES = {
   ok:   { ring: "ring-emerald-200/70", bg: "bg-emerald-50/50",  iconWrap: "bg-emerald-100 text-emerald-700", chipBg: "bg-emerald-100 text-emerald-700" },
-  info: { ring: "ring-violet-200/70",  bg: "bg-violet-50/50",    iconWrap: "bg-violet-100 text-violet-700",   chipBg: "bg-violet-100 text-violet-700" },
+  info: { ring: "ring-blue-200/70",  bg: "bg-blue-50/50",    iconWrap: "bg-blue-100 text-blue-700",   chipBg: "bg-blue-100 text-blue-700" },
   warn: { ring: "ring-amber-200/70",   bg: "bg-amber-50/50",     iconWrap: "bg-amber-100 text-amber-700",      chipBg: "bg-amber-100 text-amber-800" },
 } as const
 
@@ -89,13 +89,13 @@ export function ProactiveNudgesFeed({ className }: { className?: string }) {
 
   return (
     <section className={`rounded-3xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] overflow-hidden ${className ?? ''}`}>
-      <header className="flex items-center gap-2 px-5 py-3 border-b border-slate-100 bg-gradient-to-r from-violet-50/60 to-blue-50/40">
-        <span className="h-8 w-8 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center"><Sparkles className="h-4 w-4" /></span>
+      <header className="flex items-center gap-2 px-5 py-3 border-b border-slate-100 bg-gradient-to-r from-blue-50/60 to-blue-50/40">
+        <span className="h-8 w-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center"><Sparkles className="h-4 w-4" /></span>
         <div>
           <h3 className="text-[14px] font-bold text-slate-900 leading-tight">For you — proactive nudges</h3>
           <p className="text-[11px] text-slate-500">AI watches your record · acts before you have to ask</p>
         </div>
-        <span className="ml-auto inline-flex items-center gap-1 text-[10.5px] font-mono font-semibold text-violet-700">
+        <span className="ml-auto inline-flex items-center gap-1 text-[10.5px] font-mono font-semibold text-blue-700">
           <Bell className="h-3 w-3" /> {visible.length} live
         </span>
       </header>
@@ -124,7 +124,7 @@ export function ProactiveNudgesFeed({ className }: { className?: string }) {
                 <p className="text-[12px] text-slate-600 leading-snug">{n.body}</p>
                 <div className="mt-1.5 flex items-center gap-2">
                   <button type="button" onClick={() => act(n)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11.5px] font-semibold bg-violet-600 hover:bg-violet-700 text-white">
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11.5px] font-semibold bg-blue-600 hover:bg-blue-700 text-white">
                     {n.cta} <ArrowRight className="h-3 w-3" />
                   </button>
                   <button type="button" onClick={() => dismiss(n)}

@@ -105,7 +105,7 @@ function ClinicalView({ d }: { d: DischargeSummary }) {
       {d.labTrends.length > 0 && (
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
-            <FlaskConical className="h-3.5 w-3.5 text-purple-500" />
+            <FlaskConical className="h-3.5 w-3.5 text-blue-500" />
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Lab Result Trends</p>
           </div>
           <div className="rounded-lg overflow-hidden border border-slate-200">

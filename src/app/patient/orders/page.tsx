@@ -115,7 +115,7 @@ export default function DoctorOrdersPage() {
             </div>
 
             {/* Why the doctor ordered it */}
-            <p className="mt-1.5 text-[12.5px] text-violet-700 flex items-center gap-1.5">
+            <p className="mt-1.5 text-[12.5px] text-blue-700 flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 flex-shrink-0" /> {item.clinicalNote}
             </p>
 

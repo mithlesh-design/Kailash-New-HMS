@@ -127,6 +127,7 @@ const navByRole: Record<Role, NavItem[]> = {
   reception: RECEPTION_SECTIONS.flatMap(s => s.items),
   pharmacy: PHARMACY_SECTIONS.flatMap(s => s.items),
   admin: [
+    { href: '/admin/command-center',  label: 'Command Center',   icon: Activity },
     { href: '/admin/dashboard',       label: 'COO Dashboard',    icon: LayoutDashboard },
     { href: '/admin/users',           label: 'Staff Management', icon: UserCog },
     { href: '/admin/credentials',     label: 'Credentials',      icon: ShieldCheck },
@@ -266,32 +267,29 @@ const navByRole: Record<Role, NavItem[]> = {
   ],
 }
 
-const roleConfig: Record<Role, { label: string; color: string; bg: string; gradient: string }> = {
-  patient:       { label: 'Patient Portal',      color: '#2563EB', bg: 'rgba(37,99,235,0.08)',   gradient: 'linear-gradient(135deg,#2563EB,#0891B2)' },
-  doctor:        { label: 'Doctor Portal',       color: '#0EA5E9', bg: 'rgba(14,165,233,0.08)',  gradient: 'linear-gradient(135deg,#0EA5E9,#6366F1)' },
-  reception:     { label: 'Reception',           color: '#F59E0B', bg: 'rgba(245,158,11,0.08)', gradient: 'linear-gradient(135deg,#F59E0B,#EF4444)' },
-  admin:         { label: 'Admin Portal',        color: '#8B5CF6', bg: 'rgba(139,92,246,0.08)',  gradient: 'linear-gradient(135deg,#8B5CF6,#6366F1)' },
-  nurse:         { label: 'Nursing Station',     color: '#10B981', bg: 'rgba(16,185,129,0.08)', gradient: 'linear-gradient(135deg,#10B981,#06B6D4)' },
-  emergency:     { label: 'Emergency Room',      color: '#EF4444', bg: 'rgba(239,68,68,0.08)',  gradient: 'linear-gradient(135deg,#EF4444,#F97316)' },
-  lab:           { label: 'Laboratory',          color: '#8B5CF6', bg: 'rgba(139,92,246,0.08)', gradient: 'linear-gradient(135deg,#8B5CF6,#EC4899)' },
-  radiology:     { label: 'Radiology Dept',      color: '#6366F1', bg: 'rgba(99,102,241,0.08)', gradient: 'linear-gradient(135deg,#6366F1,#8B5CF6)' },
-  insurance:     { label: 'TPA & Insurance',     color: '#14B8A6', bg: 'rgba(20,184,166,0.08)', gradient: 'linear-gradient(135deg,#14B8A6,#0EA5E9)' },
-  inventory:     { label: 'Inventory Mgr',       color: '#D97706', bg: 'rgba(217,119,6,0.08)',  gradient: 'linear-gradient(135deg,#D97706,#EA580C)' },
-  pharmacy:      { label: 'Pharmacy',            color: '#EC4899', bg: 'rgba(236,72,153,0.08)', gradient: 'linear-gradient(135deg,#EC4899,#8B5CF6)' },
-  bed_manager:   { label: 'Admission Desk',      color: '#0891B2', bg: 'rgba(8,145,178,0.08)',  gradient: 'linear-gradient(135deg,#0891B2,#0EA5E9)' },
-  discharge:     { label: 'Discharge Desk',      color: '#059669', bg: 'rgba(5,150,105,0.08)',  gradient: 'linear-gradient(135deg,#059669,#10B981)' },
-  billing:       { label: 'Billing Dept',        color: '#B45309', bg: 'rgba(180,83,9,0.08)',   gradient: 'linear-gradient(135deg,#B45309,#D97706)' },
-  ot:            { label: 'Operation Theater',   color: '#DC2626', bg: 'rgba(220,38,38,0.08)',  gradient: 'linear-gradient(135deg,#DC2626,#9F1239)' },
-  housekeeping:  { label: 'Housekeeping',        color: '#7C3AED', bg: 'rgba(124,58,237,0.08)', gradient: 'linear-gradient(135deg,#7C3AED,#6366F1)' },
-  quality:       { label: 'Quality & Safety',    color: '#0D9488', bg: 'rgba(13,148,136,0.08)', gradient: 'linear-gradient(135deg,#0D9488,#0891B2)' },
-  blood_bank:    { label: 'Blood Bank',          color: '#DC2626', bg: 'rgba(220,38,38,0.08)',  gradient: 'linear-gradient(135deg,#DC2626,#B91C1C)' },
-  cssd:          { label: 'CSSD',               color: '#0D9488', bg: 'rgba(13,148,136,0.08)', gradient: 'linear-gradient(135deg,#0D9488,#0891B2)' },
-  dietary:       { label: 'Dietary Services',    color: '#16A34A', bg: 'rgba(22,163,74,0.08)',  gradient: 'linear-gradient(135deg,#16A34A,#0D9488)' },
-  bmw:           { label: 'Bio-Medical Waste',   color: '#D97706', bg: 'rgba(217,119,6,0.08)',  gradient: 'linear-gradient(135deg,#D97706,#B45309)' },
-  mortuary:      { label: 'Mortuary',            color: '#475569', bg: 'rgba(71,85,105,0.08)',  gradient: 'linear-gradient(135deg,#475569,#334155)' },
-  ambulance:     { label: 'Ambulance Svc.',      color: '#EA580C', bg: 'rgba(234,88,12,0.08)',  gradient: 'linear-gradient(135deg,#EA580C,#DC2626)' },
-  audit_officer: { label: 'Audit & Compliance',  color: '#4F46E5', bg: 'rgba(79,70,229,0.08)',  gradient: 'linear-gradient(135deg,#4F46E5,#7C3AED)' },
+// Single disciplined deep-blue identity shared by every portal (uniform per design
+// direction). Roles are distinguished by label + icon only — never by color.
+const ROLE_LABELS: Record<Role, string> = {
+  patient: 'Patient Portal',      doctor: 'Doctor Portal',       reception: 'Reception',
+  admin: 'Admin Portal',          nurse: 'Nursing Station',      emergency: 'Emergency Room',
+  lab: 'Laboratory',              radiology: 'Radiology Dept',   insurance: 'TPA & Insurance',
+  inventory: 'Inventory Mgr',     pharmacy: 'Pharmacy',          bed_manager: 'Admission Desk',
+  discharge: 'Discharge Desk',    billing: 'Billing Dept',       ot: 'Operation Theater',
+  housekeeping: 'Housekeeping',   quality: 'Quality & Safety',   blood_bank: 'Blood Bank',
+  cssd: 'CSSD',                   dietary: 'Dietary Services',   bmw: 'Bio-Medical Waste',
+  mortuary: 'Mortuary',           ambulance: 'Ambulance Svc.',   audit_officer: 'Audit & Compliance',
 }
+
+const BRAND = {
+  color: '#1E3A8A',
+  bg: 'rgba(30,58,138,0.07)',
+  gradient: 'linear-gradient(135deg,#1E3A8A,#2563EB)',
+} as const
+
+const roleConfig: Record<Role, { label: string; color: string; bg: string; gradient: string }> =
+  Object.fromEntries(
+    (Object.keys(ROLE_LABELS) as Role[]).map(r => [r, { label: ROLE_LABELS[r], ...BRAND }])
+  ) as Record<Role, { label: string; color: string; bg: string; gradient: string }>
 
 // Roles whose sidebar is rendered as grouped sections (with headers) instead of a flat list.
 const sectionsByRole: Partial<Record<Role, { header: string; items: NavItem[] }[]>> = {
@@ -451,9 +449,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="px-2.5 pb-4 flex flex-col gap-2 pt-3" style={{ borderTop: '1px solid rgba(15,23,42,0.05)' }}>
           {/* AI Status Chip */}
           {!collapsed && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'linear-gradient(135deg, #FAF5FF, #F5F3FF)', border: '1px solid rgba(139,92,246,0.10)' }}>
-              <Sparkles className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#7C3AED' }} />
-              <span className="text-[11px] font-semibold" style={{ color: '#7C3AED' }}>AI Active</span>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: 'linear-gradient(135deg, #F5F8FF, #F8FAFD)', border: '1px solid rgba(37,99,235,0.12)' }}>
+              <Sparkles className="h-3.5 w-3.5 flex-shrink-0" style={{ color: '#1E3A8A' }} />
+              <span className="text-[11px] font-semibold" style={{ color: '#1E3A8A' }}>AI Active</span>
               <div className="ml-auto h-1.5 w-1.5 rounded-full bg-green-500" style={{ boxShadow: '0 0 6px #22c55e' }} />
             </div>
           )}

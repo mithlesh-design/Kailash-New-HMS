@@ -7,7 +7,7 @@ import type { Patient, QueueStatus } from "@/store/usePatientStore"
 const statusConfig: Record<QueueStatus, { label: string; color: string; bg: string; border: string }> = {
   waiting:    { label: 'Waiting',    color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' },
   vitals:     { label: 'Vitals',     color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
-  consulting: { label: 'Consulting', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200' },
+  consulting: { label: 'Consulting', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
   pharmacy:   { label: 'Pharmacy',   color: 'text-teal-600', bg: 'bg-teal-50', border: 'border-teal-200' },
   billing:    { label: 'Billing',    color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
   done:       { label: 'Done',       color: 'text-slate-500', bg: 'bg-slate-100', border: 'border-slate-200' },

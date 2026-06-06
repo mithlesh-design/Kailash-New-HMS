@@ -16,7 +16,7 @@ const CATEGORY_COLOR: Record<NurseTaskCategory, string> = {
   Hygiene:       'text-cyan-600 bg-cyan-50 border-cyan-100',
   Mobility:      'text-amber-600 bg-amber-50 border-amber-100',
   Documentation: 'text-slate-600 bg-slate-50 border-slate-100',
-  Procedure:     'text-violet-600 bg-violet-50 border-violet-100',
+  Procedure:     'text-blue-600 bg-blue-50 border-blue-100',
 }
 
 export default function NurseTasksPage() {
@@ -72,7 +72,7 @@ export default function NurseTasksPage() {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className={`font-bold text-sm ${t.done ? 'text-slate-500 line-through' : 'text-[#0F172A]'}`}>{t.title}</p>
-          {t.source === 'ai' && <span className="inline-flex items-center gap-1 text-[9px] font-bold text-violet-700 bg-violet-50 border border-violet-100 px-1.5 py-0.5 rounded-full"><Sparkles className="h-2.5 w-2.5" /> AI</span>}
+          {t.source === 'ai' && <span className="inline-flex items-center gap-1 text-[9px] font-bold text-blue-700 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-full"><Sparkles className="h-2.5 w-2.5" /> AI</span>}
         </div>
         <p className="text-xs text-[#64748B] mt-0.5">{t.patientName}</p>
       </div>
@@ -97,7 +97,7 @@ export default function NurseTasksPage() {
               <AlertCircle className="h-4 w-4 text-red-600" /><span className="text-sm font-bold text-red-700">{high.length} urgent</span>
             </div>
           )}
-          <button onClick={buildAiTasks} className="flex items-center gap-1.5 text-sm font-bold text-violet-700 bg-violet-50 border border-violet-100 hover:bg-violet-100 px-3 py-2 rounded-xl cursor-pointer transition-colors">
+          <button onClick={buildAiTasks} className="flex items-center gap-1.5 text-sm font-bold text-blue-700 bg-blue-50 border border-blue-100 hover:bg-blue-100 px-3 py-2 rounded-xl cursor-pointer transition-colors">
             <Sparkles className="h-4 w-4" /> AI: build shift tasks
           </button>
           <button onClick={addManual} className="flex items-center gap-1.5 text-sm font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 px-3 py-2 rounded-xl cursor-pointer transition-colors">
@@ -137,11 +137,11 @@ export default function NurseTasksPage() {
           <button onClick={dictate} className="flex items-center gap-1.5 text-sm font-bold text-blue-700 bg-blue-50 border border-blue-100 hover:bg-blue-100 px-3 py-1.5 rounded-xl cursor-pointer transition-colors">
             <Mic className="h-4 w-4" /> Dictate
           </button>
-          <button onClick={structure} className="flex items-center gap-1.5 text-sm font-bold text-violet-700 bg-violet-50 border border-violet-100 hover:bg-violet-100 px-3 py-1.5 rounded-xl cursor-pointer transition-colors">
+          <button onClick={structure} className="flex items-center gap-1.5 text-sm font-bold text-blue-700 bg-blue-50 border border-blue-100 hover:bg-blue-100 px-3 py-1.5 rounded-xl cursor-pointer transition-colors">
             <Wand2 className="h-4 w-4" /> Structure with AI
           </button>
           <button onClick={saveNote} className="flex items-center gap-1.5 text-sm font-bold text-white px-4 py-1.5 rounded-xl cursor-pointer transition-all ml-auto"
-            style={{ background: 'linear-gradient(135deg,#16A34A,#0D9488)', boxShadow: '0 2px 8px rgba(22,163,74,0.25)' }}>
+            style={{ background: 'linear-gradient(135deg,#16A34A,#1E3A8A)', boxShadow: '0 2px 8px rgba(22,163,74,0.25)' }}>
             <CheckCircle2 className="h-4 w-4" /> Save to chart
           </button>
         </div>

@@ -177,7 +177,7 @@ export default function PatientBloodBankPage() {
             <span className="text-[12px] font-semibold text-green-600">Eligible</span>
           </div>
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50">
-            <span className="h-10 w-10 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0"><CalendarCheck className="h-5 w-5" /></span>
+            <span className="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0"><CalendarCheck className="h-5 w-5" /></span>
             <div className="flex-1"><p className="text-[14px] font-semibold text-slate-900">Last donation</p><p className="text-[12.5px] text-slate-500">12 Jan 2026 · next eligible now</p></div>
           </div>
         </div>

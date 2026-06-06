@@ -3,9 +3,10 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Search, ArrowRight, UserPlus, X, CheckCircle2, Volume2, Clock,
-  Activity, Sparkles, Stethoscope, Ambulance,
+  Activity, Sparkles, Stethoscope, Ambulance, AlertTriangle, UserCheck,
 } from "lucide-react"
-import { usePatientStore, type QueueStatus, type TriageLevel } from "@/store/usePatientStore"
+import { usePatientStore, type QueueStatus, type TriageLevel, type Patient } from "@/store/usePatientStore"
+import { computeQueueEta } from "@/lib/queueEta"
 import { OPD_ROOMS, doctorsForDept } from "@/lib/opd"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -91,7 +92,7 @@ const EMPTY_FORM: WalkInForm = {
 }
 
 export default function OpdQueuePage() {
-  const { patients, updateStatus, addPatient, sendToEmergency } = usePatientStore()
+  const { patients, updateStatus, addPatient, sendToEmergency, findByPhone } = usePatientStore()
   const currentUser = useAuthStore(s => s.currentUser)
   const actorName = currentUser?.name ?? 'Reception'
   const [search, setSearch]       = useState("")
@@ -103,6 +104,18 @@ export default function OpdQueuePage() {
 
   const suggestion = suggestTriage(form.symptoms)
   const todayISO = new Date().toISOString().slice(0, 10)
+
+  // Track A — dedup check-in. Match the typed phone against existing records
+  // so the clerk reuses known demographics instead of re-keying, and we catch
+  // accidental double-registration of someone already in today's queue.
+  const phoneDigits = form.phone.replace(/\D/g, '').slice(-10)
+  const existingMatch = phoneDigits.length === 10 ? findByPhone(phoneDigits)[0] : undefined
+  const activeToday = phoneDigits.length === 10
+    ? findByPhone(phoneDigits).find(p =>
+        ['waiting', 'vitals', 'consulting'].includes(p.queueStatus) && (p.registeredDate ?? todayISO) === todayISO)
+    : undefined
+  const prefillFromExisting = (p: Patient) =>
+    setForm(f => ({ ...f, name: p.name, age: String(p.age), gender: p.gender, department: p.department, doctor: p.doctor }))
 
   const filtered = patients.filter(p => {
     const matchToday = (p.registeredDate ?? todayISO) === todayISO  // live board = today's patients only
@@ -250,6 +263,7 @@ export default function OpdQueuePage() {
                     const triage = getTriageTheme(p.triageLevel)
                     const isNow = p.queueStatus === 'consulting'
                     const isDone = p.queueStatus === 'done'
+                    const eta = computeQueueEta(p, patients)
                     const nextLabel = NEXT_LABEL[p.queueStatus]
                     const canAnnounce = p.queueStatus === 'waiting' || p.queueStatus === 'vitals' || p.queueStatus === 'consulting'
 
@@ -263,7 +277,7 @@ export default function OpdQueuePage() {
                         transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                         className={cn(
                           "bg-white border shadow-sm rounded-xl p-3.5 hover:shadow-md transition-all flex flex-col gap-2 relative overflow-hidden",
-                          isNow ? "border-violet-200" : isDone ? "border-green-200 opacity-70" : "hover:border-slate-300"
+                          isNow ? "border-blue-200" : isDone ? "border-green-200 opacity-70" : "hover:border-slate-300"
                         )}
                       >
                         <div className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-xl", triage.bar)} />
@@ -272,7 +286,7 @@ export default function OpdQueuePage() {
                           <div className="flex items-center gap-2.5">
                             <div className={cn(
                               "h-8 w-8 rounded-xl flex items-center justify-center font-bold text-[12px] flex-shrink-0",
-                              isNow ? "bg-violet-50 text-violet-700 border border-violet-100" : "bg-slate-50 text-slate-700 border border-slate-100"
+                              isNow ? "bg-blue-50 text-blue-700 border border-blue-100" : "bg-slate-50 text-slate-700 border border-slate-100"
                             )}>#{p.token}</div>
                             <div>
                               <p className="text-[14px] font-bold text-slate-900 leading-tight">{p.name}</p>
@@ -291,7 +305,9 @@ export default function OpdQueuePage() {
                         {/* Meta: arrival, wait, vitals, doctor */}
                         <div className="ml-1.5 flex items-center gap-x-2.5 gap-y-1 flex-wrap text-[10.5px] font-medium text-slate-400">
                           <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {p.registeredAt}</span>
-                          {p.queueStatus === 'waiting' && p.estimatedWait > 0 && <span>~{p.estimatedWait}m wait</span>}
+                          {p.queueStatus === 'waiting' && (eta.nextUp
+                            ? <span className="text-green-600 font-semibold">Next up</span>
+                            : <span title={`${eta.positionAhead} patient(s) ahead`}>~{eta.etaMin}m wait · {eta.positionAhead} ahead</span>)}
                           {p.vitals
                             ? <span className="flex items-center gap-1 text-green-600 font-semibold"><Activity className="h-3 w-3" /> Vitals done</span>
                             : (p.queueStatus !== 'waiting' && <span className="flex items-center gap-1 text-amber-500 font-semibold"><Activity className="h-3 w-3" /> Vitals pending</span>)}
@@ -401,6 +417,28 @@ export default function OpdQueuePage() {
                     <Input id="wi-age" type="number" placeholder="Yrs" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} className="h-10 rounded-xl" min={1} max={120} />
                   </div>
                 </div>
+
+                {/* Track A — returning-patient dedup */}
+                {activeToday ? (
+                  <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 flex items-start gap-2" role="status">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                    <p className="text-[12px] text-amber-800">
+                      <b>{activeToday.name}</b> ({activeToday.id}) is already in today&apos;s queue — token #{activeToday.token}, {activeToday.queueStatus}. Avoid duplicate registration.
+                    </p>
+                  </div>
+                ) : existingMatch && (
+                  <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 flex items-center gap-2" role="status">
+                    <UserCheck className="h-4 w-4 text-emerald-600 flex-shrink-0" aria-hidden="true" />
+                    <p className="text-[12px] text-emerald-800 flex-1">
+                      Returning patient: <b>{existingMatch.name}</b> · {existingMatch.age}y · {existingMatch.id}
+                    </p>
+                    <button type="button" onClick={() => prefillFromExisting(existingMatch)}
+                      aria-label={`Use existing details for ${existingMatch.name}`}
+                      className="text-[11px] font-bold text-emerald-700 bg-white border border-emerald-200 rounded-lg px-2.5 py-1 hover:bg-emerald-100 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+                      Use details
+                    </button>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Gender</label>
                   <div className="flex gap-2">
@@ -417,12 +455,12 @@ export default function OpdQueuePage() {
 
                 {/* AI triage suggestion */}
                 {suggestion && form.symptoms.trim() && (
-                  <div className="rounded-xl bg-violet-50 border border-violet-100 p-3">
-                    <div className="flex items-center gap-1.5 mb-1"><Sparkles className="h-3.5 w-3.5 text-violet-600" /><span className="text-[12px] font-bold text-violet-900">AI triage suggestion</span></div>
-                    <p className="text-[12px] text-violet-800">Suggested <b>{suggestion.triage}</b> priority · <b>{suggestion.department}</b> — {suggestion.reason}</p>
+                  <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
+                    <div className="flex items-center gap-1.5 mb-1"><Sparkles className="h-3.5 w-3.5 text-blue-600" /><span className="text-[12px] font-bold text-blue-900">AI triage suggestion</span></div>
+                    <p className="text-[12px] text-blue-800">Suggested <b>{suggestion.triage}</b> priority · <b>{suggestion.department}</b> — {suggestion.reason}</p>
                     {(form.triage !== suggestion.triage || form.department !== suggestion.department) && (
                       <button onClick={() => setForm(f => ({ ...f, triage: suggestion.triage, department: suggestion.department, doctor: firstDoctorOf(suggestion.department) }))}
-                        className="mt-2 text-[12px] font-bold text-white bg-violet-600 hover:bg-violet-700 rounded-lg px-3 py-1.5 transition">Apply suggestion</button>
+                        className="mt-2 text-[12px] font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg px-3 py-1.5 transition">Apply suggestion</button>
                     )}
                   </div>
                 )}

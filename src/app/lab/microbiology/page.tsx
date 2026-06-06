@@ -28,7 +28,7 @@ const SOURCE_STYLE: Record<string, string> = {
   OPD: "bg-blue-50 text-blue-700",
   IPD: "bg-indigo-50 text-indigo-700",
   ICU: "bg-red-50 text-red-700",
-  OT:  "bg-purple-50 text-purple-700",
+  OT:  "bg-blue-50 text-blue-700",
   ER:  "bg-orange-50 text-orange-700",
 }
 
@@ -76,7 +76,7 @@ export default function LabMicrobiology() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-          <Activity className="h-6 w-6 text-violet-600" /> Microbiology
+          <Activity className="h-6 w-6 text-blue-600" /> Microbiology
         </h1>
         <p className="text-sm text-[#64748B] mt-1">Multi-day culture · Inoculated → Growth check → Identified → AST → Final · final report releases the test</p>
       </div>
@@ -85,7 +85,7 @@ export default function LabMicrobiology() {
         {PHASES.map(p => (
           <div key={p.code} className="rounded-xl bg-white ring-1 ring-slate-200/70 overflow-hidden">
             <div className="px-3 py-2.5 border-b border-slate-100 flex items-center gap-2 bg-slate-50/60">
-              <p.icon className="h-4 w-4 text-violet-600" />
+              <p.icon className="h-4 w-4 text-blue-600" />
               <h2 className="text-sm font-bold text-slate-800">{p.label}</h2>
               <span className="text-xs text-slate-400">{grouped[p.code].length}</span>
             </div>
@@ -129,7 +129,7 @@ function MicroCard(props: {
         <Stethoscope className="h-3 w-3" />{order.doctorName}
         {order.wardBed && <><span className="text-slate-300">·</span><Bed className="h-3 w-3" />{order.wardBed}</>}
       </p>
-      <p className="text-[12px] font-semibold text-violet-700 mt-1">{test.name}</p>
+      <p className="text-[12px] font-semibold text-blue-700 mt-1">{test.name}</p>
       <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
         <Clock className="h-3 w-3" />Day {micro.day} · {timeAgo(test.orderedAt)}
       </p>
@@ -150,7 +150,7 @@ function InoculatedActions({ onAdvance, onFinalize, day }: { onAdvance: (p: Part
     <div className="flex flex-wrap gap-1.5">
       <button onClick={() => onAdvance({ phase: "growth_check", day: day + 1, growth: "growth" })}
         className="text-[11px] font-bold text-white px-2.5 py-1 rounded-lg cursor-pointer"
-        style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)" }}>Growth detected</button>
+        style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)" }}>Growth detected</button>
       <button onClick={() => onFinalize(`No growth after ${(day + 1) * 24} hours of incubation`)}
         className="text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg cursor-pointer">No growth — finalise</button>
     </div>
@@ -161,9 +161,9 @@ function GrowthCheckActions({ onAdvance, onFinalize, day }: { onAdvance: (p: Par
   const [organism, setOrganism] = useState("")
   return (
     <div className="space-y-1.5">
-      <p className="text-[11px] font-semibold text-violet-700">Growth detected — identify organism</p>
+      <p className="text-[11px] font-semibold text-blue-700">Growth detected — identify organism</p>
       <input value={organism} onChange={e => setOrganism(e.target.value)} placeholder="e.g. E. coli"
-        className="w-full h-7 px-2 text-[11px] rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-200" />
+        className="w-full h-7 px-2 text-[11px] rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-200" />
       <div className="flex gap-1.5">
         <button onClick={() => {
             if (!organism.trim()) return
@@ -172,7 +172,7 @@ function GrowthCheckActions({ onAdvance, onFinalize, day }: { onAdvance: (p: Par
           }}
           disabled={!organism.trim()}
           className="text-[11px] font-bold text-white px-2.5 py-1 rounded-lg cursor-pointer disabled:opacity-50"
-          style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)" }}>Identify</button>
+          style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)" }}>Identify</button>
         <button onClick={() => onFinalize(`No significant growth identified — contaminant flora only`)}
           className="text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg cursor-pointer">No growth — finalise</button>
       </div>
@@ -211,7 +211,7 @@ function IdentifiedActions({ micro, onAdvance }: { micro: MicrobioResult; onAdva
       <button onClick={() => onAdvance({ phase: "ast", day: micro.day + 1 })}
         disabled={org.ast.length === 0}
         className="w-full text-[11px] font-bold text-white px-2.5 py-1 rounded-lg cursor-pointer disabled:opacity-50"
-        style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)" }}>Save AST → review</button>
+        style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)" }}>Save AST → review</button>
     </div>
   )
 }
@@ -249,11 +249,11 @@ function ASTActions({ micro, onAdvance, onFinalize }: { micro: MicrobioResult; o
         })}
       </div>
       <textarea value={report} onChange={e => setReport(e.target.value)} rows={3}
-        className="w-full text-[11px] rounded-md border border-slate-200 p-1.5 focus:outline-none focus:ring-2 focus:ring-violet-200"
+        className="w-full text-[11px] rounded-md border border-slate-200 p-1.5 focus:outline-none focus:ring-2 focus:ring-blue-200"
         placeholder="Final report" />
       <button onClick={() => onFinalize(report || `${org.name} isolated, AST as documented`)}
         className="w-full text-[11px] font-bold text-white px-2.5 py-1 rounded-lg cursor-pointer flex items-center justify-center gap-1"
-        style={{ background: "linear-gradient(135deg,#16A34A,#0D9488)" }}>
+        style={{ background: "linear-gradient(135deg,#16A34A,#1E3A8A)" }}>
         <FileText className="h-3 w-3" /> Save final report
       </button>
     </div>

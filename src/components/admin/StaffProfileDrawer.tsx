@@ -27,7 +27,7 @@ const STATUS_TINT: Record<StaffMember['status'], string> = {
 const SHIFT_DOT: Record<ShiftType, string> = {
   Morning: 'bg-amber-500',
   Evening: 'bg-blue-500',
-  Night:   'bg-violet-600',
+  Night:   'bg-blue-600',
   Off:     'bg-slate-200',
 }
 
@@ -175,7 +175,7 @@ export function StaffProfileDrawer({ staffId, onClose }: StaffProfileDrawerProps
           >
             {/* Header */}
             <div className="flex items-start gap-4 p-5 border-b border-slate-100">
-              <span className="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex items-center justify-center text-base font-bold flex-shrink-0">
+              <span className="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-500 text-white flex items-center justify-center text-base font-bold flex-shrink-0">
                 {initials}
               </span>
               <div className="flex-1 min-w-0">

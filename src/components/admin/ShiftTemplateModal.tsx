@@ -23,7 +23,7 @@ export interface ShiftTemplateModalProps {
 const SHIFT_TINT: Record<ShiftType, string> = {
   Morning: 'bg-amber-400',
   Evening: 'bg-blue-500',
-  Night:   'bg-violet-600',
+  Night:   'bg-blue-600',
   Off:     'bg-slate-200',
 }
 

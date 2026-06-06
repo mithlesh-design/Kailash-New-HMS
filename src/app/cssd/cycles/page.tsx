@@ -15,7 +15,7 @@ import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
 const METHOD_TINT: Record<SterilizationMethod, string> = {
   Autoclave: 'bg-rose-50 text-rose-700 ring-rose-200',
   ETO:       'bg-amber-50 text-amber-700 ring-amber-200',
-  Plasma:    'bg-violet-50 text-violet-700 ring-violet-200',
+  Plasma:    'bg-blue-50 text-blue-700 ring-blue-200',
   Chemical:  'bg-blue-50 text-blue-700 ring-blue-200',
 }
 

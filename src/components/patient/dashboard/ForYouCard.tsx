@@ -15,7 +15,7 @@ type Nudge = { icon: React.ElementType; tint: string; title: string; detail: str
 function nudgesFor(mode: LiveMode, stage: OpdStage): Nudge[] {
   if (mode === 'video') {
     if (stage === 'booked' || stage === 'waiting_room') return [
-      { icon: Video, tint: 'bg-violet-50 text-violet-600', title: 'Be ready for your video call', detail: 'Find a quiet, well-lit spot and test your camera & mic.', cta: 'Test camera & mic', priority: true },
+      { icon: Video, tint: 'bg-blue-50 text-blue-600', title: 'Be ready for your video call', detail: 'Find a quiet, well-lit spot and test your camera & mic.', cta: 'Test camera & mic', priority: true },
       { icon: Upload, tint: 'bg-blue-50 text-blue-600', title: 'Add your past reports', detail: 'Share old prescriptions or reports so your doctor is prepared.', cta: 'Upload reports' },
       { icon: Stethoscope, tint: 'bg-teal-50 text-teal-600', title: 'Answer a few questions', detail: 'A quick pre-consult helps your doctor make the most of the call.', cta: 'Start pre-consult' },
     ]
@@ -24,7 +24,7 @@ function nudgesFor(mode: LiveMode, stage: OpdStage): Nudge[] {
       { icon: FileText, tint: 'bg-blue-50 text-blue-600', title: 'Have your reports handy', detail: 'Share any document during the call if your doctor asks.', cta: 'My reports' },
     ]
     return [ // prescription / done
-      { icon: FileText, tint: 'bg-violet-50 text-violet-600', title: 'e-Prescription ready', detail: 'View your prescription and order medicines for home delivery.', cta: 'View & order', priority: true },
+      { icon: FileText, tint: 'bg-blue-50 text-blue-600', title: 'e-Prescription ready', detail: 'View your prescription and order medicines for home delivery.', cta: 'View & order', priority: true },
       { icon: Salad, tint: 'bg-green-50 text-green-600', title: 'Personalized diet plan', detail: 'AI-built for your concern, in your language.', cta: 'View diet plan' },
       { icon: CalendarClock, tint: 'bg-amber-50 text-amber-600', title: 'Book a follow-up', detail: 'Schedule your next check-in with the same doctor.', cta: 'Book follow-up' },
     ]
@@ -32,7 +32,7 @@ function nudgesFor(mode: LiveMode, stage: OpdStage): Nudge[] {
   // in-person
   if (stage === 'waiting' || stage === 'vitals') return [
     { icon: Activity, tint: 'bg-blue-50 text-blue-600', title: "We'll call you for vitals", detail: 'Keep your phone close — your live status updates right here.', cta: 'View live status', priority: true },
-    { icon: Upload, tint: 'bg-violet-50 text-violet-600', title: 'Add your past reports', detail: 'Share old prescriptions or lab reports with your doctor.', cta: 'Upload reports' },
+    { icon: Upload, tint: 'bg-blue-50 text-blue-600', title: 'Add your past reports', detail: 'Share old prescriptions or lab reports with your doctor.', cta: 'Upload reports' },
     { icon: MapPin, tint: 'bg-teal-50 text-teal-600', title: 'Find your way', detail: 'Directions to the vitals room and consultation.', cta: 'Hospital map' },
   ]
   if (stage === 'consulting') return [
@@ -40,7 +40,7 @@ function nudgesFor(mode: LiveMode, stage: OpdStage): Nudge[] {
     { icon: Upload, tint: 'bg-blue-50 text-blue-600', title: 'Add your past reports', detail: 'Share documents your doctor may need.', cta: 'Upload reports' },
   ]
   return [ // pharmacy / billing / done — results now exist
-    { icon: FlaskConical, tint: 'bg-violet-50 text-violet-600', title: 'Lab result ready — explained', detail: 'Your CBC was reviewed; we put it in plain language.', cta: 'See what it means', priority: true },
+    { icon: FlaskConical, tint: 'bg-blue-50 text-blue-600', title: 'Lab result ready — explained', detail: 'Your CBC was reviewed; we put it in plain language.', cta: 'See what it means', priority: true },
     { icon: FileText, tint: 'bg-blue-50 text-blue-600', title: 'e-Prescription ready', detail: 'Collect at the pharmacy or order home delivery.', cta: 'View prescription' },
     { icon: CalendarClock, tint: 'bg-amber-50 text-amber-600', title: 'Book a follow-up', detail: 'Stay on track with your care plan.', cta: 'Book follow-up' },
   ]
@@ -54,7 +54,7 @@ export function ForYouCard() {
   return (
     <div className="rounded-3xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] p-5">
       <div className="flex items-center gap-2 mb-3">
-        <Sparkles className="h-4.5 w-4.5 text-fuchsia-500" />
+        <Sparkles className="h-4.5 w-4.5 text-blue-500" />
         <h3 className="text-[15px] font-bold text-slate-900">For you</h3>
         <span className="text-[11px] font-semibold text-slate-400">AI-personalized · {mode === 'video' ? 'online' : 'in-person'}</span>
       </div>

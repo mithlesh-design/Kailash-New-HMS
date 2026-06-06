@@ -16,7 +16,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   Blue:     'bg-blue-100   text-blue-800   border-blue-200',
   Black:    'bg-slate-200  text-slate-800  border-slate-300',
   White:    'bg-slate-50   text-slate-700  border-slate-200',
-  Cytotoxic:'bg-purple-100 text-purple-800 border-purple-200',
+  Cytotoxic:'bg-blue-100 text-blue-800 border-blue-200',
 }
 
 const STATUS_BADGE: Record<string, { variant: "success" | "warning" | "danger" }> = {

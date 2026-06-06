@@ -80,7 +80,7 @@ export default function ReceptionSetup() {
         </div>
 
         <div className={CARD}>
-          <h3 className="text-[15px] font-bold text-slate-900 mb-1 flex items-center gap-2"><Volume2 className="h-4.5 w-4.5 text-violet-600" /> Queue & announcements</h3>
+          <h3 className="text-[15px] font-bold text-slate-900 mb-1 flex items-center gap-2"><Volume2 className="h-4.5 w-4.5 text-blue-600" /> Queue & announcements</h3>
           <div className="divide-y divide-slate-50">
             <Row icon={Volume2} title="Auto-announce next token" desc="Call the next patient automatically over the speaker" on={autoAnnounce} onToggle={() => setAutoAnnounce(v => !v)} />
             <Row icon={Settings} title="Print token slip on register" desc="Print a paper token when a walk-in is registered" on={printToken} onToggle={() => setPrintToken(v => !v)} />

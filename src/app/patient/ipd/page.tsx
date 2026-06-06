@@ -111,12 +111,12 @@ export default function IpdPage() {
       </div>
 
       {/* AI summary */}
-      <div className="rounded-3xl bg-violet-50 border border-violet-100 p-5">
+      <div className="rounded-3xl bg-blue-50 border border-blue-100 p-5">
         <div className="flex items-center gap-2 mb-2">
-          <span className="h-9 w-9 rounded-2xl bg-violet-100 flex items-center justify-center flex-shrink-0"><Sparkles className="h-4.5 w-4.5 text-violet-600" /></span>
-          <div><p className="text-[14px] font-bold text-violet-900">How you&apos;re doing</p><p className="text-[12px] text-violet-500">AI summary · in plain language</p></div>
+          <span className="h-9 w-9 rounded-2xl bg-blue-100 flex items-center justify-center flex-shrink-0"><Sparkles className="h-4.5 w-4.5 text-blue-600" /></span>
+          <div><p className="text-[14px] font-bold text-blue-900">How you&apos;re doing</p><p className="text-[12px] text-blue-500">AI summary · in plain language</p></div>
         </div>
-        <p className="text-[13.5px] text-violet-800 leading-relaxed">
+        <p className="text-[13.5px] text-blue-800 leading-relaxed">
           {insight.patientReassurance}{last ? ` At the last round, ${ip.admittingDoctor} noted: “${last.note}”.` : ''}
           {next ? ` Your next doctor round is expected around ${fmtTime(next.scheduledAt)}.` : ''}
         </p>
@@ -125,7 +125,7 @@ export default function IpdPage() {
       {/* Curated care timeline — every step, in plain language */}
       {timeline.length > 0 && (
         <div className="rounded-3xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] p-5">
-          <h3 className="text-[15px] font-bold text-slate-900 mb-1 flex items-center gap-2"><Activity className="h-4.5 w-4.5 text-violet-600" /> Your care timeline</h3>
+          <h3 className="text-[15px] font-bold text-slate-900 mb-1 flex items-center gap-2"><Activity className="h-4.5 w-4.5 text-blue-600" /> Your care timeline</h3>
           <p className="text-[12px] text-slate-500 mb-3">Everything happening in your care, explained simply.</p>
           <div className="space-y-3">
             {timeline.map(e => (

@@ -187,7 +187,7 @@ export default function CredentialsPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={sendBatchReminders}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-violet-50 hover:bg-violet-100 text-violet-700 cursor-pointer">
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 cursor-pointer">
             <Bell className="h-3.5 w-3.5" />Send reminders
           </button>
           <button onClick={exportCSV}

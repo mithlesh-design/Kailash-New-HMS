@@ -153,7 +153,7 @@ export default function HoursPage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <KPI label="Scheduled hours" value={`${totals.scheduled}h`} tint="bg-blue-50 border-blue-200 text-blue-700" />
-        <KPI label="Overtime hours" value={`${totals.overtime}h`} tint="bg-violet-50 border-violet-200 text-violet-700" />
+        <KPI label="Overtime hours" value={`${totals.overtime}h`} tint="bg-blue-50 border-blue-200 text-blue-700" />
         <KPI label="OT pay (₹)" value={`₹${totals.otPay.toLocaleString('en-IN')}`} tint="bg-emerald-50 border-emerald-200 text-emerald-700" />
         <KPI label="OT-risk staff" value={totals.atRisk} tint={totals.atRisk > 0 ? "bg-red-50 border-red-200 text-red-700" : "bg-slate-50 border-slate-200 text-slate-600"} />
       </div>
@@ -222,7 +222,7 @@ export default function HoursPage() {
                 </td>
                 <td className="px-4 py-3 text-xs text-slate-600">{r.staff.department}</td>
                 <td className="px-4 py-3 text-xs font-bold text-slate-800 tabular-nums">{r.scheduled}h</td>
-                <td className={cn('px-4 py-3 text-xs font-bold tabular-nums', r.overtime > 0 ? 'text-violet-700' : 'text-slate-400')}>{r.overtime}h</td>
+                <td className={cn('px-4 py-3 text-xs font-bold tabular-nums', r.overtime > 0 ? 'text-blue-700' : 'text-slate-400')}>{r.overtime}h</td>
                 <td className={cn('px-4 py-3 text-xs font-black tabular-nums', r.otRisk ? 'text-red-700' : 'text-slate-800')}>{r.total}h</td>
                 <td className="px-4 py-3 text-xs font-bold tabular-nums text-slate-700">
                   {r.otPay > 0 ? `₹${r.otPay.toLocaleString('en-IN')}` : '—'}

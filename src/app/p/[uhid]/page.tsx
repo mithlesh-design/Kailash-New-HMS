@@ -9,15 +9,19 @@
 // shows the same journey data the staff portal aggregates, in WhatsApp-style
 // chat-bubble format with patient-friendly language.
 
-import { use, useEffect, useMemo, useState } from "react"
+import { use, useEffect, useMemo, useState, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   Heart, Clock, Phone, Hospital, AlertTriangle, CheckCircle2,
   ClipboardList, Bed, Stethoscope, FlaskConical, ScanLine,
   ShieldCheck, LogOut, Building2, Activity, Ambulance, MessageCircle,
+  Lock,
 } from "lucide-react"
 import { usePatientStore } from "@/store/usePatientStore"
 import { useInpatientStore } from "@/store/useInpatientStore"
 import { useERStore } from "@/store/useERStore"
+import { useFamilyTokenStore } from "@/store/useFamilyTokenStore"
+import { validateFamilyToken } from "@/lib/familyToken"
 import { aggregateJourney, DEPT_COLOR, type Department, type JourneyEvent } from "@/lib/journeyAggregator"
 import { cn } from "@/lib/utils"
 
@@ -82,10 +86,40 @@ function groupByDate(events: JourneyEvent[]): { date: string; events: JourneyEve
   }))
 }
 
+// Centered card shell shared by every gate/loading state.
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">{children}</div>
+    </div>
+  )
+}
+
+function LoadingShell() {
+  return (
+    <Shell>
+      <Hospital className="h-12 w-12 text-emerald-600 mx-auto mb-3 motion-safe:animate-pulse" aria-hidden="true" />
+      <p className="text-sm text-slate-500">Loading secure tracking…</p>
+    </Shell>
+  )
+}
+
+// useSearchParams() must sit inside a Suspense boundary.
 export default function FamilyTrackPage({ params }: { params: Promise<{ uhid: string }> }) {
+  return (
+    <Suspense fallback={<LoadingShell />}>
+      <FamilyTrackInner params={params} />
+    </Suspense>
+  )
+}
+
+function FamilyTrackInner({ params }: { params: Promise<{ uhid: string }> }) {
   const { uhid } = use(params)
   // Up-case so /p/pt-44012 and /p/PT-44012 both work — matches SMS-link behavior.
   const upUhid = uhid.toUpperCase()
+  const router = useRouter()
+  // Access token from the SMS link (?t=…). Validated before any PHI renders.
+  const token = useSearchParams().get('t')
 
   // Live polling — re-aggregate every 10s so newly logged events appear.
   const [tick, setTick] = useState(0)
@@ -93,6 +127,23 @@ export default function FamilyTrackPage({ params }: { params: Promise<{ uhid: st
     const iv = setInterval(() => setTick(t => t + 1), 10_000)
     return () => clearInterval(iv)
   }, [])
+
+  const revoked = useFamilyTokenStore(s => s.revoked)
+  const activeRecord = useFamilyTokenStore(s => s.records[upUhid])
+  const validation = useMemo(
+    () => validateFamilyToken(token, upUhid, { revoked }),
+    [token, upUhid, revoked],
+  )
+
+  // Open a staff-issued link in place (the "resend secure link" affordance):
+  // navigates to the same page with the active, consented token attached.
+  const openWithToken = (t: string) => router.replace(`/p/${uhid}?t=${t}`)
+  const consentAndOpen = () => {
+    const fam = useFamilyTokenStore.getState()
+    const name = validation.payload?.name ?? activeRecord?.name ?? 'Patient'
+    const t = fam.grantConsent(upUhid) ?? fam.issue(upUhid, name, { consent: true })
+    openWithToken(t)
+  }
 
   const patient    = usePatientStore(s => s.patients.find(p => p.id === upUhid))
   const inpatient  = useInpatientStore(s => s.inpatients.find(i => i.patientId === upUhid))
@@ -123,21 +174,77 @@ export default function FamilyTrackPage({ params }: { params: Promise<{ uhid: st
     [events],
   )
 
+  // ── Access gate ─────────────────────────────────────────────────────────
+  // Validate the link's token BEFORE revealing any patient data — the UHID
+  // alone is not a credential. (Frontend pattern; a real backend enforces the
+  // same payload via HMAC + a route handler.)
+  if (!validation.ok) {
+    // A staff-issued, consented, still-valid link exists in this session —
+    // offer to open it (the "resend secure link" affordance). Validity
+    // (signature, expiry, consent, revocation) is checked via the lib.
+    const fallback = activeRecord
+      && validateFamilyToken(activeRecord.token, upUhid, { revoked }).ok
+      ? activeRecord
+      : undefined
+
+    if (validation.reason === 'no-consent') {
+      return (
+        <Shell>
+          <ShieldCheck className="h-12 w-12 text-emerald-600 mx-auto mb-3" />
+          <h1 className="text-xl font-bold text-slate-900">Consent needed</h1>
+          <p className="text-sm text-slate-500 mt-2">
+            Live tracking for <span className="font-bold">{validation.payload?.name ?? 'this patient'}</span> shares
+            ward, care-team and progress with whoever holds this link. Continue only if you are
+            the patient or an authorized family member.
+          </p>
+          <button onClick={consentAndOpen}
+            className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm">
+            <CheckCircle2 className="h-4 w-4" />I consent — show live status
+          </button>
+          <p className="text-[11px] text-slate-400 mt-3">Your consent is recorded. You can ask the hospital to revoke this link anytime.</p>
+        </Shell>
+      )
+    }
+
+    const expired = validation.reason === 'expired'
+    return (
+      <Shell>
+        <Lock className="h-12 w-12 text-amber-500 mx-auto mb-3" />
+        <h1 className="text-xl font-bold text-slate-900">{expired ? 'Link expired' : 'Secure link required'}</h1>
+        <p className="text-sm text-slate-500 mt-2">
+          {expired
+            ? 'This tracking link has expired for the patient’s privacy.'
+            : 'This page needs the secure link sent to you by SMS — the patient ID alone can’t open it.'}
+        </p>
+        {fallback ? (
+          <button onClick={() => openWithToken(fallback.token)}
+            className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm">
+            <ShieldCheck className="h-4 w-4" />Open secure view
+          </button>
+        ) : (
+          <a href="tel:+918012340000"
+            className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm">
+            <Phone className="h-4 w-4" />Ask hospital to resend link
+          </a>
+        )}
+        <p className="text-[11px] text-slate-400 mt-3 font-mono">{upUhid}</p>
+      </Shell>
+    )
+  }
+
   if (!patient && !inpatient && !erRecord) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
-          <Hospital className="h-12 w-12 text-emerald-600 mx-auto mb-3" />
-          <h1 className="text-xl font-bold text-slate-900">Kailash Healthcare</h1>
-          <p className="text-sm text-slate-500 mt-2">
-            Patient ID <span className="font-mono font-bold">{upUhid}</span> not found.
-            Check the link from your SMS — UHIDs look like <span className="font-mono">PT-XXXXX</span>.
-          </p>
-          <a href="tel:+918012340000" className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm">
-            <Phone className="h-4 w-4" />Call hospital
-          </a>
-        </div>
-      </div>
+      <Shell>
+        <Hospital className="h-12 w-12 text-emerald-600 mx-auto mb-3" />
+        <h1 className="text-xl font-bold text-slate-900">Kailash Healthcare</h1>
+        <p className="text-sm text-slate-500 mt-2">
+          Patient ID <span className="font-mono font-bold">{upUhid}</span> not found.
+          Check the link from your SMS — UHIDs look like <span className="font-mono">PT-XXXXX</span>.
+        </p>
+        <a href="tel:+918012340000" className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-sm">
+          <Phone className="h-4 w-4" />Call hospital
+        </a>
+      </Shell>
     )
   }
 
@@ -153,7 +260,7 @@ export default function FamilyTrackPage({ params }: { params: Promise<{ uhid: st
             <div className="flex-1 min-w-0">
               <p className="font-bold text-base truncate">{name}</p>
               <p className="text-[11px] opacity-90 truncate flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 motion-safe:animate-pulse" aria-hidden="true" />
                 {currentLocation}
               </p>
             </div>
@@ -169,10 +276,20 @@ export default function FamilyTrackPage({ params }: { params: Promise<{ uhid: st
       </div>
 
       <div className="max-w-md mx-auto p-3 space-y-3">
+        {/* Authorization banner — confirms this link is consented + time-boxed */}
+        {validation.ok && (
+          <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 flex items-center gap-2">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
+            <p className="text-[11px] text-emerald-800">
+              Tracking authorized · access expires {fmtDate(new Date(validation.payload.exp).toISOString())} {fmtTime(new Date(validation.payload.exp).toISOString())}
+            </p>
+          </div>
+        )}
+
         {/* Critical banner (recent only) */}
         {criticalEvent && (
-          <div className="rounded-xl bg-red-50 border border-red-200 p-3 flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
+          <div role="alert" className="rounded-xl bg-red-50 border border-red-200 p-3 flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <div className="flex-1 min-w-0">
               <p className="text-[12px] font-bold text-red-900">{publicTitle(criticalEvent.title)}</p>
               <p className="text-[11px] text-red-700 mt-0.5">If you have any concerns, please speak with the duty doctor at the nursing station.</p>
@@ -180,9 +297,9 @@ export default function FamilyTrackPage({ params }: { params: Promise<{ uhid: st
           </div>
         )}
 
-        {/* Latest status card */}
+        {/* Latest status card — announced to assistive tech as it updates */}
         {lastEvent && (
-          <div className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+          <div aria-live="polite" className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400 mb-1">
               <Activity className="h-3 w-3" />Latest update
             </div>
@@ -221,7 +338,7 @@ export default function FamilyTrackPage({ params }: { params: Promise<{ uhid: st
               <MessageCircle className="h-3.5 w-3.5 text-emerald-600" />Hospital updates
             </p>
           </div>
-          <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto" style={{ background: 'linear-gradient(180deg,#FAF7F0,#F5F0E5)' }}>
+          <div role="log" aria-label="Hospital updates timeline" className="p-4 space-y-3 max-h-[60vh] overflow-y-auto" style={{ background: 'linear-gradient(180deg,#FAF7F0,#F5F0E5)' }}>
             {events.length === 0 && (
               <p className="text-center text-xs text-slate-500 py-8">
                 You're registered. Updates will start appearing as your visit progresses.

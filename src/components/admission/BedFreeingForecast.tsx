@@ -38,7 +38,7 @@ interface BedPrediction {
 const WINDOW_BUCKETS: { key: Window; max: EtaHrs; label: string; tint: string }[] = [
   { key: 'now',  max: 0.5, label: 'Now / overdue', tint: 'border-emerald-300 bg-emerald-50 text-emerald-700' },
   { key: '2h',   max: 2,   label: 'Next 2h',        tint: 'border-blue-200 bg-blue-50 text-blue-700' },
-  { key: '4h',   max: 4,   label: '2-4h',           tint: 'border-violet-200 bg-violet-50 text-violet-700' },
+  { key: '4h',   max: 4,   label: '2-4h',           tint: 'border-blue-200 bg-blue-50 text-blue-700' },
   { key: '8h',   max: 8,   label: '4-8h',           tint: 'border-amber-200 bg-amber-50 text-amber-700' },
   { key: '24h',  max: 24,  label: '8-24h',          tint: 'border-slate-200 bg-slate-50 text-slate-600' },
 ]
@@ -161,14 +161,14 @@ export function BedFreeingForecast() {
   const totalNext24h = predictions.length
 
   return (
-    <div className="rounded-xl bg-white border border-violet-200 overflow-hidden"
-      style={{ background: "linear-gradient(135deg,rgba(139,92,246,0.04),rgba(236,72,153,0.03))" }}>
-      <div className="px-4 py-3 border-b border-violet-100 flex items-center justify-between flex-wrap gap-2">
+    <div className="rounded-xl bg-white border border-blue-200 overflow-hidden"
+      style={{ background: "linear-gradient(135deg,rgba(37,99,235,0.04),rgba(236,72,153,0.03))" }}>
+      <div className="px-4 py-3 border-b border-blue-100 flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-violet-600" />AI bed-freeing forecast
+          <Sparkles className="h-4 w-4 text-blue-600" />AI bed-freeing forecast
         </h2>
         <p className="text-[11px] text-slate-500">
-          <b className="text-violet-700">{totalNext4h}</b> beds expected free in next 4h ·
+          <b className="text-blue-700">{totalNext4h}</b> beds expected free in next 4h ·
           {' '}<b className="text-slate-700">{totalNext24h}</b> in next 24h
         </p>
       </div>

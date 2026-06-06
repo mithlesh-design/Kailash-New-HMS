@@ -72,8 +72,8 @@ export function DpdpSelfAuditPanel({ className }: { className?: string }) {
 
   return (
     <section className={`rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-sm overflow-hidden ${className ?? ''}`}>
-      <header className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-violet-50/60 to-indigo-50/40">
-        <Sparkles className="h-4 w-4 text-violet-600" />
+      <header className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-blue-50/60 to-indigo-50/40">
+        <Sparkles className="h-4 w-4 text-blue-600" />
         <h3 className="text-[14px] font-semibold text-slate-900">DPDP / DISHA Self-Audit</h3>
         <span className="text-[11px] text-slate-500">Five principles · live over audit trail</span>
         <span className={`ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wide ${TONE_STYLES[overallTone].badge}`}>
@@ -105,14 +105,14 @@ export function DpdpSelfAuditPanel({ className }: { className?: string }) {
                 <span className="ml-auto text-[10.5px] font-mono text-slate-500">{d.metric.value}{d.metric.unit ? ' ' + d.metric.unit : ''}</span>
               </div>
 
-              <ul className="text-[11.5px] text-slate-600 space-y-0.5 pl-3.5 list-disc marker:text-violet-400">
+              <ul className="text-[11.5px] text-slate-600 space-y-0.5 pl-3.5 list-disc marker:text-blue-400">
                 {d.drivers.map((line, i) => <li key={i}>{line}</li>)}
               </ul>
 
               <div className="rounded-lg bg-white/80 ring-1 ring-slate-200/70 px-2.5 py-2 mt-auto">
                 <p className="text-[10.5px] font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Recommended action</p>
                 <p className="text-[12px] text-slate-800 leading-snug flex items-start gap-1.5">
-                  <ArrowRight className="h-3 w-3 text-violet-500 mt-0.5 flex-shrink-0" /> {d.recommendation}
+                  <ArrowRight className="h-3 w-3 text-blue-500 mt-0.5 flex-shrink-0" /> {d.recommendation}
                 </p>
               </div>
 
@@ -126,7 +126,7 @@ export function DpdpSelfAuditPanel({ className }: { className?: string }) {
                       <X className="h-3 w-3" /> Dismiss
                     </button>
                     <button type="button" onClick={() => accept(d)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-violet-600 hover:bg-violet-700 text-white ml-auto">
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-blue-600 hover:bg-blue-700 text-white ml-auto">
                       <Check className="h-3 w-3" /> Action
                     </button>
                   </>

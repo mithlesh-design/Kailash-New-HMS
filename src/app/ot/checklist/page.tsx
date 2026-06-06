@@ -109,7 +109,7 @@ export default function OTCaseWorkflow() {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-            <ClipboardCheck className="h-6 w-6 text-purple-600" /> OT Case Workflow
+            <ClipboardCheck className="h-6 w-6 text-blue-600" /> OT Case Workflow
           </h1>
           <p className="text-sm text-[#64748B] mt-1">WHO Surgical Safety Checklist · pre-op clearance · anaesthesia chart · counts &amp; specimens · debrief</p>
         </div>
@@ -121,7 +121,7 @@ export default function OTCaseWorkflow() {
         {procedures.map(p => (
           <button key={p.id} onClick={() => setActiveId(p.id)}
             className={cn('text-[11px] font-bold px-3 py-1.5 rounded-lg cursor-pointer ring-1',
-              p.id === activeId ? 'bg-purple-600 text-white ring-purple-700' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50')}>
+              p.id === activeId ? 'bg-blue-600 text-white ring-blue-700' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50')}>
             {p.patientName} · {p.otRoom}
           </button>
         ))}
@@ -132,14 +132,14 @@ export default function OTCaseWorkflow() {
         <div>
           <p className="text-sm font-bold text-slate-900 flex items-center gap-2 flex-wrap">
             {active.patientName} <span className="text-[11px] font-bold text-slate-400">{active.patientAge}y</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-700">{active.otRoom}</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">{active.otRoom}</span>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">{active.status}</span>
             {active.bloodRequired && <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700">BLOOD RX</span>}
           </p>
           <p className="text-[12px] text-slate-500 mt-0.5 flex items-center gap-1">
             <Stethoscope className="h-3 w-3" />{active.surgeon} · anaesthetist {active.anaesthetist}
           </p>
-          <p className="text-[13px] font-bold text-purple-700 mt-1">{active.procedureName}</p>
+          <p className="text-[13px] font-bold text-blue-700 mt-1">{active.procedureName}</p>
         </div>
         <div className="text-right">
           <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Scheduled</p>
@@ -205,7 +205,7 @@ export default function OTCaseWorkflow() {
                   {phaseItems(phase).map(item => (
                     <label key={item.id} className="flex items-start gap-2 cursor-pointer group">
                       <input type="checkbox" checked={item.checked} onChange={() => checkWHO(active.id, item.id)}
-                        className="mt-0.5 accent-purple-600" />
+                        className="mt-0.5 accent-blue-600" />
                       <span className={cn('text-[13px] flex-1',
                         item.checked ? 'text-slate-500 line-through' : 'text-slate-800')}>
                         {item.label}
@@ -268,7 +268,7 @@ export default function OTCaseWorkflow() {
                             placeholder="e.g. Gallbladder for HPE"
                             className="flex-1 h-7 px-2 text-[11px] rounded-md border border-slate-200" />
                           <button onClick={onSpecimenAdd}
-                            className="text-[11px] font-bold text-white bg-purple-600 hover:bg-purple-700 px-2.5 py-1 rounded cursor-pointer">Log</button>
+                            className="text-[11px] font-bold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded cursor-pointer">Log</button>
                         </div>
                       </div>
 
@@ -305,7 +305,7 @@ export default function OTCaseWorkflow() {
       <div className="flex justify-end">
         <button onClick={onCompleteCase}
           className="flex items-center gap-1.5 text-sm font-bold text-white px-4 py-2 rounded-xl cursor-pointer"
-          style={{ background: 'linear-gradient(135deg,#16A34A,#0D9488)', boxShadow: '0 2px 8px rgba(22,163,74,0.25)' }}>
+          style={{ background: 'linear-gradient(135deg,#16A34A,#1E3A8A)', boxShadow: '0 2px 8px rgba(22,163,74,0.25)' }}>
           <CheckCircle className="h-4 w-4" />Complete case
         </button>
       </div>
@@ -323,8 +323,8 @@ function AnesthesiaPanel(props: {
   setTechnique: (t: 'GA' | 'Spinal' | 'Epidural' | 'CSE' | 'Regional' | 'MAC' | 'Local') => void
 }) {
   return (
-    <div className="rounded-lg bg-white ring-1 ring-purple-200 p-3 space-y-2">
-      <p className="text-[11px] font-bold uppercase tracking-wide text-purple-700 flex items-center gap-1"><Sparkles className="h-3 w-3" />Anaesthesia assessment</p>
+    <div className="rounded-lg bg-white ring-1 ring-blue-200 p-3 space-y-2">
+      <p className="text-[11px] font-bold uppercase tracking-wide text-blue-700 flex items-center gap-1"><Sparkles className="h-3 w-3" />Anaesthesia assessment</p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[12px]">
         <div>
           <label className="text-[10px] font-bold text-slate-500 block mb-0.5">ASA</label>
@@ -332,7 +332,7 @@ function AnesthesiaPanel(props: {
             {(['1','2','3','4','5','6'] as ASAClass[]).map(a => (
               <button key={a} onClick={() => props.setASA(a)}
                 className={cn('flex-1 text-[11px] font-bold px-1.5 py-1 rounded',
-                  props.asa === a ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}>{a}</button>
+                  props.asa === a ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}>{a}</button>
             ))}
           </div>
           {props.asa && <p className="text-[10px] text-slate-500 mt-1">{ASA_DESC[props.asa]}</p>}
@@ -343,7 +343,7 @@ function AnesthesiaPanel(props: {
             {([1,2,3,4] as Mallampati[]).map(m => (
               <button key={m} onClick={() => props.setMallampati(m)}
                 className={cn('flex-1 text-[11px] font-bold px-1.5 py-1 rounded',
-                  props.mallampati === m ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}>{m}</button>
+                  props.mallampati === m ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}>{m}</button>
             ))}
           </div>
         </div>

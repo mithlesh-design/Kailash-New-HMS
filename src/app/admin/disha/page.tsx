@@ -51,7 +51,7 @@ const ACTION_TINT: Record<DishaAction, string> = {
   disha_record_accessed:  'bg-blue-50 text-blue-700',
   disha_consent_captured: 'bg-emerald-50 text-emerald-700',
   disha_consent_revoked:  'bg-amber-50 text-amber-700',
-  disha_data_export:      'bg-violet-50 text-violet-700',
+  disha_data_export:      'bg-blue-50 text-blue-700',
   disha_rtbf_requested:   'bg-orange-50 text-orange-700',
   disha_rtbf_fulfilled:   'bg-emerald-50 text-emerald-700',
   disha_breach_logged:    'bg-red-50 text-red-700',

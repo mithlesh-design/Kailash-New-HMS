@@ -171,7 +171,7 @@ function VerificationPanel() {
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1.5">
                   <p className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
-                    <Sparkles className="h-3 w-3 text-purple-500" /> AI Approval Probability
+                    <Sparkles className="h-3 w-3 text-blue-500" /> AI Approval Probability
                   </p>
                   <span className={`text-sm font-black ${result.aiProbability > 75 ? 'text-green-700' : result.aiProbability > 50 ? 'text-amber-700' : 'text-red-700'}`}>
                     {result.aiProbability}%
@@ -253,7 +253,7 @@ export default function InsuranceDashboard() {
             { label: 'Cashless',     sub: 'Registered (intake)',  count: cashlessWalkIns + cashlessInpatients, color: 'border-amber-200 bg-amber-50',     icon: User,         fg: 'text-amber-700',   href: '/insurance/dashboard#monitor', cta: 'Monitor' },
             { label: 'Pre-auth',     sub: 'Pending insurer',      count: preAuthPending,                       color: 'border-orange-200 bg-orange-50',   icon: Hourglass,    fg: 'text-orange-700',  href: '/insurance/preauth',           cta: 'Draft' },
             { label: 'Approved',     sub: 'In stay · claim soon', count: preAuthApproved,                      color: 'border-blue-200 bg-blue-50',       icon: ShieldCheck,  fg: 'text-blue-700',    href: '/insurance/claims',            cta: 'Submit' },
-            { label: 'Submitted',    sub: 'Awaiting settlement',  count: claimSubmitted,                       color: 'border-violet-200 bg-violet-50',   icon: Send,         fg: 'text-violet-700',  href: '/insurance/claims',            cta: 'Track' },
+            { label: 'Submitted',    sub: 'Awaiting settlement',  count: claimSubmitted,                       color: 'border-blue-200 bg-blue-50',   icon: Send,         fg: 'text-blue-700',  href: '/insurance/claims',            cta: 'Track' },
             { label: 'Settled',      sub: 'Paid by insurer',      count: settled,                              color: 'border-emerald-200 bg-emerald-50', icon: CheckCircle2, fg: 'text-emerald-700', href: '/insurance/claims',            cta: 'Reconcile' },
             { label: 'Query',        sub: 'Insurer queries',      count: claims.filter(c => c.aiDenialRisk && c.aiDenialRisk.score >= 70 && c.status === 'In Process').length, color: 'border-red-200 bg-red-50', icon: AlertTriangle, fg: 'text-red-700', href: '/insurance/claims', cta: 'Reply' },
             { label: 'Denied',       sub: 'Claim rejected',       count: denied,                               color: 'border-slate-200 bg-slate-50',     icon: ShieldAlert,  fg: 'text-slate-600',   href: '/insurance/claims',            cta: 'Appeal' },

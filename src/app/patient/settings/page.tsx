@@ -112,28 +112,28 @@ export default function PatientSettings() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Globe className="h-4 w-4 text-violet-500" />
+            <Globe className="h-4 w-4 text-blue-500" />
             <p className="text-[14px] font-bold text-slate-900">Language</p>
           </div>
           <div className="space-y-1.5">
             {LOCALES.map((l) => (
               <button key={l.value} onClick={() => update('locale', l.value)}
-                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg ring-1 text-left transition cursor-pointer ${prefs.locale === l.value ? 'ring-violet-300 bg-violet-50 text-violet-800' : 'ring-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg ring-1 text-left transition cursor-pointer ${prefs.locale === l.value ? 'ring-blue-300 bg-blue-50 text-blue-800' : 'ring-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
                 <span className="flex-1 text-[13px] font-semibold">{l.label}</span>
-                {prefs.locale === l.value ? <span className="h-2 w-2 rounded-full bg-violet-600" /> : null}
+                {prefs.locale === l.value ? <span className="h-2 w-2 rounded-full bg-blue-600" /> : null}
               </button>
             ))}
           </div>
         </div>
         <div className="rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Clock className="h-4 w-4 text-violet-500" />
+            <Clock className="h-4 w-4 text-blue-500" />
             <p className="text-[14px] font-bold text-slate-900">Remind me</p>
           </div>
           <div className="grid grid-cols-2 gap-1.5">
             {[1, 4, 12, 24].map((hrs) => (
               <button key={hrs} onClick={() => update('reminderBeforeHrs', hrs as ReminderHrs)}
-                className={`px-3 py-2 rounded-lg ring-1 text-[12.5px] font-semibold transition cursor-pointer ${prefs.reminderBeforeHrs === hrs ? 'ring-violet-300 bg-violet-50 text-violet-800' : 'ring-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
+                className={`px-3 py-2 rounded-lg ring-1 text-[12.5px] font-semibold transition cursor-pointer ${prefs.reminderBeforeHrs === hrs ? 'ring-blue-300 bg-blue-50 text-blue-800' : 'ring-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
                 {hrs}h before
               </button>
             ))}

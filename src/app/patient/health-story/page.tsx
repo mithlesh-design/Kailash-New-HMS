@@ -12,7 +12,7 @@ const BP_TREND = [
 
 const TIMELINE = [
   { icon: Stethoscope, tint: 'bg-blue-50 text-blue-600', title: 'OPD consultation — Dr. Priya Nair', sub: 'Today · Chest tightness, breathlessness' },
-  { icon: FlaskConical, tint: 'bg-violet-50 text-violet-600', title: 'Lab: Complete Blood Count', sub: 'Today · Reviewed — mildly raised WBC' },
+  { icon: FlaskConical, tint: 'bg-blue-50 text-blue-600', title: 'Lab: Complete Blood Count', sub: 'Today · Reviewed — mildly raised WBC' },
   { icon: Pill, tint: 'bg-pink-50 text-pink-600', title: 'Prescription dispensed', sub: '20 Apr · Metformin, Cetirizine' },
   { icon: Stethoscope, tint: 'bg-blue-50 text-blue-600', title: 'Hypertension follow-up', sub: '05 Mar · BP controlled' },
 ]
@@ -26,7 +26,7 @@ function ScoreRing({ value }: { value: number }) {
       <svg viewBox="0 0 120 120" className="h-32 w-32 -rotate-90">
         <circle cx="60" cy="60" r={r} fill="none" stroke="#E2E8F0" strokeWidth="10" />
         <circle cx="60" cy="60" r={r} fill="none" stroke="url(#g)" strokeWidth="10" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={off} />
-        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#10B981" /><stop offset="100%" stopColor="#0EA5E9" /></linearGradient></defs>
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#10B981" /><stop offset="100%" stopColor="#2563EB" /></linearGradient></defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-[30px] font-bold text-slate-900 leading-none">{value}</span>
@@ -46,8 +46,8 @@ export default function HealthStoryPage() {
 
       {/* AI summary + health score */}
       <div className="grid md:grid-cols-3 gap-5">
-        <div className="md:col-span-2 rounded-3xl bg-gradient-to-br from-violet-50 to-fuchsia-50 border border-violet-100 p-5">
-          <div className="flex items-center gap-2 mb-2"><Sparkles className="h-4.5 w-4.5 text-fuchsia-500" /><span className="text-[13px] font-bold text-slate-900">AI summary of your health</span></div>
+        <div className="md:col-span-2 rounded-3xl bg-gradient-to-br from-blue-50 to-blue-50 border border-blue-100 p-5">
+          <div className="flex items-center gap-2 mb-2"><Sparkles className="h-4.5 w-4.5 text-blue-500" /><span className="text-[13px] font-bold text-slate-900">AI summary of your health</span></div>
           <p className="text-[14px] text-slate-700 leading-relaxed">
             Over the last 6 months your <b>blood pressure has steadily improved</b> (from 142/92 to 130/85) — your medication and lifestyle changes are working. Your <b>diabetes is borderline</b> and due for a 3-month check. Today&apos;s visit is for new chest symptoms, being treated as high priority. Keep up the BP routine and book your diabetes follow-up.
           </p>
@@ -70,7 +70,7 @@ export default function HealthStoryPage() {
               <YAxis tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} domain={[60, 160]} />
               <Tooltip />
               <Line type="monotone" dataKey="sys" name="Systolic" stroke="#2563EB" strokeWidth={2.5} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="dia" name="Diastolic" stroke="#0EA5E9" strokeWidth={2.5} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="dia" name="Diastolic" stroke="#2563EB" strokeWidth={2.5} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

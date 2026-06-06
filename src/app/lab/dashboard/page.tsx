@@ -155,9 +155,9 @@ export default function LabOverview() {
           <p className="text-sm text-[#64748B] mt-1">Incharge command center · pipeline by bench · critical-value SLA · AI exception triage</p>
         </div>
         <div className="flex gap-2">
-          <Link href="/lab/inbox" className="flex items-center gap-1.5 text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-3 py-2 rounded-xl"><ClipboardList className="h-3.5 w-3.5" />Open Inbox</Link>
+          <Link href="/lab/inbox" className="flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-xl"><ClipboardList className="h-3.5 w-3.5" />Open Inbox</Link>
           <Link href="/lab/benches" className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl"
-            style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" }}>
+            style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
             <Microscope className="h-3.5 w-3.5" />Open Benches</Link>
         </div>
       </div>
@@ -170,7 +170,7 @@ export default function LabOverview() {
       <div className="bg-white rounded-xl border border-slate-200 p-4">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-violet-600" />Sample-to-release journey
+            <Activity className="h-4 w-4 text-blue-600" />Sample-to-release journey
           </h2>
           <p className="text-[11px] text-slate-500">Order → collect → bench → enter → verify → release</p>
         </div>
@@ -178,7 +178,7 @@ export default function LabOverview() {
           {[
             { key: 'phleb', label: 'Phlebotomy', sub: 'Awaiting collection', count: m.kpis.awaiting, color: 'border-amber-200 bg-amber-50', icon: Droplet, fg: 'text-amber-700', href: '/lab/phlebotomy', cta: 'Call patient' },
             { key: 'analyzer', label: 'Analyzer feed', sub: 'On bench → auto-run', count: m.kpis.onBench, color: 'border-blue-200 bg-blue-50', icon: Microscope, fg: 'text-blue-700', href: '/lab/analyzer-feed', cta: 'Push results' },
-            { key: 'verify', label: 'Pathologist', sub: 'Pending verification', count: m.kpis.pendingVerify, color: 'border-violet-200 bg-violet-50', icon: ShieldCheck, fg: 'text-violet-700', href: '/lab/verify', cta: 'Sign off' },
+            { key: 'verify', label: 'Pathologist', sub: 'Pending verification', count: m.kpis.pendingVerify, color: 'border-blue-200 bg-blue-50', icon: ShieldCheck, fg: 'text-blue-700', href: '/lab/verify', cta: 'Sign off' },
             { key: 'released', label: 'Released', sub: 'Released today', count: m.kpis.releasedToday, color: 'border-emerald-200 bg-emerald-50', icon: Send, fg: 'text-emerald-700', href: '/lab/inbox', cta: 'View inbox' },
             { key: 'critical', label: 'Critical callback', sub: 'Awaiting callback', count: m.kpis.critPending, color: m.kpis.critPending > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: Phone, fg: m.kpis.critPending > 0 ? 'text-red-700' : 'text-slate-400', href: '/lab/dashboard#callback', cta: 'Log callback' },
           ].map((s, i, arr) => (
@@ -205,7 +205,7 @@ export default function LabOverview() {
         {[
           { label: "Awaiting collection", value: m.kpis.awaiting, icon: ClipboardList, fg: "text-amber-600", bg: "bg-amber-50" },
           { label: "On bench / in progress", value: m.kpis.onBench, icon: Microscope, fg: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Pending verification", value: m.kpis.pendingVerify, icon: Hourglass, fg: "text-violet-600", bg: "bg-violet-50" },
+          { label: "Pending verification", value: m.kpis.pendingVerify, icon: Hourglass, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Critical pending callback", value: m.kpis.critPending, icon: Phone, fg: "text-red-600", bg: "bg-red-50" },
           { label: "Released today", value: m.kpis.releasedToday, icon: PackageCheck, fg: "text-emerald-600", bg: "bg-emerald-50" },
           { label: "TAT breaches", value: m.kpis.tatBreaches, icon: AlertTriangle, fg: "text-orange-600", bg: "bg-orange-50", action: escalateTatBreaches, actionLabel: "Escalate" },
@@ -240,7 +240,7 @@ export default function LabOverview() {
                       {counts.awaiting_collection > 0 && <p className="text-[10px] text-slate-500"><b>{counts.awaiting_collection}</b> awaiting</p>}
                       {(counts.on_bench + counts.collected) > 0 && <p className="text-[10px] text-amber-600"><b>{counts.on_bench + counts.collected}</b> on bench</p>}
                       {counts.in_progress > 0 && <p className="text-[10px] text-blue-600"><b>{counts.in_progress}</b> in progress</p>}
-                      {counts.entered > 0 && <p className="text-[10px] text-violet-600"><b>{counts.entered}</b> pending verify</p>}
+                      {counts.entered > 0 && <p className="text-[10px] text-blue-600"><b>{counts.entered}</b> pending verify</p>}
                       {counts.verified > 0 && <p className="text-[10px] text-emerald-600"><b>{counts.verified}</b> pending release</p>}
                     </div>
                   </div>
@@ -274,7 +274,7 @@ export default function LabOverview() {
                       {callbackId === test.id ? (
                         <div className="flex items-center gap-2 flex-wrap">
                           <input value={callbackTo} onChange={e => setCallbackTo(e.target.value)} placeholder={`Call ${order.doctorName}…`}
-                            className="w-40 h-7 px-2 text-[11px] rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-200" />
+                            className="w-40 h-7 px-2 text-[11px] rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-200" />
                           <button onClick={() => onLogCallback(test.id, order.patientName)}
                             className="text-[11px] font-bold text-white bg-red-600 hover:bg-red-700 px-2.5 py-1 rounded-lg cursor-pointer">Confirm log</button>
                           <button onClick={() => { setCallbackId(null); setCallbackTo("") }}
@@ -295,18 +295,18 @@ export default function LabOverview() {
             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Hourglass className="h-4 w-4 text-violet-600" />
+                  <Hourglass className="h-4 w-4 text-blue-600" />
                   <h2 className="text-sm font-bold text-slate-800">Pending verification</h2>
                   <span className="text-xs text-slate-400">{m.entered.length}</span>
                 </div>
-                <Link href="/lab/benches" className="text-xs font-bold text-violet-700 hover:underline flex items-center gap-1">Open Benches <ArrowRight className="h-3 w-3" /></Link>
+                <Link href="/lab/benches" className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1">Open Benches <ArrowRight className="h-3 w-3" /></Link>
               </div>
               <div className="divide-y divide-slate-100">
                 {m.entered.slice(0, 5).map(({ order, test }) => (
                   <div key={test.id} className="px-4 py-2.5 text-sm">
                     <span className="font-bold text-slate-800">{order.patientName}</span>
                     <span className="text-slate-400 mx-2">·</span>
-                    <span className="text-violet-700">{test.name}</span>
+                    <span className="text-blue-700">{test.name}</span>
                     <span className="text-slate-400 mx-2">·</span>
                     <span className="text-[11px] text-slate-500">entered by {test.enteredBy?.name ?? "—"}</span>
                   </div>
@@ -329,7 +329,7 @@ export default function LabOverview() {
                     <div key={name}>
                       <p className="text-xs text-slate-600 flex items-center justify-between"><span>{name}</span><b>{n}</b></p>
                       <div className="h-1.5 mt-1 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-violet-500" style={{ width: `${(n / maxLoad) * 100}%` }} />
+                        <div className="h-full bg-blue-500" style={{ width: `${(n / maxLoad) * 100}%` }} />
                       </div>
                     </div>
                   ))}
@@ -358,20 +358,20 @@ export default function LabOverview() {
             )}
           </div>
 
-          <div className="rounded-xl border border-violet-200 p-4" style={{ background: "linear-gradient(135deg,rgba(139,92,246,0.06),rgba(236,72,153,0.04))" }}>
-            <h2 className="text-sm font-bold flex items-center gap-2 mb-2 text-violet-800"><Sparkles className="h-4 w-4 text-violet-600" />AI exception triage</h2>
+          <div className="rounded-xl border border-blue-200 p-4" style={{ background: "linear-gradient(135deg,rgba(37,99,235,0.06),rgba(236,72,153,0.04))" }}>
+            <h2 className="text-sm font-bold flex items-center gap-2 mb-2 text-blue-800"><Sparkles className="h-4 w-4 text-blue-600" />AI exception triage</h2>
             {m.overOverdue.length === 0 && m.repeatCriticals.length === 0 ? (
               <p className="text-xs text-slate-500">No exceptions. Pipeline is healthy.</p>
             ) : (
               <div className="space-y-2 text-xs">
                 {m.overOverdue.map(({ order, test }) => (
-                  <p key={test.id} className="text-violet-700">
+                  <p key={test.id} className="text-blue-700">
                     <Clock className="h-3 w-3 inline -mt-0.5 mr-1" />
                     <b>{order.patientName}</b> · {test.name} · <b>{minsElapsed(test.orderedAt)}m</b> elapsed (TAT {test.expectedTATmin}m) — likely stuck
                   </p>
                 ))}
                 {m.repeatCriticals.map(([patient, n]) => (
-                  <p key={patient} className="text-violet-700">
+                  <p key={patient} className="text-blue-700">
                     <Activity className="h-3 w-3 inline -mt-0.5 mr-1" />
                     <b>{patient}</b> — {n} critical results today, repeat delta-check recommended
                   </p>
@@ -381,8 +381,8 @@ export default function LabOverview() {
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 flex items-center gap-1.5"><CheckCircle className="h-3 w-3 text-emerald-500" />Reflex queue: <Link href="/lab/reflex" className="font-bold text-violet-700 hover:underline">open</Link></p>
-            <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1"><FlaskConical className="h-3 w-3 text-violet-500" />Microbiology: <Link href="/lab/microbiology" className="font-bold text-violet-700 hover:underline">open</Link></p>
+            <p className="text-xs text-slate-500 flex items-center gap-1.5"><CheckCircle className="h-3 w-3 text-emerald-500" />Reflex queue: <Link href="/lab/reflex" className="font-bold text-blue-700 hover:underline">open</Link></p>
+            <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1"><FlaskConical className="h-3 w-3 text-blue-500" />Microbiology: <Link href="/lab/microbiology" className="font-bold text-blue-700 hover:underline">open</Link></p>
           </div>
         </div>
       </div>

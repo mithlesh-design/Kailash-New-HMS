@@ -140,7 +140,7 @@ export function SurgeryPanel({ ip }: { ip: Inpatient }) {
         <button onClick={() => { advanceSurgery(ip.patientId); toast.success('Patient sent to OT') }} className="h-9 px-3.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12.5px] font-bold flex items-center gap-1.5">Send to OT <ArrowRight className="h-3.5 w-3.5" /></button>
       )}
       {sg.status === 'in_ot' && (
-        <button onClick={() => { advanceSurgery(ip.patientId); toast.success('Moved to recovery') }} className="h-9 px-3.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-[12.5px] font-bold flex items-center gap-1.5">Move to recovery <ArrowRight className="h-3.5 w-3.5" /></button>
+        <button onClick={() => { advanceSurgery(ip.patientId); toast.success('Moved to recovery') }} className="h-9 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[12.5px] font-bold flex items-center gap-1.5">Move to recovery <ArrowRight className="h-3.5 w-3.5" /></button>
       )}
       {sg.status === 'recovery' && (
         <div className="space-y-2">

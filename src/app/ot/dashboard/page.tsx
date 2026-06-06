@@ -172,7 +172,7 @@ function IPDBriefPanel({ proc }: { proc: OTProcedure }) {
               setReqDesc('')
             }}
             className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white rounded-lg cursor-pointer transition-all"
-            style={{ background: 'linear-gradient(135deg,#2563EB,#0891B2)' }}
+            style={{ background: 'linear-gradient(135deg,#2563EB,#2563EB)' }}
           >
             <Plus className="h-3.5 w-3.5" /> Dispatch
           </button>
@@ -186,7 +186,7 @@ const STATUS_COLOR: Record<string, string> = {
   Scheduled:     'bg-slate-100 text-slate-700 border-slate-200',
   'Pre-Op':      'bg-amber-50 text-amber-700 border-amber-200',
   'In Progress': 'bg-blue-50 text-blue-700 border-blue-200',
-  Recovery:      'bg-purple-50 text-purple-700 border-purple-200',
+  Recovery:      'bg-blue-50 text-blue-700 border-blue-200',
   Completed:     'bg-green-50 text-green-700 border-green-200',
 }
 
@@ -272,7 +272,7 @@ export default function OTDashboard() {
       <div className="bg-white rounded-xl border border-slate-200 p-4">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-purple-600" />OT patient journey
+            <Activity className="h-4 w-4 text-blue-600" />OT patient journey
           </h2>
           <p className="text-[11px] text-slate-500">
             Booking → PAC → Pre-op → WHO Sign-In → In progress → Sign-Out → Recovery → Ward
@@ -282,7 +282,7 @@ export default function OTDashboard() {
           {[
             { label: 'Scheduled',    sub: `${pacPending} need PAC`,  count: scheduled.length, color: 'border-amber-200 bg-amber-50',     icon: Calendar,         fg: 'text-amber-700',     href: '/ot/schedule',  cta: 'View schedule' },
             { label: 'PAC done',     sub: 'ASA · M · NPO set',       count: pacDone,          color: 'border-blue-200 bg-blue-50',       icon: Stethoscope,      fg: 'text-blue-700',      href: '/ot/checklist', cta: 'Open PAC' },
-            { label: 'Pre-op',       sub: `${whoOpen} WHO pending`,  count: preOp.length,     color: 'border-violet-200 bg-violet-50',   icon: ClipboardCheck,   fg: 'text-violet-700',    href: '/ot/checklist', cta: 'Sign-In' },
+            { label: 'Pre-op',       sub: `${whoOpen} WHO pending`,  count: preOp.length,     color: 'border-blue-200 bg-blue-50',   icon: ClipboardCheck,   fg: 'text-blue-700',    href: '/ot/checklist', cta: 'Sign-In' },
             { label: 'In progress',  sub: 'Time-Out → Sign-Out',     count: inProgress.length,color: 'border-pink-200 bg-pink-50',       icon: Heart,            fg: 'text-pink-700',      href: '/ot/checklist', cta: 'Track' },
             { label: 'Recovery',     sub: 'PACU monitoring',         count: recovery.length,  color: 'border-cyan-200 bg-cyan-50',       icon: Wind,             fg: 'text-cyan-700',      href: '/ot/checklist', cta: 'Debrief' },
             { label: 'Completed',    sub: 'Ward transfer',           count: completed.length, color: 'border-emerald-200 bg-emerald-50', icon: LogOut,           fg: 'text-emerald-700',   href: '/ot/dashboard', cta: 'Archive' },
@@ -345,7 +345,7 @@ export default function OTDashboard() {
                       <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.asa ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-400')}>
                         ASA {a?.asa ?? '—'}
                       </span>
-                      <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.mallampati ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white border-slate-200 text-slate-400')}>
+                      <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.mallampati ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-400')}>
                         M {a?.mallampati ?? '—'}
                       </span>
                       <span className={cn("font-bold px-1.5 py-0.5 rounded border", a?.npoSince ? 'bg-cyan-50 border-cyan-200 text-cyan-700' : 'bg-white border-slate-200 text-slate-400')}>

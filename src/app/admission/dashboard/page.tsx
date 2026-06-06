@@ -66,10 +66,10 @@ function BundlePanel({ req }: { req: AdmissionRequest }) {
           <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1"><Pill className="h-3 w-3" /> Prescriptions ({b.prescriptions.length})</p>
           <div className="space-y-1.5">
             {b.prescriptions.map((p, i) => (
-              <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: '#F5F3FF', border: '1px solid #DDD6FE' }}>
-                <div className="h-1.5 w-1.5 rounded-full bg-purple-500 flex-shrink-0" />
-                <span className="text-xs font-semibold text-purple-900">{p.medicine}</span>
-                <span className="text-[10px] text-purple-600 ml-auto">{p.dosage} · {p.duration}</span>
+              <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: '#F5F8FF', border: '1px solid #DBEAFE' }}>
+                <div className="h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                <span className="text-xs font-semibold text-blue-900">{p.medicine}</span>
+                <span className="text-[10px] text-blue-600 ml-auto">{p.dosage} · {p.duration}</span>
               </div>
             ))}
           </div>
@@ -177,7 +177,7 @@ export default function AdmissionDashboard() {
             { label: 'Pending',   sub: 'Awaiting bed',     count: pending.length,        color: 'border-orange-200 bg-orange-50',   icon: Hourglass,    fg: 'text-orange-700',   href: '/admission/dashboard', cta: 'Assign' },
             { label: 'Assigned',  sub: 'Awaiting arrival', count: assignedReqs,          color: 'border-amber-200 bg-amber-50',     icon: UserCheck,    fg: 'text-amber-700',    href: '/admission/dashboard', cta: 'Mark arrived' },
             { label: 'Admitted',  sub: 'Today',            count: admittedTodayCount,    color: 'border-blue-200 bg-blue-50',       icon: CheckCircle2, fg: 'text-blue-700',     href: '/admission/dashboard', cta: 'Review' },
-            { label: 'Occupied',  sub: 'On wards',         count: occupiedBeds.length,   color: 'border-violet-200 bg-violet-50',   icon: Bed,          fg: 'text-violet-700',   href: '/admission/beds',      cta: 'Bed board' },
+            { label: 'Occupied',  sub: 'On wards',         count: occupiedBeds.length,   color: 'border-blue-200 bg-blue-50',   icon: Bed,          fg: 'text-blue-700',   href: '/admission/beds',      cta: 'Bed board' },
             { label: 'Cleaning',  sub: 'Turning over',     count: cleaningBeds.length,   color: 'border-yellow-200 bg-yellow-50',   icon: Wrench,       fg: 'text-yellow-700',   href: '/admission/beds',      cta: 'Track' },
             { label: 'Available', sub: 'Ready now',        count: availableBeds.length,  color: 'border-emerald-200 bg-emerald-50', icon: Activity,     fg: 'text-emerald-700',  href: '/admission/beds',      cta: 'Allocate' },
           ].map((s, i, arr) => (
@@ -262,7 +262,7 @@ export default function AdmissionDashboard() {
                       {req.bundle && (
                         <button
                           onClick={e => { e.stopPropagation(); setBundleViewId(bundleViewId === req.id ? null : req.id) }}
-                          className="p-1.5 rounded-lg text-purple-500 hover:bg-purple-50 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
                           title="View admission bundle"
                         >
                           <FileText className="h-4 w-4" />
@@ -285,7 +285,7 @@ export default function AdmissionDashboard() {
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden border-t border-purple-100"
+                        className="overflow-hidden border-t border-blue-100"
                         style={{ background: '#FAFAFE' }}
                       >
                         <BundlePanel req={req} />
@@ -346,11 +346,11 @@ export default function AdmissionDashboard() {
           {selectedReq ? (
             <div className="p-4 space-y-3">
               {/* AI recommendation banner */}
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-purple-50 border border-purple-100">
-                <Sparkles className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
+                <Sparkles className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-xs font-bold text-purple-900">AI Bed Recommendation</p>
-                  <p className="text-xs text-purple-700 mt-0.5">
+                  <p className="text-xs font-bold text-blue-900">AI Bed Recommendation</p>
+                  <p className="text-xs text-blue-700 mt-0.5">
                     {matchingBeds.length > 0
                       ? `Best match: Bed ${matchingBeds[0].bedNumber} (${matchingBeds[0].ward}, ${matchingBeds[0].floor} floor)`
                       : `No exact match for ${selectedReq.admissionType}. Check all available beds.`}
@@ -410,7 +410,7 @@ export default function AdmissionDashboard() {
                     Available: 'bg-green-100 text-green-700 border-green-200',
                     Occupied: 'bg-blue-100 text-blue-700 border-blue-200',
                     Cleaning: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                    Reserved: 'bg-purple-100 text-purple-700 border-purple-200',
+                    Reserved: 'bg-blue-100 text-blue-700 border-blue-200',
                     Maintenance: 'bg-red-100 text-red-700 border-red-200',
                   }
                   return (

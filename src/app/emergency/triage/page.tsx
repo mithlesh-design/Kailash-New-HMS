@@ -45,7 +45,7 @@ const ARRIVAL_LABEL: Record<Arrival, string> = {
 const ARRIVAL_STYLE: Record<Arrival, string> = {
   walk_in: 'bg-blue-50 text-blue-700',
   ambulance: 'bg-red-50 text-red-700',
-  transfer: 'bg-violet-50 text-violet-700',
+  transfer: 'bg-blue-50 text-blue-700',
 }
 
 const minsSince = (iso: string) => Math.round((Date.now() - new Date(iso).getTime()) / 60000)
@@ -423,7 +423,7 @@ function TriageRow(props: {
                   Imaging
                 </button>
                 <button onClick={props.onOrderRx}
-                  className="text-[11px] font-semibold px-2 py-1 rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 cursor-pointer">
+                  className="text-[11px] font-semibold px-2 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 cursor-pointer">
                   ER Rx
                 </button>
               </div>
@@ -454,8 +454,8 @@ function TriageRow(props: {
                 </div>
               )}
               {(draftSuggestion ?? suggestion) && (
-                <div className={cn('rounded-lg p-2.5 ring-1', 'ring-violet-200 bg-violet-50')}>
-                  <p className="text-[11px] font-bold text-violet-700 flex items-center gap-1">AI ESI suggestion</p>
+                <div className={cn('rounded-lg p-2.5 ring-1', 'ring-blue-200 bg-blue-50')}>
+                  <p className="text-[11px] font-bold text-blue-700 flex items-center gap-1">AI ESI suggestion</p>
                   <p className="text-lg font-bold text-slate-900 mt-0.5">ESI {(draftSuggestion ?? suggestion)!.level}</p>
                   <p className="text-[10px] text-slate-500 line-clamp-2">{(draftSuggestion ?? suggestion)!.reason}</p>
                 </div>

@@ -251,7 +251,7 @@ export default function IncidentsPage() {
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mt-2">
                           <div className="flex items-center gap-2 mb-1.5">
                             <button onClick={() => setResolveNote(capaTemplate())}
-                              className="text-[10.5px] font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 px-2 py-0.5 rounded cursor-pointer">
+                              className="text-[10.5px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-0.5 rounded cursor-pointer">
                               Insert CAPA template
                             </button>
                             <span className="text-[10px] text-slate-400">Corrective + preventive action · NABH CQI</span>

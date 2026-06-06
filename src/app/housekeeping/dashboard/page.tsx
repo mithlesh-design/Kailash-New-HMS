@@ -180,7 +180,7 @@ export default function HousekeepingDashboard() {
                         </Button>
                       )}
                       {task.status === 'In Progress' && (
-                        <label className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md bg-violet-50 hover:bg-violet-100 text-violet-700 text-[11px] font-semibold cursor-pointer border border-violet-200">
+                        <label className="inline-flex items-center gap-1 h-8 px-2.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-semibold cursor-pointer border border-blue-200">
                           📷 Photo + Done
                           <input type="file" accept="image/*" capture="environment" className="hidden"
                             onChange={(e) => {

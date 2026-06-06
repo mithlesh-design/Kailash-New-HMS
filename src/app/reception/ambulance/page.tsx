@@ -14,7 +14,7 @@ const VEHICLE_STATUS: Record<string, { label: string; tint: string; dot: string 
   out_of_service: { label: 'Out of service', tint: 'bg-slate-100 text-slate-500', dot: 'bg-slate-400' },
 }
 const TRIP_TINT: Record<string, string> = {
-  dispatched: 'bg-amber-50 text-amber-700', en_route: 'bg-blue-50 text-blue-700', at_scene: 'bg-violet-50 text-violet-700',
+  dispatched: 'bg-amber-50 text-amber-700', en_route: 'bg-blue-50 text-blue-700', at_scene: 'bg-blue-50 text-blue-700',
   transporting: 'bg-indigo-50 text-indigo-700', completed: 'bg-green-50 text-green-700', cancelled: 'bg-slate-100 text-slate-500',
 }
 

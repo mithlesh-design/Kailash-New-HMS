@@ -58,7 +58,7 @@ const STAGE_META: Record<CashlessStage, {
   registered:        { label: 'Registered',       tint: 'border-amber-200 bg-amber-50 text-amber-700',       icon: User,        order: 1, sub: 'Awaiting pre-auth draft' },
   pre_auth_pending:  { label: 'Pre-auth pending', tint: 'border-orange-200 bg-orange-50 text-orange-700',    icon: Hourglass,   order: 2, sub: 'Drafted, awaiting insurer' },
   pre_auth_approved: { label: 'Pre-auth approved',tint: 'border-blue-200 bg-blue-50 text-blue-700',          icon: ShieldCheck, order: 3, sub: 'In stay · final claim pending' },
-  claim_submitted:   { label: 'Claim submitted',  tint: 'border-violet-200 bg-violet-50 text-violet-700',    icon: Send,        order: 4, sub: 'Awaiting settlement' },
+  claim_submitted:   { label: 'Claim submitted',  tint: 'border-blue-200 bg-blue-50 text-blue-700',    icon: Send,        order: 4, sub: 'Awaiting settlement' },
   queried:           { label: 'Query',            tint: 'border-red-200 bg-red-50 text-red-700',             icon: AlertTriangle,order: 5,sub: 'Insurer needs reply' },
   settled:           { label: 'Settled',          tint: 'border-emerald-200 bg-emerald-50 text-emerald-700', icon: CheckCircle2, order: 6, sub: 'Paid by insurer' },
   denied:            { label: 'Denied',           tint: 'border-slate-300 bg-slate-100 text-slate-700',      icon: ShieldAlert, order: 7, sub: 'Claim rejected' },

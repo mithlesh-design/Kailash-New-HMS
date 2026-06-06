@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 const SOURCES: RxSource[] = ["OPD", "IPD", "ICU", "OT", "Home Rx", "Discharge"]
 const SOURCE_STYLE: Record<RxSource, string> = {
   OPD: "bg-blue-50 text-blue-700", IPD: "bg-indigo-50 text-indigo-700", ICU: "bg-red-50 text-red-700",
-  OT: "bg-purple-50 text-purple-700", "Home Rx": "bg-teal-50 text-teal-700", Discharge: "bg-amber-50 text-amber-700",
+  OT: "bg-blue-50 text-blue-700", "Home Rx": "bg-teal-50 text-teal-700", Discharge: "bg-amber-50 text-amber-700",
 }
 const STATUS_STYLE: Record<string, string> = {
   queued: "bg-amber-100 text-amber-700", preparing: "bg-blue-100 text-blue-700", ready: "bg-green-100 text-green-700",
@@ -58,7 +58,7 @@ export default function PharmacyOverview() {
           <p className="text-sm text-[#64748B] mt-1">At-a-glance status · the live working surface is the Prescription Queue</p>
         </div>
         <Link href="/pharmacy/queue" className="flex items-center gap-1.5 text-sm font-bold text-white px-4 py-2 rounded-xl"
-          style={{ background: "linear-gradient(135deg,#EC4899,#8B5CF6)", boxShadow: "0 2px 8px rgba(236,72,153,0.25)" }}>
+          style={{ background: "linear-gradient(135deg,#EC4899,#2563EB)", boxShadow: "0 2px 8px rgba(236,72,153,0.25)" }}>
           Open queue <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -109,16 +109,16 @@ export default function PharmacyOverview() {
 
         {/* Stock & procurement + revenue */}
         <div className="space-y-4">
-          <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-violet-600">Collected today</p>
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Collected today</p>
             <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-1 mt-1"><IndianRupee className="h-5 w-5" />{m.revenueToday}</h3>
-            <p className="text-xs text-violet-700 mt-0.5">{m.collectedTodayCount} prescription(s) dispensed</p>
+            <p className="text-xs text-blue-700 mt-0.5">{m.collectedTodayCount} prescription(s) dispensed</p>
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
             <h2 className="text-sm font-bold text-slate-800">Stock & procurement</h2>
             <Link href="/pharmacy/inventory" className="flex items-center justify-between hover:bg-slate-50 -mx-1 px-1 py-1.5 rounded-lg">
-              <span className="text-sm text-slate-600 flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-violet-500" /> Open purchase orders</span>
+              <span className="text-sm text-slate-600 flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-blue-500" /> Open purchase orders</span>
               <span className="text-sm font-bold text-slate-900 flex items-center gap-1">{openPOs} <ArrowRight className="h-3 w-3 text-slate-400" /></span>
             </Link>
             <Link href="/pharmacy/inventory" className="flex items-center justify-between hover:bg-slate-50 -mx-1 px-1 py-1.5 rounded-lg">

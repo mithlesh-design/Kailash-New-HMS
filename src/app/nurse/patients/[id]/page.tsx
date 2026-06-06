@@ -16,7 +16,7 @@ const fmt = (iso: string) => new Date(iso).toLocaleString("en-IN", { day: "2-dig
 const newsChip = (b?: string) => b === "high" ? "bg-red-100 text-red-700" : b === "medium" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
 const statusChip: Record<MarStatus, string> = {
   given: "text-green-600", held: "text-orange-600", missed: "text-red-600", due: "text-amber-600",
-  scheduled: "text-slate-400", running: "text-blue-600", prn: "text-violet-600",
+  scheduled: "text-slate-400", running: "text-blue-600", prn: "text-blue-600",
 }
 
 export default function NursePatientDetail() {
@@ -89,7 +89,7 @@ export default function NursePatientDetail() {
 
         {/* MAR */}
         <Card className="p-5">
-          <div className="flex items-center gap-2 mb-3"><Pill className="h-4 w-4 text-purple-600" /><h2 className="text-sm font-bold text-slate-900">Medication (today)</h2></div>
+          <div className="flex items-center gap-2 mb-3"><Pill className="h-4 w-4 text-blue-600" /><h2 className="text-sm font-bold text-slate-900">Medication (today)</h2></div>
           <div className="space-y-1.5">
             {mar.length === 0 && <p className="text-xs text-slate-400">No active medications.</p>}
             {mar.map(slot => {

@@ -47,7 +47,7 @@ export default function Verification() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-          <ShieldCheck className="h-6 w-6 text-violet-600" /> Verification
+          <ShieldCheck className="h-6 w-6 text-blue-600" /> Verification
         </h1>
         <p className="text-sm text-[#64748B] mt-1">Second-read sign-off · releases the report to the ordering doctor and the patient</p>
       </div>
@@ -108,8 +108,8 @@ function VerificationRow(props: {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-bold text-slate-900 truncate">{s.patientName}</span>
             <span className="text-[11px] font-bold text-slate-400">{s.patientId}</span>
-            <span className="text-[12px] font-bold text-violet-700">{s.name}</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700">{s.modality}</span>
+            <span className="text-[12px] font-bold text-blue-700">{s.name}</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">{s.modality}</span>
             {isCritical && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700 flex items-center gap-0.5">
                 <ShieldAlert className="h-3 w-3" />CRITICAL
@@ -125,7 +125,7 @@ function VerificationRow(props: {
 
         <button onClick={props.onVerify}
           className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap"
-          style={{ background: "linear-gradient(135deg,#16A34A,#0D9488)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
+          style={{ background: "linear-gradient(135deg,#16A34A,#1E3A8A)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
           <CheckCircle className="h-3.5 w-3.5" />Verify &amp; release
         </button>
         <button onClick={props.onToggle} className="p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer text-slate-400">

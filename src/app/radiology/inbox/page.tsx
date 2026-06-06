@@ -18,7 +18,7 @@ const SOURCE_STYLE: Record<RadSource, string> = {
   OPD: "bg-blue-50 text-blue-700 ring-blue-200",
   IPD: "bg-indigo-50 text-indigo-700 ring-indigo-200",
   ICU: "bg-red-50 text-red-700 ring-red-200",
-  OT:  "bg-purple-50 text-purple-700 ring-purple-200",
+  OT:  "bg-blue-50 text-blue-700 ring-blue-200",
   ER:  "bg-orange-50 text-orange-700 ring-orange-200",
 }
 const PRIORITY_STYLE: Record<Priority, string> = {
@@ -93,7 +93,7 @@ export default function RadiologyInbox() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-          <ClipboardList className="h-6 w-6 text-violet-600" /> Radiology Inbox
+          <ClipboardList className="h-6 w-6 text-blue-600" /> Radiology Inbox
         </h1>
         <p className="text-sm text-[#64748B] mt-1">Schedule incoming orders · check in arriving patients · contrast/safety gates before routing</p>
       </div>
@@ -188,7 +188,7 @@ function StudyRow(props: {
             {s.wardBed && <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-0.5"><Bed className="h-3 w-3" />{s.wardBed}</span>}
             <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded", PRIORITY_STYLE[s.priority])}>{s.priority}</span>
             {stat && <span className="text-[10px] font-bold text-red-700 animate-pulse">⚡</span>}
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700">{s.modality}</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">{s.modality}</span>
             {needsContrast && (
               <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-0.5",
                 contrastReady ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
@@ -228,7 +228,7 @@ function StudyRow(props: {
               </select>
               <button onClick={props.onSchedule}
                 className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap"
-                style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" }}>
+                style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
                 <Calendar className="h-3.5 w-3.5" /> Schedule
               </button>
             </>
@@ -236,7 +236,7 @@ function StudyRow(props: {
           {s.status === "scheduled" && (
             <button onClick={props.onArrived}
               className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap"
-              style={{ background: "linear-gradient(135deg,#16A34A,#0D9488)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
+              style={{ background: "linear-gradient(135deg,#16A34A,#1E3A8A)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
               <Send className="h-3.5 w-3.5" /> Mark arrived
             </button>
           )}
@@ -274,7 +274,7 @@ function StudyRow(props: {
             </div>
           )}
           {s.aiPrelim && (
-            <p className="text-[11px] text-violet-700 italic">{s.aiPrelim}</p>
+            <p className="text-[11px] text-blue-700 italic">{s.aiPrelim}</p>
           )}
           <p className="text-[11px] text-slate-400 flex items-center gap-1"><Clock className="h-3 w-3" />TAT target: {s.expectedTATmin} min</p>
         </div>

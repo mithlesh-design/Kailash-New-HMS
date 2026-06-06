@@ -121,10 +121,10 @@ export function CareTeamPresenceCard({ ward = "Cardiac Care", department, classN
 
   return (
     <section className={`rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-sm overflow-hidden ${className ?? ''}`}>
-      <header className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-sky-50/60 to-violet-50/40">
-        <Sparkles className="h-4 w-4 text-violet-600" />
+      <header className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-sky-50/60 to-blue-50/40">
+        <Sparkles className="h-4 w-4 text-blue-600" />
         <h3 className="text-[14px] font-semibold text-slate-900">Care-Team Presence · {ward}</h3>
-        <span className="ml-auto inline-flex items-center gap-1.5 text-[10.5px] font-mono font-semibold text-violet-700">
+        <span className="ml-auto inline-flex items-center gap-1.5 text-[10.5px] font-mono font-semibold text-blue-700">
           <Users className="h-3 w-3" /> {onShiftCount} on shift · {handoverPendingCount} near handover
         </span>
       </header>
@@ -143,7 +143,7 @@ export function CareTeamPresenceCard({ ward = "Cardiac Care", department, classN
                 title={`${m.name} · ${m.role}${m.shiftHours ? ' · ' + m.shiftHours : ''}`}
               >
                 <span className="relative">
-                  <span className="h-6 w-6 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-[10.5px] font-bold">{m.initials}</span>
+                  <span className="h-6 w-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10.5px] font-bold">{m.initials}</span>
                   <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white ${s.dot}`} />
                 </span>
                 <span className="text-[11.5px] font-semibold text-slate-800 max-w-[110px] truncate">{m.name}</span>
@@ -158,7 +158,7 @@ export function CareTeamPresenceCard({ ward = "Cardiac Care", department, classN
           {handoverPendingCount > 0 ? <ReasoningChip compact tone="warn" title={`${handoverPendingCount} handover near`} /> : null}
           {pendingIncoming.length > 0 ? <ReasoningChip compact tone="info" title={`${pendingIncoming.length} incoming handover${pendingIncoming.length === 1 ? '' : 's'}`} /> : null}
           <button type="button" onClick={openCompose}
-            className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-violet-600 hover:bg-violet-700 text-white">
+            className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-blue-600 hover:bg-blue-700 text-white">
             <Send className="h-3 w-3" /> Compose handover
           </button>
         </div>
@@ -194,11 +194,11 @@ export function CareTeamPresenceCard({ ward = "Cardiac Care", department, classN
 
       {/* Compose dialog (inline panel, not modal — keeps page state visible) */}
       {composeOpen ? (
-        <div className="border-t border-violet-100/60 p-3 bg-gradient-to-br from-violet-50/40 to-blue-50/30 space-y-2">
+        <div className="border-t border-blue-100/60 p-3 bg-gradient-to-br from-blue-50/40 to-blue-50/30 space-y-2">
           <div className="flex items-center gap-2">
-            <Wand2 className="h-3.5 w-3.5 text-violet-600" />
-            <p className="text-[11.5px] font-semibold text-violet-900">SBAR draft · AI-skeleton, editable</p>
-            <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-violet-700">
+            <Wand2 className="h-3.5 w-3.5 text-blue-600" />
+            <p className="text-[11.5px] font-semibold text-blue-900">SBAR draft · AI-skeleton, editable</p>
+            <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-blue-700">
               <Sparkles className="h-3 w-3" /> 82% confidence
             </span>
           </div>
@@ -206,7 +206,7 @@ export function CareTeamPresenceCard({ ward = "Cardiac Care", department, classN
             value={sbarText}
             onChange={(e) => setSbarText(e.target.value)}
             rows={9}
-            className="w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-[12.5px] text-slate-800 font-mono leading-relaxed outline-none focus:ring-violet-400 whitespace-pre-wrap"
+            className="w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-[12.5px] text-slate-800 font-mono leading-relaxed outline-none focus:ring-blue-400 whitespace-pre-wrap"
             aria-label="SBAR handover note"
           />
           <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ export function CareTeamPresenceCard({ ward = "Cardiac Care", department, classN
               <Wand2 className="h-3 w-3" /> Regenerate
             </button>
             <button type="button" onClick={sign} disabled={sbarText.trim().length < 30}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50">
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50">
               <Send className="h-3 w-3" /> Sign & send
             </button>
           </div>

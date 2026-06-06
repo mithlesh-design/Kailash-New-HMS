@@ -100,6 +100,8 @@ interface PatientState {
   generateFamilyToken: (patientId: string, familyPhones: string[], consentGiven: boolean) => string
   updateFamilyViewableStatus: (patientId: string, status: FamilyViewableStatus) => void
   getPatientByFamilyToken: (token: string) => Patient | undefined
+  /** Track A dedup — existing records matching a phone (last-10-digit match). */
+  findByPhone: (phone: string) => Patient[]
 }
 
 const TODAY = new Date().toISOString().slice(0, 10)
@@ -462,6 +464,12 @@ export const usePatientStore = create<PatientState>()(persist((set, get) => ({
 
   getPatientByFamilyToken: (token) => {
     return get().patients.find(p => p.familyAccessToken === token)
+  },
+
+  findByPhone: (phone) => {
+    const norm = phone.replace(/\D/g, '').slice(-10)
+    if (norm.length < 10) return []
+    return get().patients.filter(p => p.phone.replace(/\D/g, '').slice(-10) === norm)
   },
 
   addPatient: (partial) => {

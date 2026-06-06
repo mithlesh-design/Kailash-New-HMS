@@ -68,7 +68,7 @@ export default function NurseHandover() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <WardSwitcher />
-          <button onClick={build} className="flex items-center gap-1.5 text-sm font-bold text-violet-700 bg-violet-50 border border-violet-100 hover:bg-violet-100 px-3 py-2 rounded-xl cursor-pointer transition-colors">
+          <button onClick={build} className="flex items-center gap-1.5 text-sm font-bold text-blue-700 bg-blue-50 border border-blue-100 hover:bg-blue-100 px-3 py-2 rounded-xl cursor-pointer transition-colors">
             <RefreshCw className="h-4 w-4" /> Regenerate
           </button>
         </div>
@@ -86,7 +86,7 @@ export default function NurseHandover() {
               </div>
               <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans mb-3">{h.sbar}</pre>
               <button onClick={() => receive(h.id, h.fromNurse)} className="flex items-center gap-1.5 text-sm font-bold text-white px-4 py-2 rounded-xl cursor-pointer"
-                style={{ background: "linear-gradient(135deg,#2563EB,#0891B2)" }}>
+                style={{ background: "linear-gradient(135deg,#2563EB,#2563EB)" }}>
                 <CheckCircle2 className="h-4 w-4" /> Receive &amp; acknowledge
               </button>
             </div>
@@ -97,7 +97,7 @@ export default function NurseHandover() {
       {/* Outgoing — AI-compiled SBAR + sign */}
       <Card className="p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-4 w-4 text-violet-600" />
+          <Sparkles className="h-4 w-4 text-blue-600" />
           <h2 className="text-sm font-bold text-slate-900">End-of-shift handover</h2>
           <span className="ml-auto text-[11px] text-slate-500">{ho?.patients.length ?? 0} patients{urgentCount > 0 ? ` · ${urgentCount} urgent` : ""} · → {NEXT_SHIFT[shift]} shift</span>
         </div>
@@ -122,7 +122,7 @@ export default function NurseHandover() {
         <textarea rows={2} value={addendum} onChange={e => setAddendum(e.target.value)} placeholder="Shift addendum — anything not captured above…"
           className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500 bg-slate-50 mb-3" />
         <button onClick={sign} className="flex items-center gap-1.5 text-sm font-bold text-white px-4 py-2 rounded-xl cursor-pointer"
-          style={{ background: "linear-gradient(135deg,#16A34A,#0D9488)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
+          style={{ background: "linear-gradient(135deg,#16A34A,#1E3A8A)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
           <ShieldCheck className="h-4 w-4" /> Sign &amp; hand over to {NEXT_SHIFT[shift]} shift
         </button>
       </Card>

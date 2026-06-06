@@ -11,7 +11,7 @@ const TRIAGE_GRADIENTS: Record<string, string> = {
   Critical: "linear-gradient(135deg,#DC2626,#B91C1C)",
   High: "linear-gradient(135deg,#EA580C,#DC2626)",
   Medium: "linear-gradient(135deg,#D97706,#B45309)",
-  Low: "linear-gradient(135deg,#16A34A,#0D9488)",
+  Low: "linear-gradient(135deg,#16A34A,#1E3A8A)",
 }
 const TRIAGE_RANK: Record<string, number> = { Critical: 0, High: 1, Medium: 2, Low: 3 }
 
@@ -40,7 +40,7 @@ function RoomCard({ doctor, room, department, patients }: { doctor: string; room
               <span className="text-xl font-black leading-none">{nowServing.token}</span>
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-violet-600 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-violet-500 animate-pulse" /> Now serving</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" /> Now serving</p>
               <p className="text-sm font-bold text-slate-900 truncate">{nowServing.name}</p>
             </div>
           </div>
@@ -99,9 +99,9 @@ export default function QueueBoardPage() {
         {/* Summary */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { icon: DoorOpen, label: "OPDs consulting", value: `${openRooms} / ${OPD_ROOMS.length} rooms`, gradient: "linear-gradient(135deg,#8B5CF6,#6366F1)" },
+            { icon: DoorOpen, label: "OPDs consulting", value: `${openRooms} / ${OPD_ROOMS.length} rooms`, gradient: "linear-gradient(135deg,#2563EB,#6366F1)" },
             { icon: Users, label: "Waiting across OPDs", value: `${waitingCount} patients`, gradient: "linear-gradient(135deg,#F59E0B,#EA580C)" },
-            { icon: Volume2, label: "Departments active", value: `${activeDepts.length}`, gradient: "linear-gradient(135deg,#2563EB,#0891B2)" },
+            { icon: Volume2, label: "Departments active", value: `${activeDepts.length}`, gradient: "linear-gradient(135deg,#2563EB,#2563EB)" },
           ].map(({ icon: Icon, label, value, gradient }, i) => (
             <motion.div key={label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
               className="flex items-center gap-4 p-5 rounded-2xl bg-white" style={{ boxShadow: "0 1px 4px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04)" }}>

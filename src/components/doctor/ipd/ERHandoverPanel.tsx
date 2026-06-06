@@ -175,7 +175,7 @@ export function ERHandoverPanel({ patientId }: { patientId: string }) {
                     <span className={cn("text-[9.5px] font-bold uppercase px-1.5 py-0.5 rounded",
                       t.status === 'released'   ? (crit ? 'bg-red-100 text-red-700' : flagged > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')
                       : t.status === 'verified' ? 'bg-blue-100 text-blue-700'
-                      : t.status === 'entered'  ? 'bg-violet-100 text-violet-700'
+                      : t.status === 'entered'  ? 'bg-blue-100 text-blue-700'
                       : 'bg-slate-100 text-slate-500')}>
                       {t.status.replace('_', ' ')}
                     </span>
@@ -185,12 +185,12 @@ export function ERHandoverPanel({ patientId }: { patientId: string }) {
               })}
               {radStudies.map(s2 => (
                 <li key={s2.id} className="flex items-center gap-2 text-[11px]">
-                  <ScanLine className="h-2.5 w-2.5 text-violet-600 flex-shrink-0" />
+                  <ScanLine className="h-2.5 w-2.5 text-blue-600 flex-shrink-0" />
                   <span className="font-bold text-slate-900 truncate flex-1">{s2.modality} {s2.name}</span>
                   <span className={cn("text-[9.5px] font-bold uppercase px-1.5 py-0.5 rounded",
                     s2.status === 'released' ? 'bg-emerald-100 text-emerald-700'
                     : s2.status === 'verified' ? 'bg-blue-100 text-blue-700'
-                    : s2.status === 'reported' ? 'bg-violet-100 text-violet-700'
+                    : s2.status === 'reported' ? 'bg-blue-100 text-blue-700'
                     : 'bg-slate-100 text-slate-500')}>
                     {s2.status.replace('_', ' ')}
                   </span>

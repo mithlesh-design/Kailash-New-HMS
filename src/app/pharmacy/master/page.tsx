@@ -7,7 +7,7 @@ import { toast } from "sonner"
 
 const SCHEDULE_STYLE: Record<string, string> = {
   X: "bg-red-100 text-red-700", H1: "bg-orange-100 text-orange-700",
-  H: "bg-blue-100 text-blue-700", G: "bg-violet-100 text-violet-700", OTC: "bg-green-100 text-green-700",
+  H: "bg-blue-100 text-blue-700", G: "bg-blue-100 text-blue-700", OTC: "bg-green-100 text-green-700",
 }
 
 export default function DrugMaster() {
@@ -34,7 +34,7 @@ export default function DrugMaster() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             Drug Master
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 flex items-center gap-1"><Sparkles className="h-3 w-3" /> AI-generated</span>
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 flex items-center gap-1"><Sparkles className="h-3 w-3" /> AI-generated</span>
           </h1>
           <p className="text-slate-500 text-sm mt-1">Catalog generated and kept current by AI — coding, interactions and allergy classes. No manual entry.</p>
         </div>
@@ -42,15 +42,15 @@ export default function DrugMaster() {
       </div>
 
       {/* AI status banner */}
-      <div className="rounded-2xl p-4 flex items-center gap-4 flex-wrap" style={{ background: "linear-gradient(135deg,rgba(139,92,246,0.10),rgba(236,72,153,0.08))" }}>
-        <div className="p-3 rounded-xl bg-white shadow-sm"><Sparkles className="h-5 w-5 text-violet-600" /></div>
+      <div className="rounded-2xl p-4 flex items-center gap-4 flex-wrap" style={{ background: "linear-gradient(135deg,rgba(37,99,235,0.10),rgba(236,72,153,0.08))" }}>
+        <div className="p-3 rounded-xl bg-white shadow-sm"><Sparkles className="h-5 w-5 text-blue-600" /></div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold text-slate-800">Maintained automatically by AI</p>
           <p className="text-xs text-slate-500">{drugs.length} drugs in catalog · ATC-coded · last synced {lastSynced}. New molecules, interactions and schedule changes are added by AI — pharmacists never edit this list.</p>
         </div>
         <button onClick={resync} disabled={syncing}
           className="flex items-center gap-1.5 text-xs font-bold text-white px-4 py-2 rounded-xl cursor-pointer disabled:opacity-60"
-          style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" }}>
+          style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
           <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} /> {syncing ? "Re-syncing…" : "Re-sync with AI"}
         </button>
       </div>
@@ -58,7 +58,7 @@ export default function DrugMaster() {
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search generic or brand name…"
-          className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-200" />
+          className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

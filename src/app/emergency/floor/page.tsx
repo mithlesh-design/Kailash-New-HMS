@@ -29,7 +29,7 @@ const DISPOSITIONS: { value: Disposition; label: string; tone: string }[] = [
   { value: 'admit_icu',  label: 'Admit ICU',  tone: 'bg-red-50 text-red-700 ring-red-200' },
   { value: 'admit_hdu',  label: 'Admit HDU',  tone: 'bg-orange-50 text-orange-700 ring-orange-200' },
   { value: 'discharge',  label: 'Discharge',  tone: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
-  { value: 'transfer',   label: 'Transfer',   tone: 'bg-violet-50 text-violet-700 ring-violet-200' },
+  { value: 'transfer',   label: 'Transfer',   tone: 'bg-blue-50 text-blue-700 ring-blue-200' },
   { value: 'against_medical_advice', label: 'AMA', tone: 'bg-amber-50 text-amber-700 ring-amber-200' },
   { value: 'deceased',   label: 'Deceased',   tone: 'bg-slate-100 text-slate-700 ring-slate-200' },
 ]
@@ -308,7 +308,7 @@ function FloorRow(props: {
           {p.phase === 'awaiting_disposition' && mine && (
             <button onClick={props.onComplete}
               className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer"
-              style={{ background: 'linear-gradient(135deg,#16A34A,#0D9488)' }}>
+              style={{ background: 'linear-gradient(135deg,#16A34A,#1E3A8A)' }}>
               <Send className="h-3.5 w-3.5" />Complete ER visit
             </button>
           )}
@@ -410,7 +410,7 @@ function FloorRow(props: {
                       }}
                       className={cn("flex items-center gap-1.5 h-9 px-2 rounded-lg border text-[11px] font-bold cursor-pointer transition text-left",
                         o.kind === 'lab' ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
-                        : o.kind === 'imaging' ? 'bg-violet-50 border-violet-200 text-violet-700 hover:bg-violet-100'
+                        : o.kind === 'imaging' ? 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
                         : 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100')}>
                       <Icon className="h-3 w-3 flex-shrink-0" />
                       <span className="truncate">{o.label}</span>
@@ -441,7 +441,7 @@ function FloorRow(props: {
                       <span className={cn("text-[9.5px] font-bold uppercase px-1.5 py-0.5 rounded",
                         status === 'released'   ? (crit ? 'bg-red-100 text-red-700' : flagged > 0 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')
                         : status === 'verified' ? 'bg-blue-100 text-blue-700'
-                        : status === 'entered'  ? 'bg-violet-100 text-violet-700'
+                        : status === 'entered'  ? 'bg-blue-100 text-blue-700'
                         : status === 'in_progress' || status === 'on_bench' ? 'bg-cyan-100 text-cyan-700'
                         : 'bg-slate-100 text-slate-500')}>
                         {status.replace('_', ' ')}
@@ -452,12 +452,12 @@ function FloorRow(props: {
                 })}
                 {props.radStudies.slice(0, 4).map(s => (
                   <div key={s.id} className="flex items-center gap-2 text-[11px] py-1 px-2 rounded bg-white ring-1 ring-slate-200">
-                    <ScanLine className="h-2.5 w-2.5 text-violet-600 flex-shrink-0" />
+                    <ScanLine className="h-2.5 w-2.5 text-blue-600 flex-shrink-0" />
                     <span className="font-bold text-slate-900 truncate flex-1">{s.modality} {s.name}</span>
                     <span className={cn("text-[9.5px] font-bold uppercase px-1.5 py-0.5 rounded",
                       s.status === 'released' ? 'bg-emerald-100 text-emerald-700'
                       : s.status === 'verified' ? 'bg-blue-100 text-blue-700'
-                      : s.status === 'reported' ? 'bg-violet-100 text-violet-700'
+                      : s.status === 'reported' ? 'bg-blue-100 text-blue-700'
                       : s.status === 'acquired' ? 'bg-cyan-100 text-cyan-700'
                       : s.status === 'acquiring' || s.status === 'arrived' ? 'bg-amber-100 text-amber-700'
                       : 'bg-slate-100 text-slate-500')}>

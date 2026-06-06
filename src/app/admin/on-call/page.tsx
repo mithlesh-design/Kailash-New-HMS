@@ -209,7 +209,7 @@ export default function OnCallPage() {
                         )}
                         {nightMember ? (
                           <button onClick={() => night && handleEditSlot(night)}
-                            className="block w-full text-[10px] font-bold px-1.5 py-1 rounded bg-violet-50 text-violet-800 hover:bg-violet-100 cursor-pointer truncate"
+                            className="block w-full text-[10px] font-bold px-1.5 py-1 rounded bg-blue-50 text-blue-800 hover:bg-blue-100 cursor-pointer truncate"
                             title={`Night: ${nightMember.name} (${nightMember.role})`}>
                             ☾ {nightMember.name.replace('Dr. ', '').split(' ')[0]}
                           </button>
@@ -234,7 +234,7 @@ export default function OnCallPage() {
           <span className="text-[11px] font-semibold text-slate-600">☀ Day (08:00–20:00)</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="h-2 w-3 rounded-sm bg-violet-600" />
+          <span className="h-2 w-3 rounded-sm bg-blue-600" />
           <span className="text-[11px] font-semibold text-slate-600">☾ Night (20:00–08:00)</span>
         </div>
         <span className="text-slate-300">·</span>

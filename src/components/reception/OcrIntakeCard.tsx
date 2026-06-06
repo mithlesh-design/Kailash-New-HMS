@@ -132,11 +132,11 @@ export function OcrIntakeCard({ onApply, className }: Props) {
   }
 
   return (
-    <div className={`rounded-xl bg-gradient-to-br from-violet-50/70 to-blue-50/40 ring-1 ring-violet-200/60 overflow-hidden ${className ?? ''}`}>
-      <header className="flex items-center gap-2 px-3 py-2 border-b border-violet-100/60">
-        <ScanLine className="h-3.5 w-3.5 text-violet-600" />
-        <h3 className="text-[12.5px] font-semibold text-violet-900">AI Scan & Fill</h3>
-        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-violet-700">
+    <div className={`rounded-xl bg-gradient-to-br from-blue-50/70 to-blue-50/40 ring-1 ring-blue-200/60 overflow-hidden ${className ?? ''}`}>
+      <header className="flex items-center gap-2 px-3 py-2 border-b border-blue-100/60">
+        <ScanLine className="h-3.5 w-3.5 text-blue-600" />
+        <h3 className="text-[12.5px] font-semibold text-blue-900">AI Scan & Fill</h3>
+        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-blue-700">
           <Sparkles className="h-3 w-3" /> Mock OCR — instant intake
         </span>
       </header>
@@ -166,9 +166,9 @@ export function OcrIntakeCard({ onApply, className }: Props) {
             tabIndex={0}
             onClick={pickFile}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') pickFile() }}
-            className="rounded-xl border-2 border-dashed border-violet-200 bg-white hover:bg-violet-50/40 transition px-3 py-4 flex items-center gap-3 cursor-pointer"
+            className="rounded-xl border-2 border-dashed border-blue-200 bg-white hover:bg-blue-50/40 transition px-3 py-4 flex items-center gap-3 cursor-pointer"
           >
-            <span className="h-9 w-9 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center"><ImageIcon className="h-4 w-4" /></span>
+            <span className="h-9 w-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><ImageIcon className="h-4 w-4" /></span>
             <div className="flex-1 min-w-0">
               <p className="text-[12.5px] font-semibold text-slate-800">Drop or pick a {DOC_META[docType].label}</p>
               <p className="text-[11px] text-slate-500">800 ms simulated scan · every field is editable after.</p>
@@ -179,7 +179,7 @@ export function OcrIntakeCard({ onApply, className }: Props) {
                 <Upload className="h-3 w-3" /> Upload
               </button>
               <button type="button" onClick={(e) => { e.stopPropagation(); startScan() }}
-                className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-semibold bg-violet-600 hover:bg-violet-700 text-white">
+                className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-semibold bg-blue-600 hover:bg-blue-700 text-white">
                 <Camera className="h-3 w-3" /> Demo scan
               </button>
             </div>
@@ -196,20 +196,20 @@ export function OcrIntakeCard({ onApply, className }: Props) {
 
       {scanning ? (
         <div className="px-3 pb-3">
-          <div className="rounded-xl bg-white px-3 py-3 ring-1 ring-violet-200/70 flex items-center gap-3">
-            <Loader2 className="h-4 w-4 text-violet-600 animate-spin" />
+          <div className="rounded-xl bg-white px-3 py-3 ring-1 ring-blue-200/70 flex items-center gap-3">
+            <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
             <p className="text-[12.5px] text-slate-700">Scanning {DOC_META[docType].label.toLowerCase()}{fileName ? ' — ' + fileName : ''}…</p>
-            <span className="ml-auto text-[10.5px] font-mono text-violet-500">~800 ms</span>
+            <span className="ml-auto text-[10.5px] font-mono text-blue-500">~800 ms</span>
           </div>
         </div>
       ) : null}
 
       {fields ? (
         <div className="px-3 pb-3">
-          <div className="rounded-xl bg-white p-3 ring-1 ring-violet-200/70 space-y-2">
+          <div className="rounded-xl bg-white p-3 ring-1 ring-blue-200/70 space-y-2">
             <div className="flex items-center gap-1.5">
-              <ScanLine className="h-3 w-3 text-violet-600" />
-              <p className="text-[10.5px] font-semibold text-violet-700 uppercase tracking-wide">OCR draft — review before applying</p>
+              <ScanLine className="h-3 w-3 text-blue-600" />
+              <p className="text-[10.5px] font-semibold text-blue-700 uppercase tracking-wide">OCR draft — review before applying</p>
               {fileName ? <span className="text-[10.5px] text-slate-400">· {fileName}</span> : null}
             </div>
             <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
@@ -228,7 +228,7 @@ export function OcrIntakeCard({ onApply, className }: Props) {
             <button type="button" onClick={discard} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11.5px] font-semibold bg-white hover:bg-slate-50 text-slate-700 ring-1 ring-slate-200">
               <X className="h-3 w-3" /> Discard
             </button>
-            <button type="button" onClick={applyFields} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-violet-600 hover:bg-violet-700 text-white">
+            <button type="button" onClick={applyFields} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-blue-600 hover:bg-blue-700 text-white">
               <Check className="h-3 w-3" /> Apply to form
             </button>
           </div>

@@ -37,15 +37,15 @@ export function AiPreBrief({ patient }: { patient: Patient }) {
   }, [patient.id])
 
   return (
-    <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-white overflow-hidden shadow-sm">
-      <div className="px-5 py-4 border-b border-purple-100 flex items-center justify-between bg-white/50 backdrop-blur-sm">
+    <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white overflow-hidden shadow-sm">
+      <div className="px-5 py-4 border-b border-blue-100 flex items-center justify-between bg-white/50 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center border border-purple-200 shadow-sm">
-            <BrainCircuit className="h-4 w-4 text-purple-600" />
+          <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center border border-blue-200 shadow-sm">
+            <BrainCircuit className="h-4 w-4 text-blue-600" />
           </div>
           <div>
-            <h3 className="font-bold text-purple-900 tracking-tight">AI Pre-Consultation Brief</h3>
-            <p className="text-[11px] font-semibold text-purple-600/70 uppercase tracking-wider mt-0.5">Auto-generated summary</p>
+            <h3 className="font-bold text-blue-900 tracking-tight">AI Pre-Consultation Brief</h3>
+            <p className="text-[11px] font-semibold text-blue-600/70 uppercase tracking-wider mt-0.5">Auto-generated summary</p>
           </div>
         </div>
         <NeonBadge variant="purple" dot pulse={analyzing}>
@@ -61,11 +61,11 @@ export function AiPreBrief({ patient }: { patient: Patient }) {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 backdrop-blur-[2px]"
             >
-              <Sparkles className="h-6 w-6 text-purple-400 animate-pulse mb-3" />
+              <Sparkles className="h-6 w-6 text-blue-400 animate-pulse mb-3" />
               <div className="space-y-2 w-3/4 max-w-sm">
-                <div className="h-2 w-full rounded-full bg-purple-100 shimmer" />
-                <div className="h-2 w-5/6 rounded-full bg-purple-100 shimmer" />
-                <div className="h-2 w-4/6 rounded-full bg-purple-100 shimmer" />
+                <div className="h-2 w-full rounded-full bg-blue-100 shimmer" />
+                <div className="h-2 w-5/6 rounded-full bg-blue-100 shimmer" />
+                <div className="h-2 w-4/6 rounded-full bg-blue-100 shimmer" />
               </div>
             </motion.div>
           ) : (
@@ -76,7 +76,7 @@ export function AiPreBrief({ patient }: { patient: Patient }) {
             >
               <p className="text-sm text-slate-700 leading-relaxed font-medium">
                 <span className="font-bold text-slate-900">Summary:</span> {patient.name.split(' ')[0]} ({patient.age}y) presents with{" "}
-                <span className="text-purple-700 font-bold bg-purple-100/50 px-1 rounded">{patient.symptoms.length ? patient.symptoms.join(', ') : 'no specific complaint recorded'}</span>.
+                <span className="text-blue-700 font-bold bg-blue-100/50 px-1 rounded">{patient.symptoms.length ? patient.symptoms.join(', ') : 'no specific complaint recorded'}</span>.
                 {' '}{patient.history.length ? `History: ${patient.history.join(', ')}.` : 'No significant past medical history.'}
                 {' '}{hasVitals ? 'Vitals recorded at triage.' : 'Vitals not yet recorded.'}
               </p>

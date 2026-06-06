@@ -22,7 +22,7 @@ const STATUS_CONFIG: Record<MarStatus, { color: string; icon: React.ElementType;
   due:       { color: 'text-amber-600 bg-amber-50',   icon: Clock,         label: 'Due' },
   scheduled: { color: 'text-slate-500 bg-slate-100',  icon: Clock,         label: 'Scheduled' },
   running:   { color: 'text-blue-600 bg-blue-50',     icon: Droplets,      label: 'Running' },
-  prn:       { color: 'text-violet-600 bg-violet-50', icon: Pill,          label: 'PRN' },
+  prn:       { color: 'text-blue-600 bg-blue-50', icon: Pill,          label: 'PRN' },
 }
 const ORDER: Record<MarStatus, number> = { missed: 0, due: 1, prn: 2, running: 3, scheduled: 4, held: 5, given: 6 }
 
@@ -252,7 +252,7 @@ export default function MedicationMAR() {
                           toast.success(`Procurement requested for ${rx.patientName} — pharmacy notified`)
                         }}
                         className="flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-bold text-white rounded-xl cursor-pointer transition-all"
-                        style={{ background: 'linear-gradient(135deg,#2563EB,#0891B2)', boxShadow: '0 2px 8px rgba(37,99,235,0.25)' }}
+                        style={{ background: 'linear-gradient(135deg,#2563EB,#2563EB)', boxShadow: '0 2px 8px rgba(37,99,235,0.25)' }}
                       >
                         <ShoppingCart className="h-4 w-4" /> Request Procurement
                       </button>

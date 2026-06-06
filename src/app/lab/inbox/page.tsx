@@ -19,7 +19,7 @@ const SOURCE_STYLE: Record<LabSource, string> = {
   OPD: "bg-blue-50 text-blue-700 ring-blue-200",
   IPD: "bg-indigo-50 text-indigo-700 ring-indigo-200",
   ICU: "bg-red-50 text-red-700 ring-red-200",
-  OT:  "bg-purple-50 text-purple-700 ring-purple-200",
+  OT:  "bg-blue-50 text-blue-700 ring-blue-200",
   ER:  "bg-orange-50 text-orange-700 ring-orange-200",
 }
 const PRIORITY_STYLE: Record<Priority, string> = {
@@ -123,7 +123,7 @@ export default function LabInbox() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-          <ClipboardList className="h-6 w-6 text-violet-600" /> Lab Inbox
+          <ClipboardList className="h-6 w-6 text-blue-600" /> Lab Inbox
         </h1>
         <p className="text-sm text-[#64748B] mt-1">Phlebotomy &amp; sample collection · orders coming in from across the hospital</p>
       </div>
@@ -238,7 +238,7 @@ function OrderRow(props: {
           {awaiting && (
             <button onClick={props.onCollect}
               className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap"
-              style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" }}>
+              style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
               <Send className="h-3.5 w-3.5" /> Collect
             </button>
           )}
@@ -265,7 +265,7 @@ function OrderRow(props: {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {o.tests.map(t => (
                 <div key={t.id} className="bg-white rounded-lg ring-1 ring-slate-200/70 p-2.5 text-sm flex items-center gap-2">
-                  <FlaskConical className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />
+                  <FlaskConical className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
                   <span className="font-semibold text-slate-800 flex-1 min-w-0 truncate">{t.name}</span>
                   <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded", PRIORITY_STYLE[t.priority])}>{t.priority}</span>
                   <span className="text-[10px] font-semibold text-slate-400 uppercase">{t.bench}</span>

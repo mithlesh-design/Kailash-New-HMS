@@ -21,7 +21,7 @@ const STATUS_TINT: Record<StatutoryStatus, string> = {
   due_soon:  'bg-amber-50 border-amber-200 text-amber-700',
   overdue:   'bg-red-50 border-red-200 text-red-700',
   filed:     'bg-emerald-50 border-emerald-200 text-emerald-700',
-  exempted:  'bg-violet-50 border-violet-200 text-violet-700',
+  exempted:  'bg-blue-50 border-blue-200 text-blue-700',
 }
 
 const STATUS_LABEL: Record<StatutoryStatus, string> = {
@@ -35,10 +35,10 @@ const STATUS_LABEL: Record<StatutoryStatus, string> = {
 const TYPE_TINT: Record<StatutoryType, string> = {
   PF:            'bg-blue-100 text-blue-800',
   ESI:           'bg-cyan-100 text-cyan-800',
-  GSTR1:         'bg-violet-100 text-violet-800',
-  GSTR3B:        'bg-violet-100 text-violet-800',
+  GSTR1:         'bg-blue-100 text-blue-800',
+  GSTR3B:        'bg-blue-100 text-blue-800',
   TDS:           'bg-indigo-100 text-indigo-800',
-  PT:            'bg-fuchsia-100 text-fuchsia-800',
+  PT:            'bg-blue-100 text-blue-800',
   TRADE_LICENCE: 'bg-emerald-100 text-emerald-800',
   POLLUTION:     'bg-green-100 text-green-800',
   DRUG_LICENCE:  'bg-pink-100 text-pink-800',
@@ -189,7 +189,7 @@ export default function StatutoryPage() {
         <KPI label="Due ≤7d" value={kpis.due_soon} tint={kpis.due_soon > 0 ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-slate-50 border-slate-200 text-slate-600"} />
         <KPI label="Upcoming" value={kpis.upcoming} tint="bg-blue-50 border-blue-200 text-blue-700" />
         <KPI label="Filed YTD" value={kpis.filed} tint="bg-emerald-50 border-emerald-200 text-emerald-700" />
-        <KPI label="Filed ₹" value={`₹${(totalAmountFiled / 100000).toFixed(1)}L`} tint="bg-violet-50 border-violet-200 text-violet-700" />
+        <KPI label="Filed ₹" value={`₹${(totalAmountFiled / 100000).toFixed(1)}L`} tint="bg-blue-50 border-blue-200 text-blue-700" />
       </div>
 
       {/* Critical strip */}
@@ -316,7 +316,7 @@ export default function StatutoryPage() {
                           File
                         </button>
                         <button onClick={() => handleExempt(e.id)}
-                          className="text-[10px] font-bold px-2 py-1 rounded text-violet-600 hover:bg-violet-50 cursor-pointer">
+                          className="text-[10px] font-bold px-2 py-1 rounded text-blue-600 hover:bg-blue-50 cursor-pointer">
                           Exempt
                         </button>
                       </div>

@@ -23,7 +23,7 @@ const EVENT_ICONS: Record<ClaimEvent['kind'], { icon: React.ComponentType<{ clas
   approved: { icon: CheckCircle, tone: 'text-emerald-600' },
   partially_approved: { icon: AlertTriangle, tone: 'text-amber-600' },
   rejected: { icon: AlertTriangle, tone: 'text-red-600' },
-  document: { icon: Upload, tone: 'text-violet-600' },
+  document: { icon: Upload, tone: 'text-blue-600' },
   note: { icon: MessageSquare, tone: 'text-slate-500' },
 }
 
@@ -107,7 +107,7 @@ export default function PatientInsurance() {
       </div>
 
       {/* Policy card */}
-      <div className="rounded-3xl p-5 text-white bg-gradient-to-br from-teal-500 to-cyan-600 shadow-[0_10px_30px_rgba(13,148,136,0.3)]">
+      <div className="rounded-3xl p-5 text-white bg-gradient-to-br from-teal-500 to-cyan-600 shadow-[0_10px_30px_rgba(30,58,138,0.3)]">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" /><span className="text-[13px] font-bold uppercase tracking-wider text-white/80">Cashless · Active</span></div>
           <span className="text-[13px] font-semibold text-white/90">{mine.provider}</span>
@@ -136,7 +136,7 @@ export default function PatientInsurance() {
           <div className="flex items-center gap-2 flex-wrap">
             <span className={cn('text-[11px] font-bold px-2.5 py-1 rounded-full', STATUS_TINT[mine.status])}>{mine.status}</span>
             {mine.aiProbability !== undefined && (
-              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 flex items-center gap-1">
+              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 flex items-center gap-1">
                 <Sparkles className="h-3 w-3" />AI approval likelihood {mine.aiProbability}%
               </span>
             )}
@@ -164,7 +164,7 @@ export default function PatientInsurance() {
               <Sparkles className="h-3 w-3" />AI denial risk
             </p>
             <button onClick={onRunDenialAnalysis}
-              className="text-[10px] font-bold text-violet-700 bg-white hover:bg-violet-50 ring-1 ring-violet-200 px-2 py-0.5 rounded cursor-pointer">
+              className="text-[10px] font-bold text-blue-700 bg-white hover:bg-blue-50 ring-1 ring-blue-200 px-2 py-0.5 rounded cursor-pointer">
               {denialRisk ? 'Refresh' : 'Run AI analysis'}
             </button>
           </div>
@@ -225,7 +225,7 @@ export default function PatientInsurance() {
                 ? <span className="text-[12px] font-semibold text-green-600">Verified · {dateOf(d.uploadedAt).split(' ').slice(0, 2).join(' ')}</span>
                 : (
                   <button onClick={() => onUpload(d.id, d.name)}
-                    className="text-[12.5px] font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1">
+                    className="text-[12.5px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1">
                     <Upload className="h-3 w-3" />Upload
                   </button>
                 )}

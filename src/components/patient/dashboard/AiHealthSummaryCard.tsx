@@ -132,16 +132,16 @@ export function AiHealthSummaryCard({ className }: { className?: string }) {
   if (hidden) return null
 
   return (
-    <section className={`rounded-3xl bg-gradient-to-br from-violet-50/80 via-white to-blue-50/40 ring-1 ring-violet-200/60 shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] p-5 ${className ?? ''}`}>
+    <section className={`rounded-3xl bg-gradient-to-br from-blue-50/80 via-white to-blue-50/40 ring-1 ring-blue-200/60 shadow-[0_1px_4px_rgba(15,23,42,0.06),0_8px_28px_rgba(15,23,42,0.05)] p-5 ${className ?? ''}`}>
       <header className="flex items-center gap-2 mb-3">
-        <span className="h-8 w-8 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center">
+        <span className="h-8 w-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
           <Sparkles className="h-4 w-4" />
         </span>
         <div>
           <h3 className="text-[14px] font-bold text-slate-900">Your health, in a glance</h3>
           <p className="text-[11px] text-slate-500">AI-written from your record · in plain language</p>
         </div>
-        <span className="ml-auto text-[10.5px] font-mono font-semibold text-violet-700">87% confidence</span>
+        <span className="ml-auto text-[10.5px] font-mono font-semibold text-blue-700">87% confidence</span>
       </header>
 
       <p className="text-[14.5px] text-slate-800 leading-relaxed mb-3">{summary}</p>
@@ -190,7 +190,7 @@ export function AiHealthSummaryCard({ className }: { className?: string }) {
               <RefreshCw className="h-3 w-3" /> Try another wording
             </button>
             <button type="button" onClick={accept}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-violet-600 hover:bg-violet-700 text-white">
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-blue-600 hover:bg-blue-700 text-white">
               <Check className="h-3 w-3" /> Looks right
             </button>
           </>

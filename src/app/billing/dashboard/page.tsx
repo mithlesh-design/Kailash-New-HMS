@@ -73,7 +73,7 @@ export default function BillingDashboard() {
           { label: "Collected", value: `₹${totalCollected.toLocaleString('en-IN')}`, color: "text-green-600", bg: "bg-green-50 border-green-200" },
           { label: "Bills Pending Freeze", value: pendingFreeze, color: "text-orange-600", bg: "bg-orange-50 border-orange-200" },
           { label: "Bills Settled", value: settled, color: "text-blue-600", bg: "bg-blue-50 border-blue-200" },
-          { label: "AI Duplicate Flags", value: duplicates.reduce((s, d) => s + d.alerts.length, 0), color: "text-violet-600", bg: "bg-violet-50 border-violet-200" },
+          { label: "AI Duplicate Flags", value: duplicates.reduce((s, d) => s + d.alerts.length, 0), color: "text-blue-600", bg: "bg-blue-50 border-blue-200" },
         ].map(({ label, value, color, bg }) => (
           <div key={label} className={cn("rounded-xl border p-4", bg)}>
             <p className={cn("text-xl font-bold", color)}>{value}</p>
@@ -84,23 +84,23 @@ export default function BillingDashboard() {
 
       {/* AI duplicate-charge audit card */}
       {duplicates.length > 0 && (
-        <div className="rounded-xl border border-violet-200 p-4 bg-gradient-to-br from-violet-50 to-fuchsia-50/40">
+        <div className="rounded-xl border border-blue-200 p-4 bg-gradient-to-br from-blue-50 to-blue-50/40">
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-violet-600" />
-              <h3 className="text-sm font-bold text-violet-800">AI Duplicate-Charge Audit</h3>
-              <span className="text-[10px] font-bold uppercase tracking-wide bg-violet-100 text-violet-700 px-2 py-0.5 rounded">
+              <Sparkles className="h-4 w-4 text-blue-600" />
+              <h3 className="text-sm font-bold text-blue-800">AI Duplicate-Charge Audit</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wide bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
                 ₹{totalDuplicateValue.toLocaleString('en-IN')} flagged
               </span>
             </div>
-            <p className="text-[11px] text-violet-700">Recurring items (ward/nursing/consultation) excluded</p>
+            <p className="text-[11px] text-blue-700">Recurring items (ward/nursing/consultation) excluded</p>
           </div>
           <div className="space-y-2">
             {duplicates.map(({ bill, alerts }) => (
-              <div key={bill.id} className="rounded-lg bg-white border border-violet-100 p-3">
+              <div key={bill.id} className="rounded-lg bg-white border border-blue-100 p-3">
                 <p className="text-xs font-bold text-slate-800">{bill.patientName} <span className="text-slate-400">· {bill.id}</span></p>
                 {alerts.map((a) => (
-                  <p key={a.groupKey} className="text-[11px] text-violet-700 mt-1 flex items-start gap-1">
+                  <p key={a.groupKey} className="text-[11px] text-blue-700 mt-1 flex items-start gap-1">
                     <ShieldAlert className="h-3 w-3 mt-0.5 flex-shrink-0" />
                     <span><b>{a.description}</b> — {a.reason} · ₹{a.totalAmount.toLocaleString('en-IN')}</span>
                   </p>
@@ -160,14 +160,14 @@ export default function BillingDashboard() {
                       <span className="text-xs text-slate-500">{bill.visitType}</span>
                       <span className="text-xs text-slate-500">{bill.payerType}</span>
                       {hasDupes && (
-                        <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 flex items-center gap-1">
+                        <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 flex items-center gap-1">
                           <ShieldAlert className="h-2.5 w-2.5" />Dupes
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-6 text-sm flex-wrap">
                       <span className="text-slate-500">Total: <span className="font-bold text-slate-900">₹{bill.subtotal.toLocaleString('en-IN')}</span></span>
-                      {bill.insuranceCovered > 0 && <span className="text-purple-600 font-medium">Insurance: ₹{bill.insuranceCovered.toLocaleString('en-IN')}</span>}
+                      {bill.insuranceCovered > 0 && <span className="text-blue-600 font-medium">Insurance: ₹{bill.insuranceCovered.toLocaleString('en-IN')}</span>}
                       <span className="text-slate-500">Paid: <span className="font-bold text-green-700">₹{bill.paidAmount.toLocaleString('en-IN')}</span></span>
                       {outstanding > 0 && <span className="text-red-600 font-bold">Due: ₹{outstanding.toLocaleString('en-IN')}</span>}
                     </div>

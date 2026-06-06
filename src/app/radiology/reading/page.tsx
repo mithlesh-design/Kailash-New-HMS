@@ -53,7 +53,7 @@ export default function ReadingRoom() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-          <FileText className="h-6 w-6 text-violet-600" /> Reading Room
+          <FileText className="h-6 w-6 text-blue-600" /> Reading Room
         </h1>
         <p className="text-sm text-[#64748B] mt-1">Radiologist queue · AI prelim · structured report · submit for verification</p>
       </div>
@@ -132,8 +132,8 @@ function ReadingRow(props: {
             <span className="font-bold text-slate-900 truncate">{s.patientName}</span>
             <span className="text-[11px] font-bold text-slate-400">{s.patientId}</span>
             {s.wardBed && <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-0.5"><Bed className="h-3 w-3" />{s.wardBed}</span>}
-            <span className="text-[12px] font-bold text-violet-700">{s.name}</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700">{s.modality}</span>
+            <span className="text-[12px] font-bold text-blue-700">{s.name}</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">{s.modality}</span>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">{cat?.template ?? "general"}</span>
             {s.readingBy && <span className="text-[11px] font-semibold text-slate-400">· {mine ? "your queue" : `on ${s.readingBy.name}`}</span>}
           </div>
@@ -155,14 +155,14 @@ function ReadingRow(props: {
           {s.status === "acquired" && (
             <button onClick={props.onClaim}
               className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer"
-              style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" }}>
+              style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
               <Hand className="h-3.5 w-3.5" />Read
             </button>
           )}
           {s.status === "reading" && mine && (
             <button onClick={props.onSubmit}
               className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap"
-              style={{ background: "linear-gradient(135deg,#16A34A,#0D9488)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
+              style={{ background: "linear-gradient(135deg,#16A34A,#1E3A8A)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
               <Send className="h-3.5 w-3.5" />Submit for verification
             </button>
           )}
@@ -197,17 +197,17 @@ function ReadingRow(props: {
           )}
 
           {/* AI prelim */}
-          <div className="rounded-lg ring-1 ring-violet-200 bg-violet-50/60 p-2.5">
+          <div className="rounded-lg ring-1 ring-blue-200 bg-blue-50/60 p-2.5">
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <p className="text-[11px] font-bold text-violet-700 flex items-center gap-1"><Sparkles className="h-3 w-3" />AI prelim</p>
+              <p className="text-[11px] font-bold text-blue-700 flex items-center gap-1"><Sparkles className="h-3 w-3" />AI prelim</p>
               {s.status === "reading" && mine && (
                 <button onClick={props.onAI}
-                  className="text-[10px] font-bold text-violet-700 bg-white hover:bg-violet-100 ring-1 ring-violet-200 px-2 py-0.5 rounded cursor-pointer">
+                  className="text-[10px] font-bold text-blue-700 bg-white hover:bg-blue-100 ring-1 ring-blue-200 px-2 py-0.5 rounded cursor-pointer">
                   {s.aiPrelim ? "Regenerate" : "Generate"}
                 </button>
               )}
             </div>
-            <p className="text-[12px] text-violet-800 mt-1 italic">{s.aiPrelim ?? "AI prelim not yet generated."}</p>
+            <p className="text-[12px] text-blue-800 mt-1 italic">{s.aiPrelim ?? "AI prelim not yet generated."}</p>
           </div>
 
           {/* Structured report editor */}
@@ -231,7 +231,7 @@ function ReadingRow(props: {
                           onBlur={(e) => props.onUpdate(sec.key, e.target.value)}
                           placeholder={sec.placeholder ?? ""}
                           rows={sec.key === "findings" || sec.key === "impression" ? 3 : 2}
-                          className="w-full text-[12px] rounded-md border border-slate-200 p-1.5 focus:outline-none focus:ring-2 focus:ring-violet-200" />
+                          className="w-full text-[12px] rounded-md border border-slate-200 p-1.5 focus:outline-none focus:ring-2 focus:ring-blue-200" />
                       ) : (
                         <p className="text-[12px] text-slate-700 whitespace-pre-wrap">{value || <span className="italic text-slate-400">—</span>}</p>
                       )}

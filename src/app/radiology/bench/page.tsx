@@ -28,8 +28,8 @@ const STATUS_STYLE: Record<StudyStatus, string> = {
   arrived: "bg-amber-100 text-amber-700",
   acquiring: "bg-blue-100 text-blue-700",
   acquired: "bg-emerald-100 text-emerald-700",
-  reading: "bg-violet-100 text-violet-700",
-  reported: "bg-violet-100 text-violet-700",
+  reading: "bg-blue-100 text-blue-700",
+  reported: "bg-blue-100 text-blue-700",
   verified: "bg-slate-100 text-slate-500",
   released: "bg-slate-100 text-slate-500",
   cancelled: "bg-red-100 text-red-700",
@@ -98,7 +98,7 @@ export default function ModalityBench() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-          <ScanLine className="h-6 w-6 text-violet-600" /> Modality Bench
+          <ScanLine className="h-6 w-6 text-blue-600" /> Modality Bench
         </h1>
         <p className="text-sm text-[#64748B] mt-1">Radiographer surface · accept patient → acquire → attach images → send for reading</p>
       </div>
@@ -179,7 +179,7 @@ function BenchRow(props: {
             <span className="font-bold text-slate-900 truncate">{s.patientName}</span>
             <span className="text-[11px] font-bold text-slate-400">{s.patientId}</span>
             {s.wardBed && <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-0.5"><Bed className="h-3 w-3" />{s.wardBed}</span>}
-            <span className="text-[12px] font-bold text-violet-700">{s.name}</span>
+            <span className="text-[12px] font-bold text-blue-700">{s.name}</span>
             <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", STATUS_STYLE[s.status])}>{STATUS_LABEL[s.status]}</span>
             {s.acquiringBy && <span className="text-[11px] font-semibold text-slate-400">· {mine ? "your counter" : `on ${s.acquiringBy.name}`}</span>}
             {needsContrast && (
@@ -207,14 +207,14 @@ function BenchRow(props: {
           {s.status === "arrived" && !s.acquiringBy && (
             <button onClick={props.onClaim}
               className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer"
-              style={{ background: "linear-gradient(135deg,#8B5CF6,#EC4899)", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" }}>
+              style={{ background: "linear-gradient(135deg,#2563EB,#EC4899)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
               <Hand className="h-3.5 w-3.5" />Accept
             </button>
           )}
           {s.status === "acquiring" && mine && (
             <button onClick={props.onAcquire}
               className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer"
-              style={{ background: "linear-gradient(135deg,#16A34A,#0D9488)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
+              style={{ background: "linear-gradient(135deg,#16A34A,#1E3A8A)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
               <CheckCircle className="h-3.5 w-3.5" />Mark acquired
             </button>
           )}
@@ -255,9 +255,9 @@ function BenchRow(props: {
               <div className="flex items-center gap-2 mt-1">
                 <input value={filename} onChange={e => props.onFilenameChange(e.target.value)}
                   placeholder={`${s.modality}-${s.id.slice(-4)}-N.jpg`}
-                  className="flex-1 h-8 px-2 text-xs rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-200" />
+                  className="flex-1 h-8 px-2 text-xs rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-200" />
                 <button onClick={props.onAttach}
-                  className="flex items-center gap-1 text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 px-2.5 py-1.5 rounded-lg cursor-pointer">
+                  className="flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg cursor-pointer">
                   <Upload className="h-3 w-3" />Attach
                 </button>
               </div>
@@ -265,7 +265,7 @@ function BenchRow(props: {
           </div>
 
           {s.aiPrelim && (
-            <p className="text-[11px] text-violet-700 italic bg-violet-50/60 rounded-md px-2 py-1.5">{s.aiPrelim}</p>
+            <p className="text-[11px] text-blue-700 italic bg-blue-50/60 rounded-md px-2 py-1.5">{s.aiPrelim}</p>
           )}
 
           {s.status === "acquiring" && mine && (

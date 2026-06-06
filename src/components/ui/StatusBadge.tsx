@@ -16,7 +16,7 @@ const VARIANT_CLASSES: Record<Variant, string> = {
   blue:    'bg-blue-50   text-blue-700   border-blue-200',
   teal:    'bg-teal-50   text-teal-700   border-teal-200',
   muted:   'bg-slate-50  text-slate-600  border-slate-200',
-  purple:  'bg-purple-50 text-purple-700 border-purple-200',
+  purple:  'bg-blue-50 text-blue-700 border-blue-200',
 }
 
 const DOT_CLASSES: Record<Variant, string> = {
@@ -26,7 +26,7 @@ const DOT_CLASSES: Record<Variant, string> = {
   blue:    'bg-blue-500',
   teal:    'bg-teal-500',
   muted:   'bg-slate-400',
-  purple:  'bg-purple-500',
+  purple:  'bg-blue-500',
 }
 
 export function StatusBadge({ variant, children, dot, className }: StatusBadgeProps) {

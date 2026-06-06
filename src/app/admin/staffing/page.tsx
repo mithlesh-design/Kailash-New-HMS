@@ -30,9 +30,9 @@ const DEPT_ICONS: Record<string, React.ElementType> = {
 
 const DEPT_GRADIENTS: Record<string, { gradient: string; light: string; text: string; shadow: string }> = {
   Emergency:        { gradient: 'linear-gradient(135deg, #DC2626, #EF4444)', light: '#FEE2E2', text: '#7F1D1D', shadow: 'rgba(220,38,38,0.25)' },
-  ICU:              { gradient: 'linear-gradient(135deg, #7C3AED, #8B5CF6)', light: '#F5F3FF', text: '#4C1D95', shadow: 'rgba(124,58,237,0.25)' },
+  ICU:              { gradient: 'linear-gradient(135deg, #1E3A8A, #2563EB)', light: '#F5F8FF', text: '#4C1D95', shadow: 'rgba(30,58,138,0.25)' },
   'General Ward':   { gradient: 'linear-gradient(135deg, #2563EB, #3B82F6)', light: '#EFF6FF', text: '#1E3A8A', shadow: 'rgba(37,99,235,0.25)' },
-  Radiology:        { gradient: 'linear-gradient(135deg, #0891B2, #06B6D4)', light: '#ECFEFF', text: '#0C4A6E', shadow: 'rgba(8,145,178,0.25)' },
+  Radiology:        { gradient: 'linear-gradient(135deg, #2563EB, #2563EB)', light: '#ECFEFF', text: '#0C4A6E', shadow: 'rgba(37,99,235,0.25)' },
   Pathology:        { gradient: 'linear-gradient(135deg, #059669, #10B981)', light: '#ECFDF5', text: '#065F46', shadow: 'rgba(5,150,105,0.25)' },
   Pharmacy:         { gradient: 'linear-gradient(135deg, #BE185D, #EC4899)', light: '#FDF2F8', text: '#831843', shadow: 'rgba(190,24,93,0.25)' },
   'General Medicine': { gradient: 'linear-gradient(135deg, #D97706, #F59E0B)', light: '#FFFBEB', text: '#78350F', shadow: 'rgba(217,119,6,0.25)' },
@@ -80,7 +80,7 @@ export default function StaffingPage() {
   const SHIFT_CONFIG = {
     Morning: { gradient: 'linear-gradient(135deg, #D97706, #F59E0B)', shadow: 'rgba(217,119,6,0.3)' },
     Evening: { gradient: 'linear-gradient(135deg, #2563EB, #3B82F6)', shadow: 'rgba(37,99,235,0.3)' },
-    Night:   { gradient: 'linear-gradient(135deg, #4C1D95, #7C3AED)', shadow: 'rgba(76,29,149,0.3)' },
+    Night:   { gradient: 'linear-gradient(135deg, #4C1D95, #1E3A8A)', shadow: 'rgba(76,29,149,0.3)' },
     Off:     { gradient: 'linear-gradient(135deg, #94A3B8, #CBD5E1)', shadow: 'rgba(148,163,184,0.2)' },
   }
 
@@ -274,17 +274,17 @@ export default function StaffingPage() {
       </div>
 
       {/* AI Staffing Insight */}
-      <div className="rounded-2xl p-5" style={{ background: 'linear-gradient(135deg, #F5F3FF, #EDE9FE)', boxShadow: '0 2px 12px rgba(124,58,237,0.08)' }}>
+      <div className="rounded-2xl p-5" style={{ background: 'linear-gradient(135deg, #F5F8FF, #EFF6FF)', boxShadow: '0 2px 12px rgba(30,58,138,0.08)' }}>
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)', boxShadow: '0 4px 12px rgba(124,58,237,0.3)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1E3A8A, #1E3A8A)', boxShadow: '0 4px 12px rgba(30,58,138,0.3)' }}>
             <Sparkles className="h-4.5 w-4.5 text-white" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <p className="text-sm font-bold text-violet-900">AI Staffing Forecast</p>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-200 text-violet-800">91% confidence</span>
+              <p className="text-sm font-bold text-blue-900">AI Staffing Forecast</p>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-200 text-blue-800">91% confidence</span>
             </div>
-            <p className="text-xs text-violet-700 leading-relaxed">
+            <p className="text-xs text-blue-700 leading-relaxed">
               Based on current admission trends (+18% week-over-week) and upcoming scheduled procedures (12 elective surgeries tomorrow),
               AI recommends increasing Evening ICU nursing coverage by 2 and Emergency doctor coverage by 1 for the next 3 days.
             </p>
@@ -294,10 +294,10 @@ export default function StaffingPage() {
                 { dept: 'Emergency', shift: 'Evening', action: '+1 Doctor' },
               ].map(rec => (
                 <div key={rec.dept} className="flex items-center gap-2 px-3 py-1.5 bg-white/60 rounded-xl">
-                  <span className="text-xs font-bold text-violet-900">{rec.dept}</span>
-                  <span className="text-[11px] text-violet-600">{rec.shift}</span>
+                  <span className="text-xs font-bold text-blue-900">{rec.dept}</span>
+                  <span className="text-[11px] text-blue-600">{rec.shift}</span>
                   <span className="text-xs font-black text-emerald-600">{rec.action}</span>
-                  <ChevronRight className="h-3 w-3 text-violet-400" />
+                  <ChevronRight className="h-3 w-3 text-blue-400" />
                 </div>
               ))}
             </div>

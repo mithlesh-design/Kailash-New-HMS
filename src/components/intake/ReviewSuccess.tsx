@@ -35,7 +35,7 @@ function Chips({ items, accent }: { items: string[]; accent?: boolean }) {
   if (!items.length) return <span className="text-slate-400 text-[14px]">—</span>
   return (
     <div className="flex flex-wrap gap-1.5">
-      {items.map(i => <span key={i} className={cn("px-2 py-0.5 text-[12px] font-medium rounded-md", accent ? "bg-purple-50 text-purple-700" : "bg-slate-100 text-slate-700")}>{i}</span>)}
+      {items.map(i => <span key={i} className={cn("px-2 py-0.5 text-[12px] font-medium rounded-md", accent ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-700")}>{i}</span>)}
     </div>
   )
 }

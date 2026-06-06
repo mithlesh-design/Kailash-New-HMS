@@ -78,27 +78,27 @@ export function PaymentModal({ open, amount, purpose, description, patientId, pa
               <div className="space-y-1.5">
                 {CHANNELS.map(({ key, label, icon: Icon, sub }) => (
                   <button key={key} onClick={() => setChannel(key)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl ring-1 transition cursor-pointer text-left ${channel === key ? 'ring-violet-300 bg-violet-50/60' : 'ring-slate-200 hover:bg-slate-50'}`}>
-                    <span className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 ${channel === key ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-600'}`}>
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl ring-1 transition cursor-pointer text-left ${channel === key ? 'ring-blue-300 bg-blue-50/60' : 'ring-slate-200 hover:bg-slate-50'}`}>
+                    <span className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 ${channel === key ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
                       <Icon className="h-4 w-4" />
                     </span>
                     <span className="flex-1 min-w-0">
                       <span className="block text-[13.5px] font-semibold text-slate-900 truncate">{label}</span>
                       <span className="block text-[11.5px] text-slate-500 truncate">{sub}</span>
                     </span>
-                    {channel === key ? <span className="h-3 w-3 rounded-full bg-violet-600 flex-shrink-0" /> : null}
+                    {channel === key ? <span className="h-3 w-3 rounded-full bg-blue-600 flex-shrink-0" /> : null}
                   </button>
                 ))}
               </div>
               <button onClick={pay}
-                className="w-full mt-5 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-[14px] font-bold cursor-pointer">
+                className="w-full mt-5 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-bold cursor-pointer">
                 <IndianRupee className="h-4 w-4" /> Pay ₹{amount.toLocaleString('en-IN')} via {CHANNEL_LABEL[channel]}
               </button>
               <p className="mt-3 text-[10.5px] text-slate-400 text-center">Demo · simulated 800 ms processing · no real money moves.</p>
             </>
           ) : busy ? (
             <div className="py-10 text-center">
-              <Loader2 className="h-8 w-8 text-violet-600 animate-spin mx-auto mb-3" />
+              <Loader2 className="h-8 w-8 text-blue-600 animate-spin mx-auto mb-3" />
               <p className="text-[13px] font-semibold text-slate-700">Processing payment…</p>
               <p className="text-[11.5px] text-slate-500 mt-1">{CHANNEL_LABEL[channel]} · ₹{amount.toLocaleString('en-IN')}</p>
             </div>
@@ -112,7 +112,7 @@ export function PaymentModal({ open, amount, purpose, description, patientId, pa
               <div className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-2 text-[12px] text-slate-600">
                 <Wallet className="h-3.5 w-3.5" /> ₹{done.amount.toLocaleString('en-IN')} · {CHANNEL_LABEL[done.channel]}
               </div>
-              <button onClick={onClose} className="w-full mt-5 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-[13.5px] font-bold cursor-pointer">Done</button>
+              <button onClick={onClose} className="w-full mt-5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13.5px] font-bold cursor-pointer">Done</button>
             </div>
           ) : done?.status === 'pending' ? (
             <div className="py-6 text-center">
@@ -122,7 +122,7 @@ export function PaymentModal({ open, amount, purpose, description, patientId, pa
               <p className="text-[15px] font-bold text-slate-900">Pre-auth pending</p>
               <p className="text-[12px] text-slate-500 mt-1">{done.failureReason ?? 'Insurance is reviewing the claim.'}</p>
               <p className="text-[11.5px] text-slate-400 mt-2">Reference: <span className="font-mono">{done.transactionId}</span></p>
-              <button onClick={onClose} className="w-full mt-5 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-[13.5px] font-bold cursor-pointer">Got it</button>
+              <button onClick={onClose} className="w-full mt-5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13.5px] font-bold cursor-pointer">Got it</button>
             </div>
           ) : (
             <div className="py-6 text-center">
@@ -133,7 +133,7 @@ export function PaymentModal({ open, amount, purpose, description, patientId, pa
               <p className="text-[12px] text-slate-500 mt-1">{done?.failureReason ?? 'Try a different channel.'}</p>
               <div className="flex gap-2 mt-5">
                 <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-[13.5px] font-semibold cursor-pointer">Close</button>
-                <button onClick={reset} className="flex-1 px-4 py-2.5 rounded-xl bg-violet-600 text-white text-[13.5px] font-bold cursor-pointer">Try again</button>
+                <button onClick={reset} className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-[13.5px] font-bold cursor-pointer">Try again</button>
               </div>
             </div>
           )}

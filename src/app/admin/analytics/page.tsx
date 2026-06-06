@@ -33,7 +33,7 @@ const BED_OCCUPANCY = [
 const PAYER_MIX = [
   { name: 'Cash / Self-Pay', value: 38, color: '#3B82F6' },
   { name: 'Govt Scheme (AB-PMJAY)', value: 24, color: '#10B981' },
-  { name: 'Corporate TPA', value: 20, color: '#8B5CF6' },
+  { name: 'Corporate TPA', value: 20, color: '#2563EB' },
   { name: 'Star Health', value: 10, color: '#F59E0B' },
   { name: 'Other Insurers', value: 8, color: '#EC4899' },
 ]
@@ -52,7 +52,7 @@ const maxRev = Math.max(...REVENUE.map(r => r.opd + r.pharmacy))
 const DISEASE = [
   { disease: 'URTI / Respiratory', count: 312, pct: 38, color: 'bg-blue-600' },
   { disease: 'Gastro / GI Disorders', count: 178, pct: 22, color: 'bg-teal-500' },
-  { disease: 'Hypertension', count: 143, pct: 17, color: 'bg-purple-600' },
+  { disease: 'Hypertension', count: 143, pct: 17, color: 'bg-blue-600' },
   { disease: 'Diabetes Follow-up', count: 112, pct: 14, color: 'bg-amber-500' },
   { disease: 'Orthopaedic', count: 73, pct: 9, color: 'bg-red-500' },
 ]
@@ -155,16 +155,16 @@ export default function AdminAnalytics() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-xl bg-gradient-to-br from-purple-50/80 to-blue-50/60 p-5 border border-purple-100/60"
+        className="rounded-xl bg-gradient-to-br from-blue-50/80 to-blue-50/60 p-5 border border-blue-100/60"
       >
         <div className="flex items-start gap-4">
           <div className="h-10 w-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
-            <Sparkles className="h-5 w-5 text-purple-500" />
+            <Sparkles className="h-5 w-5 text-blue-500" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5">
               <p className="text-sm font-bold text-slate-900">AI Weekly Summary</p>
-              <span className="text-[10px] font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full uppercase tracking-wide">Week of May 5–9</span>
+              <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full uppercase tracking-wide">Week of May 5–9</span>
             </div>
             <p className="text-sm text-slate-700 leading-relaxed">
               Hospital performance this week: OPD load up <strong>12%</strong> with General Medicine and Cardiology leading demand. Pharmacy queue efficiency improved <strong>18%</strong> following new workflow adoption. Patient satisfaction holding at <strong>4.7/5</strong>.
@@ -191,7 +191,7 @@ export default function AdminAnalytics() {
             <Line type="monotone" dataKey="General" stroke="#2563EB" strokeWidth={2} dot={{ r: 3 }} />
             <Line type="monotone" dataKey="Cardiology" stroke="#EF4444" strokeWidth={2} dot={{ r: 3 }} />
             <Line type="monotone" dataKey="Ortho" stroke="#10B981" strokeWidth={2} dot={{ r: 3 }} />
-            <Line type="monotone" dataKey="Gynae" stroke="#8B5CF6" strokeWidth={2} dot={{ r: 3 }} />
+            <Line type="monotone" dataKey="Gynae" stroke="#2563EB" strokeWidth={2} dot={{ r: 3 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

@@ -52,11 +52,11 @@ export function CopilotPreviewCard({ intent, onAccept, onReject }: Props) {
   }
 
   return (
-    <div className="mx-3 my-2 rounded-xl bg-gradient-to-br from-violet-50/80 to-blue-50/60 ring-1 ring-violet-200/60 overflow-hidden">
-      <header className="flex items-center gap-2 px-3 py-2 border-b border-violet-100/60">
-        <Wand2 className="h-3.5 w-3.5 text-violet-600" />
-        <h3 className="text-[12.5px] font-semibold text-violet-900">AI Copilot — confirm before running</h3>
-        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-violet-700">
+    <div className="mx-3 my-2 rounded-xl bg-gradient-to-br from-blue-50/80 to-blue-50/60 ring-1 ring-blue-200/60 overflow-hidden">
+      <header className="flex items-center gap-2 px-3 py-2 border-b border-blue-100/60">
+        <Wand2 className="h-3.5 w-3.5 text-blue-600" />
+        <h3 className="text-[12.5px] font-semibold text-blue-900">AI Copilot — confirm before running</h3>
+        <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-blue-700">
           <Sparkles className="h-3 w-3" /> {confPct}% confidence
         </span>
       </header>
@@ -72,20 +72,20 @@ export function CopilotPreviewCard({ intent, onAccept, onReject }: Props) {
         </div>
 
         {intent.reasoning.length > 0 ? (
-          <ul className="text-[11.5px] text-slate-600 space-y-0.5 pl-4 list-disc marker:text-violet-400">
+          <ul className="text-[11.5px] text-slate-600 space-y-0.5 pl-4 list-disc marker:text-blue-400">
             {intent.reasoning.map((r, i) => <li key={i}>{r}</li>)}
           </ul>
         ) : null}
 
         {intent.destination ? (
           <p className="text-[11.5px] text-slate-700 inline-flex items-center gap-1">
-            <ArrowRight className="h-3 w-3 text-violet-500" /> {intent.destination.label}
+            <ArrowRight className="h-3 w-3 text-blue-500" /> {intent.destination.label}
             <span className="font-mono text-[10.5px] text-slate-400">({intent.destination.route})</span>
           </p>
         ) : null}
       </div>
 
-      <footer className="flex items-center gap-2 border-t border-violet-100/60 px-3 py-2 bg-white/60">
+      <footer className="flex items-center gap-2 border-t border-blue-100/60 px-3 py-2 bg-white/60">
         <span className="text-[10.5px] text-slate-500 mr-auto">HITL — accept / reject. Decision audited.</span>
         <button
           type="button"
@@ -98,7 +98,7 @@ export function CopilotPreviewCard({ intent, onAccept, onReject }: Props) {
           type="button"
           onClick={handleAccept}
           disabled={lowConf && intent.action === "unknown"}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Check className="h-3 w-3" /> Run
         </button>

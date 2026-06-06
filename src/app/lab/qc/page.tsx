@@ -58,7 +58,7 @@ export default function LabQC() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-          <ShieldCheck className="h-6 w-6 text-violet-600" /> Quality Control
+          <ShieldCheck className="h-6 w-6 text-blue-600" /> Quality Control
         </h1>
         <p className="text-sm text-[#64748B] mt-1">Levey-Jennings runs &middot; Westgard rules &middot; active violations block release on the affected analyzer</p>
       </div>
@@ -109,7 +109,7 @@ export default function LabQC() {
                     <div className="flex items-center gap-2 flex-wrap pt-1">
                       <input value={reason} onChange={e => setReason(e.target.value)}
                         placeholder="Override reason (required)"
-                        className="flex-1 min-w-0 h-7 px-2 text-[11px] rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-200" />
+                        className="flex-1 min-w-0 h-7 px-2 text-[11px] rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-200" />
                       <button onClick={() => onOverride(s.id)}
                         className="text-[11px] font-bold text-white bg-red-600 hover:bg-red-700 px-2.5 py-1 rounded-lg cursor-pointer">Confirm override</button>
                       <button onClick={() => { setOverriding(null); setReason("") }}
@@ -172,7 +172,7 @@ function LJChart({ runs }: { runs: QCRun[] }) {
       {/* mean line */}
       <line x1={0} y1={h / 2} x2={w} y2={h / 2} stroke="#94A3B8" strokeDasharray="2 2" />
       {/* path */}
-      <path d={linePath} fill="none" stroke="#7C3AED" strokeWidth={1.5} />
+      <path d={linePath} fill="none" stroke="#1E3A8A" strokeWidth={1.5} />
       {/* points */}
       {runs.map((r, i) => {
         const z = (r.value - ref.mean) / ref.sd

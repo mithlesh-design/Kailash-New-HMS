@@ -5,38 +5,42 @@
   --font-body:    var(--font-body,    "Inter", "DM Sans", "Segoe UI", system-ui, sans-serif);
   --font-heading: var(--font-heading, "Figtree", "Inter", "Segoe UI", system-ui, sans-serif);
 
-  /* Brand Colors */
-  --color-primary: #2563EB;
-  --color-primary-light: #3B82F6;
-  --color-primary-dark: #1D4ED8;
-  --color-primary-soft: rgba(37, 99, 235, 0.08);
-  --color-secondary: #06B6D4;
-  --color-secondary-light: #14B8A6;
-  --color-accent: #8B5CF6;
+  /* Brand Colors — single disciplined deep-blue system (matches Kailash logo).
+     `primary` is the deep navy used for filled actions/active states;
+     `accent` is the brighter brand blue for hovers, links, and emphasis. */
+  --color-primary: #1E3A8A;
+  --color-primary-light: #2563EB;
+  --color-primary-dark: #172E6E;
+  --color-primary-soft: rgba(30, 58, 138, 0.06);
+  --color-accent: #2563EB;
+  --color-accent-soft: rgba(37, 99, 235, 0.08);
+  /* Legacy aliases kept so older inline references stay coherent (now blue). */
+  --color-secondary: #2563EB;
+  --color-secondary-light: #3B82F6;
 
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #2563EB 0%, #0891B2 100%);
-  --gradient-surface: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
-  --gradient-sidebar: linear-gradient(180deg, #0F172A 0%, #1E3A5F 100%);
-  --gradient-hero: linear-gradient(145deg, #0F172A 0%, #1E3A5F 50%, #0C1929 100%);
-  --gradient-card-hover: linear-gradient(135deg, rgba(37,99,235,0.04) 0%, rgba(8,145,178,0.04) 100%);
+  /* Gradients — restrained, single-hue only (no rainbow blends) */
+  --gradient-primary: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+  --gradient-surface: linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 100%);
+  --gradient-sidebar: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%);
+  --gradient-hero: linear-gradient(155deg, #0B1220 0%, #16244A 55%, #0B1220 100%);
+  --gradient-card-hover: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(37,99,235,0.03) 100%);
 
-  /* Surfaces */
-  --color-background: #F0F4F8;
+  /* Surfaces — airy, cool off-white background, crisp white cards */
+  --color-background: #F4F7FB;
   --color-surface: #FFFFFF;
-  --color-surface-raised: #FAFBFC;
-  --color-surface-sunken: #F0F4F8;
+  --color-surface-raised: #FBFCFE;
+  --color-surface-sunken: #F1F5F9;
 
-  /* Text */
-  --color-foreground: #0F172A;
-  --color-foreground-muted: #334155;
-  --color-foreground-lighter: #64748B;
-  --color-foreground-placeholder: #94A3B8;
+  /* Text — calmer, higher-contrast neutral slate ramp */
+  --color-foreground: #101828;
+  --color-foreground-muted: #475467;
+  --color-foreground-lighter: #667085;
+  --color-foreground-placeholder: #98A2B3;
 
-  /* Borders (used sparingly — only for inputs/dividers, not cards) */
-  --color-border: #E8EDF2;
-  --color-border-light: #F1F5F9;
-  --color-border-hover: #CBD5E1;
+  /* Borders — hairlines are the primary separator in the new minimal language */
+  --color-border: #EAECF2;
+  --color-border-light: #F2F4F8;
+  --color-border-hover: #D0D5DD;
   --color-border-focus: #2563EB;
 
   /* Status */
@@ -52,22 +56,23 @@
   --color-info: #0284C7;
   --color-info-bg: #F0F9FF;
 
-  /* Premium Shadow System (depth without borders) */
-  --shadow-xs:         0 1px 2px rgba(15,23,42,0.04);
-  --shadow-sm:         0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
-  --shadow-md:         0 4px 8px rgba(15,23,42,0.06), 0 2px 4px rgba(15,23,42,0.04);
-  --shadow-lg:         0 10px 24px rgba(15,23,42,0.08), 0 4px 8px rgba(15,23,42,0.04);
-  --shadow-xl:         0 20px 40px rgba(15,23,42,0.10), 0 8px 16px rgba(15,23,42,0.06);
-  --shadow-2xl:        0 32px 64px rgba(15,23,42,0.14), 0 12px 24px rgba(15,23,42,0.08);
-  --shadow-card:       0 1px 4px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.04);
-  --shadow-card-hover: 0 4px 16px rgba(15,23,42,0.10), 0 8px 32px rgba(15,23,42,0.06);
-  --shadow-elevated:   0 8px 32px rgba(37,99,235,0.10), 0 2px 8px rgba(15,23,42,0.06);
-  --shadow-glow:       0 0 20px rgba(37, 99, 235, 0.20);
-  --shadow-glow-sm:    0 0 12px rgba(37, 99, 235, 0.15);
-  --shadow-sidebar:    4px 0 24px rgba(15,23,42,0.08);
-  --shadow-header:     0 1px 12px rgba(15,23,42,0.06);
-  --shadow-modal:      0 24px 64px rgba(15,23,42,0.20), 0 8px 24px rgba(15,23,42,0.10);
-  --shadow-dropdown:   0 8px 24px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.08);
+  /* Minimal Shadow System — soft, low-spread depth that pairs with hairline borders.
+     The new language leans on borders first, shadow second (enterprise-clean). */
+  --shadow-xs:         0 1px 2px rgba(16,24,40,0.04);
+  --shadow-sm:         0 1px 2px rgba(16,24,40,0.05);
+  --shadow-md:         0 2px 6px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
+  --shadow-lg:         0 8px 20px rgba(16,24,40,0.07), 0 2px 6px rgba(16,24,40,0.04);
+  --shadow-xl:         0 16px 36px rgba(16,24,40,0.09), 0 4px 12px rgba(16,24,40,0.05);
+  --shadow-2xl:        0 28px 56px rgba(16,24,40,0.12), 0 10px 20px rgba(16,24,40,0.06);
+  --shadow-card:       0 1px 2px rgba(16,24,40,0.04);
+  --shadow-card-hover: 0 6px 18px rgba(16,24,40,0.08), 0 2px 6px rgba(16,24,40,0.04);
+  --shadow-elevated:   0 8px 24px rgba(30,58,138,0.08), 0 1px 3px rgba(16,24,40,0.05);
+  --shadow-glow:       0 0 0 4px rgba(37, 99, 235, 0.12);
+  --shadow-glow-sm:    0 0 0 3px rgba(37, 99, 235, 0.10);
+  --shadow-sidebar:    1px 0 0 rgba(16,24,40,0.06);
+  --shadow-header:     0 1px 0 rgba(16,24,40,0.06);
+  --shadow-modal:      0 24px 56px rgba(16,24,40,0.18), 0 6px 16px rgba(16,24,40,0.08);
+  --shadow-dropdown:   0 8px 24px rgba(16,24,40,0.10), 0 1px 3px rgba(16,24,40,0.06);
 
   /* Z-index scale */
   --z-dropdown: 30;
@@ -187,13 +192,14 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ── HMS Card System (shadow-based, no heavy borders) ────── */
 
-/* Base card — shadow depth, no visible border */
+/* Base card — hairline border first, soft shadow second (enterprise-minimal) */
 .hms-card {
   background: var(--color-surface);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(15, 23, 42, 0.04);
+  border: 1px solid var(--color-border);
   transition: box-shadow var(--duration-normal) var(--ease-spring),
+              border-color var(--duration-normal) var(--ease-spring),
               transform var(--duration-normal) var(--ease-spring);
 }
 
@@ -202,7 +208,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-surface);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
-  border: 1px solid rgba(15, 23, 42, 0.03);
+  border: 1px solid var(--color-border);
 }
 
 /* Interactive card — lifts on hover */
@@ -210,22 +216,24 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-surface);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(15, 23, 42, 0.04);
+  border: 1px solid var(--color-border);
   cursor: pointer;
   transition: box-shadow var(--duration-normal) var(--ease-spring),
+              border-color var(--duration-normal) var(--ease-spring),
               transform var(--duration-normal) var(--ease-spring);
 }
 .hms-card-interactive:hover {
   box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-border-hover);
   transform: translateY(-2px);
 }
 
-/* Elevated card — blue-tinted deep shadow */
+/* Elevated card — soft blue-tinted depth */
 .hms-card-elevated {
   background: var(--color-surface);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-elevated);
-  border: 1px solid rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(30, 58, 138, 0.08);
 }
 
 /* Glass card — frosted glass effect */
@@ -248,16 +256,17 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Stat card — colored accent + shadow */
+/* Stat card — hairline border + restrained hover lift */
 .hms-stat-card {
   background: var(--color-surface);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(15, 23, 42, 0.04);
+  border: 1px solid var(--color-border);
   padding: 1.25rem;
-  transition: box-shadow var(--duration-normal) var(--ease-spring);
+  transition: box-shadow var(--duration-normal) var(--ease-spring),
+              border-color var(--duration-normal) var(--ease-spring);
 }
-.hms-stat-card:hover { box-shadow: var(--shadow-md); }
+.hms-stat-card:hover { box-shadow: var(--shadow-md); border-color: var(--color-border-hover); }
 
 /* ── Gradient Utilities ──────────────────────────────────── */
 .gradient-primary {
@@ -304,18 +313,18 @@ h1, h2, h3, h4, h5, h6 {
   animation: pulse-ring 2s ease-out infinite;
 }
 
-/* ── AI Panel Styles ────────────────────────────────────── */
+/* ── AI Panel Styles — neutral blue/slate (no purple) ───── */
 .ai-glow {
-  box-shadow: 0 0 24px rgba(139, 92, 246, 0.15), 0 4px 16px rgba(15,23,42,0.06);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08), 0 2px 8px rgba(16,24,40,0.05);
 }
 .ai-card {
-  background: linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 100%);
-  border: 1px solid rgba(139, 92, 246, 0.12);
+  background: linear-gradient(135deg, #F5F8FF 0%, #F8FAFD 100%);
+  border: 1px solid rgba(37, 99, 235, 0.14);
   border-radius: var(--radius-xl);
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.08);
+  box-shadow: var(--shadow-card);
 }
 .ai-badge {
-  background: linear-gradient(135deg, #7C3AED, #6366F1);
+  background: linear-gradient(135deg, #1E3A8A, #2563EB);
   color: white;
   font-size: 0.65rem;
   font-weight: 700;
@@ -326,8 +335,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ── Queue / Kiosk Board ────────────────────────────────── */
 .queue-token-now {
-  background: linear-gradient(135deg, #2563EB 0%, #0891B2 100%);
-  box-shadow: 0 12px 40px rgba(37,99,235,0.35), 0 4px 16px rgba(37,99,235,0.25);
+  background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+  box-shadow: 0 12px 32px rgba(30,58,138,0.28), 0 2px 8px rgba(30,58,138,0.18);
   border-radius: var(--radius-2xl);
 }
 

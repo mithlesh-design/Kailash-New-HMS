@@ -19,16 +19,16 @@ interface DataTableProps<T> {
 
 export function DataTable<T>({ columns, data, keyField, onRowClick, emptyState, className }: DataTableProps<T>) {
   return (
-    <div className={cn("overflow-x-auto rounded-xl border border-slate-200 bg-white", className)}>
+    <div className={cn("overflow-x-auto rounded-xl border border-[#EAECF2] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]", className)}>
       <table className="w-full text-sm">
-        <thead className="bg-slate-50 border-b border-slate-200">
+        <thead className="bg-[#F9FAFB] border-b border-[#EAECF2]">
           <tr>
             {columns.map((col) => (
               <th
                 key={col.key}
                 scope="col"
                 className={cn(
-                  "px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap",
+                  "px-4 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap",
                   col.className
                 )}
               >
@@ -37,7 +37,7 @@ export function DataTable<T>({ columns, data, keyField, onRowClick, emptyState, 
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-[#F2F4F8]">
           {data.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="py-12 text-center text-slate-400">
@@ -51,7 +51,7 @@ export function DataTable<T>({ columns, data, keyField, onRowClick, emptyState, 
                 onClick={() => onRowClick?.(row)}
                 className={cn(
                   "transition-colors",
-                  onRowClick && "cursor-pointer hover:bg-slate-50"
+                  onRowClick && "cursor-pointer hover:bg-[#F9FAFB]"
                 )}
               >
                 {columns.map((col) => (

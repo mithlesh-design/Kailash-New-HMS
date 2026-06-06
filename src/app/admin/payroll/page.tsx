@@ -249,7 +249,7 @@ export default function PayrollPage() {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <KPI label="Staff" value={rows.length.toString()} tint="bg-slate-50 border-slate-200 text-slate-700" />
         <KPI label="Base salary" value={fmtINR(totals.baseGross)} tint="bg-blue-50 border-blue-200 text-blue-700" />
-        <KPI label="OT pay" value={fmtINR(totals.overtimePay)} tint="bg-violet-50 border-violet-200 text-violet-700" />
+        <KPI label="OT pay" value={fmtINR(totals.overtimePay)} tint="bg-blue-50 border-blue-200 text-blue-700" />
         <KPI label="Deductions" value={fmtINR(totals.deductions)} tint="bg-amber-50 border-amber-200 text-amber-700" />
         <KPI label="Net payable" value={fmtINR(totals.netPay)} tint="bg-emerald-50 border-emerald-200 text-emerald-700" />
       </div>
@@ -301,10 +301,10 @@ export default function PayrollPage() {
                 <td className="px-4 py-3 text-xs text-slate-600">{r.staff.department}</td>
                 <td className="px-4 py-3 text-xs tabular-nums">
                   <span className="text-slate-800">{r.scheduledHours}h</span>
-                  {r.overtimeHours > 0 && <span className="text-violet-700 font-bold"> + {r.overtimeHours}h OT</span>}
+                  {r.overtimeHours > 0 && <span className="text-blue-700 font-bold"> + {r.overtimeHours}h OT</span>}
                 </td>
                 <td className="px-4 py-3 text-xs font-bold text-slate-800 tabular-nums">{fmtINR(r.baseGross)}</td>
-                <td className={cn('px-4 py-3 text-xs font-bold tabular-nums', r.overtimePay > 0 ? 'text-violet-700' : 'text-slate-400')}>{fmtINR(r.overtimePay)}</td>
+                <td className={cn('px-4 py-3 text-xs font-bold tabular-nums', r.overtimePay > 0 ? 'text-blue-700' : 'text-slate-400')}>{fmtINR(r.overtimePay)}</td>
                 <td className="px-4 py-3 text-xs font-bold text-slate-800 tabular-nums">{fmtINR(r.totalGross)}</td>
                 <td className="px-4 py-3 text-xs text-amber-700 tabular-nums">−{fmtINR(r.deductions)}</td>
                 <td className="px-4 py-3 text-xs font-black text-emerald-700 tabular-nums">{fmtINR(r.netPay)}</td>

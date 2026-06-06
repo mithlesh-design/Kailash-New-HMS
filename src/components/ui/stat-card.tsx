@@ -17,14 +17,17 @@ interface StatCardProps {
   onClick?: () => void
 }
 
+// Values render in neutral ink (enterprise-minimal); the icon chip carries the
+// accent. Brand tones (blue/purple/teal/slate) collapse to the deep-blue system;
+// status tones (green/amber/red) stay semantic.
 const COLOR_MAP: Record<StatColor, { icon: string; value: string }> = {
-  blue:   { icon: "bg-blue-600 text-white",   value: "text-blue-700" },
-  green:  { icon: "bg-green-600 text-white",  value: "text-green-700" },
-  amber:  { icon: "bg-amber-500 text-white",  value: "text-amber-700" },
-  red:    { icon: "bg-red-600 text-white",    value: "text-red-700" },
-  purple: { icon: "bg-purple-600 text-white", value: "text-purple-700" },
-  slate:  { icon: "bg-slate-600 text-white",  value: "text-slate-700" },
-  teal:   { icon: "bg-teal-600 text-white",   value: "text-teal-700" },
+  blue:   { icon: "bg-[#1E3A8A] text-white", value: "text-slate-900" },
+  green:  { icon: "bg-green-600 text-white", value: "text-slate-900" },
+  amber:  { icon: "bg-amber-500 text-white", value: "text-slate-900" },
+  red:    { icon: "bg-red-600 text-white",   value: "text-slate-900" },
+  purple: { icon: "bg-[#1E3A8A] text-white", value: "text-slate-900" },
+  slate:  { icon: "bg-slate-700 text-white", value: "text-slate-900" },
+  teal:   { icon: "bg-[#2563EB] text-white", value: "text-slate-900" },
 }
 
 export function StatCard({ label, value, sub, trend, icon: Icon, color = "blue", delay = 0, onClick }: StatCardProps) {
@@ -36,7 +39,7 @@ export function StatCard({ label, value, sub, trend, icon: Icon, color = "blue",
       transition={{ delay, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       onClick={onClick}
       className={cn(
-        "bg-white rounded-xl border border-slate-200 p-5 shadow-[var(--shadow-card)] transition-all duration-200",
+        "bg-white rounded-xl border border-[#EAECF2] p-5 shadow-[var(--shadow-card)] transition-all duration-200 hover:border-[#D0D5DD]",
         onClick && "cursor-pointer hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5"
       )}
     >

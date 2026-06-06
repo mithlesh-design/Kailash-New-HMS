@@ -53,7 +53,7 @@ export default function InventoryManagerRequests() {
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Open requests", value: openCount, icon: ShoppingCart, fg: "text-violet-600", bg: "bg-violet-50" },
+          { label: "Open requests", value: openCount, icon: ShoppingCart, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Restock asks", value: restockCount, icon: Pill, fg: "text-blue-600", bg: "bg-blue-50" },
           { label: "Patient procurement", value: patientCount, icon: User, fg: "text-pink-600", bg: "bg-pink-50" },
           { label: "Pending action", value: pending.length, icon: Hourglass, fg: "text-amber-600", bg: "bg-amber-50" },

@@ -35,7 +35,7 @@ export default function DoctorAnalytics() {
   const tiles = [
     { label: 'Total consultations', value: t.consults, icon: Users, tint: 'bg-blue-50 text-blue-600' },
     { label: 'In-person (OPD)', value: t.opd, icon: Building2, tint: 'bg-teal-50 text-teal-600' },
-    { label: 'Online consults', value: t.online, icon: Video, tint: 'bg-violet-50 text-violet-600' },
+    { label: 'Online consults', value: t.online, icon: Video, tint: 'bg-blue-50 text-blue-600' },
     { label: 'Tests ordered', value: t.tests, icon: FlaskConical, tint: 'bg-rose-50 text-rose-600' },
     { label: 'Prescriptions', value: t.prescriptions, icon: Pill, tint: 'bg-pink-50 text-pink-600' },
     { label: 'Admissions', value: t.admissions, icon: BedDouble, tint: 'bg-amber-50 text-amber-600' },
@@ -118,7 +118,7 @@ export default function DoctorAnalytics() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[12.5px] font-semibold text-slate-500 w-24">Online</span>
-          <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden"><div className="h-full bg-violet-500" style={{ width: `${t.consults ? (t.online / t.consults) * 100 : 0}%` }} /></div>
+          <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${t.consults ? (t.online / t.consults) * 100 : 0}%` }} /></div>
           <span className="text-[12.5px] font-bold text-slate-700 w-10 text-right">{t.online}</span>
         </div>
         <p className="text-[11.5px] text-slate-400 mt-3">Live — completing a consultation, ordering tests, prescribing or admitting updates today&apos;s figures instantly.</p>

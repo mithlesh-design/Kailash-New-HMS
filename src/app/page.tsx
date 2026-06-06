@@ -30,11 +30,11 @@ const allRoleGroups: { id: string; label: string; roles: RoleCard[] }[] = [
     id: 'clinical',
     label: 'Clinical',
     roles: [
-      { role: 'doctor',    label: 'Doctor',          desc: 'AI pre-briefs, e-prescriptions, queue',         icon: Stethoscope, gradient: 'linear-gradient(135deg,#0EA5E9,#6366F1)', iconColor: '#0EA5E9', href: '/doctor/dashboard' },
-      { role: 'nurse',     label: 'Nurse',           desc: 'Ward monitoring, vitals, MAR, handover',        icon: Activity,    gradient: 'linear-gradient(135deg,#10B981,#06B6D4)', iconColor: '#10B981', href: '/nurse/dashboard' },
-      { role: 'pharmacy',  label: 'Pharmacy',        desc: 'Prescriptions, dispensing, narcotics log',      icon: Pill,        gradient: 'linear-gradient(135deg,#EC4899,#8B5CF6)', iconColor: '#EC4899', href: '/pharmacy/dashboard' },
-      { role: 'lab',       label: 'Laboratory',      desc: 'Sample tracking, AI anomaly, reflex tests',     icon: Microscope,  gradient: 'linear-gradient(135deg,#8B5CF6,#EC4899)', iconColor: '#8B5CF6', href: '/lab/dashboard' },
-      { role: 'radiology', label: 'Radiology',       desc: 'Scan scheduling, DICOM viewer, AI findings',    icon: ScanLine,    gradient: 'linear-gradient(135deg,#6366F1,#8B5CF6)', iconColor: '#6366F1', href: '/radiology/dashboard' },
+      { role: 'doctor',    label: 'Doctor',          desc: 'AI pre-briefs, e-prescriptions, queue',         icon: Stethoscope, gradient: 'linear-gradient(135deg,#2563EB,#6366F1)', iconColor: '#2563EB', href: '/doctor/dashboard' },
+      { role: 'nurse',     label: 'Nurse',           desc: 'Ward monitoring, vitals, MAR, handover',        icon: Activity,    gradient: 'linear-gradient(135deg,#10B981,#2563EB)', iconColor: '#10B981', href: '/nurse/dashboard' },
+      { role: 'pharmacy',  label: 'Pharmacy',        desc: 'Prescriptions, dispensing, narcotics log',      icon: Pill,        gradient: 'linear-gradient(135deg,#EC4899,#2563EB)', iconColor: '#EC4899', href: '/pharmacy/dashboard' },
+      { role: 'lab',       label: 'Laboratory',      desc: 'Sample tracking, AI anomaly, reflex tests',     icon: Microscope,  gradient: 'linear-gradient(135deg,#2563EB,#EC4899)', iconColor: '#2563EB', href: '/lab/dashboard' },
+      { role: 'radiology', label: 'Radiology',       desc: 'Scan scheduling, DICOM viewer, AI findings',    icon: ScanLine,    gradient: 'linear-gradient(135deg,#6366F1,#2563EB)', iconColor: '#6366F1', href: '/radiology/dashboard' },
       { role: 'emergency', label: 'Emergency',       desc: 'ER triage, trauma tracking, sepsis alerts',     icon: Ambulance,   gradient: 'linear-gradient(135deg,#EF4444,#F97316)', iconColor: '#EF4444', href: '/emergency/dashboard' },
     ]
   },
@@ -43,7 +43,7 @@ const allRoleGroups: { id: string; label: string; roles: RoleCard[] }[] = [
     label: 'Operations',
     roles: [
       { role: 'reception',   label: 'Reception',         desc: 'OPD queue, registration, kiosk',           icon: LayoutDashboard, gradient: 'linear-gradient(135deg,#F59E0B,#EF4444)', iconColor: '#F59E0B', href: '/reception/dashboard' },
-      { role: 'bed_manager', label: 'Admission / Beds',  desc: 'Bed allocation, forecast, census',         icon: BedDouble,       gradient: 'linear-gradient(135deg,#0891B2,#0EA5E9)', iconColor: '#0891B2', href: '/admission/dashboard' },
+      { role: 'bed_manager', label: 'Admission / Beds',  desc: 'Bed allocation, forecast, census',         icon: BedDouble,       gradient: 'linear-gradient(135deg,#2563EB,#2563EB)', iconColor: '#2563EB', href: '/admission/dashboard' },
       { role: 'discharge',   label: 'Discharge',         desc: '5-pillar clearance, discharge summary',     icon: ClipboardList,   gradient: 'linear-gradient(135deg,#059669,#10B981)', iconColor: '#059669', href: '/discharge/dashboard' },
       { role: 'ot',          label: 'Operation Theater', desc: 'OT scheduling, WHO checklist, briefing',    icon: Scissors,        gradient: 'linear-gradient(135deg,#DC2626,#9F1239)', iconColor: '#DC2626', href: '/ot/dashboard' },
     ]
@@ -53,16 +53,16 @@ const allRoleGroups: { id: string; label: string; roles: RoleCard[] }[] = [
     label: 'Finance',
     roles: [
       { role: 'billing',   label: 'Billing',         desc: 'Invoices, packages, refunds, discounts',    icon: CreditCard, gradient: 'linear-gradient(135deg,#B45309,#D97706)', iconColor: '#B45309', href: '/billing/dashboard' },
-      { role: 'insurance', label: 'Insurance / TPA', desc: 'Claims, pre-auth, AI approval scoring',     icon: FileText,   gradient: 'linear-gradient(135deg,#14B8A6,#0EA5E9)', iconColor: '#14B8A6', href: '/insurance/dashboard' },
+      { role: 'insurance', label: 'Insurance / TPA', desc: 'Claims, pre-auth, AI approval scoring',     icon: FileText,   gradient: 'linear-gradient(135deg,#2563EB,#2563EB)', iconColor: '#2563EB', href: '/insurance/dashboard' },
     ]
   },
   {
     id: 'management',
     label: 'Management',
     roles: [
-      { role: 'admin',        label: 'Admin',        desc: 'Analytics, staff, operations overview',    icon: Shield,      gradient: 'linear-gradient(135deg,#8B5CF6,#6366F1)', iconColor: '#8B5CF6', href: '/admin/dashboard' },
-      { role: 'quality',      label: 'Quality',      desc: 'NABH compliance, audits, incidents',       icon: Heart,       gradient: 'linear-gradient(135deg,#EC4899,#8B5CF6)', iconColor: '#EC4899', href: '/quality/dashboard' },
-      { role: 'housekeeping', label: 'Housekeeping', desc: 'Ward cleanliness, bed turnover tasks',     icon: Package,     gradient: 'linear-gradient(135deg,#7C3AED,#6366F1)', iconColor: '#7C3AED', href: '/housekeeping/dashboard' },
+      { role: 'admin',        label: 'Admin',        desc: 'Analytics, staff, operations overview',    icon: Shield,      gradient: 'linear-gradient(135deg,#2563EB,#6366F1)', iconColor: '#2563EB', href: '/admin/dashboard' },
+      { role: 'quality',      label: 'Quality',      desc: 'NABH compliance, audits, incidents',       icon: Heart,       gradient: 'linear-gradient(135deg,#EC4899,#2563EB)', iconColor: '#EC4899', href: '/quality/dashboard' },
+      { role: 'housekeeping', label: 'Housekeeping', desc: 'Ward cleanliness, bed turnover tasks',     icon: Package,     gradient: 'linear-gradient(135deg,#1E3A8A,#6366F1)', iconColor: '#1E3A8A', href: '/housekeeping/dashboard' },
       { role: 'inventory',    label: 'Inventory',    desc: 'Assets, stock levels, procurement',        icon: FlaskConical,gradient: 'linear-gradient(135deg,#D97706,#EA580C)', iconColor: '#D97706', href: '/inventory/dashboard' },
     ]
   },
@@ -71,56 +71,32 @@ const allRoleGroups: { id: string; label: string; roles: RoleCard[] }[] = [
     label: 'Support Services',
     roles: [
       { role: 'blood_bank',    label: 'Blood Bank',          desc: 'Inventory, cross-match, AI demand forecast',        icon: Droplets,    gradient: 'linear-gradient(135deg,#DC2626,#B91C1C)', iconColor: '#DC2626', href: '/bloodbank/dashboard' },
-      { role: 'cssd',          label: 'CSSD',                desc: 'Sterilization cycles, instrument tracking',         icon: Package,     gradient: 'linear-gradient(135deg,#0D9488,#0891B2)', iconColor: '#0D9488', href: '/cssd/dashboard' },
-      { role: 'dietary',       label: 'Dietary',             desc: 'Diet plans, meal orders, AI nutrition',             icon: Utensils,    gradient: 'linear-gradient(135deg,#16A34A,#0D9488)', iconColor: '#16A34A', href: '/dietary/dashboard' },
+      { role: 'cssd',          label: 'CSSD',                desc: 'Sterilization cycles, instrument tracking',         icon: Package,     gradient: 'linear-gradient(135deg,#1E3A8A,#2563EB)', iconColor: '#1E3A8A', href: '/cssd/dashboard' },
+      { role: 'dietary',       label: 'Dietary',             desc: 'Diet plans, meal orders, AI nutrition',             icon: Utensils,    gradient: 'linear-gradient(135deg,#16A34A,#1E3A8A)', iconColor: '#16A34A', href: '/dietary/dashboard' },
       { role: 'bmw',           label: 'Bio-Medical Waste',   desc: 'Waste categories, disposal logs, compliance',       icon: Trash2,      gradient: 'linear-gradient(135deg,#D97706,#B45309)', iconColor: '#D97706', href: '/bmw/dashboard' },
       { role: 'mortuary',      label: 'Mortuary',            desc: 'Deceased records, MLC clearance, certificates',     icon: FileText,    gradient: 'linear-gradient(135deg,#475569,#334155)', iconColor: '#475569', href: '/mortuary/dashboard' },
       { role: 'ambulance',     label: 'Ambulance',           desc: 'Fleet management, dispatch, trip log',              icon: Truck,       gradient: 'linear-gradient(135deg,#EA580C,#DC2626)', iconColor: '#EA580C', href: '/ambulance/dashboard' },
-      { role: 'audit_officer', label: 'Audit / Compliance',  desc: 'Audit trail, compliance reports, NABH prep',        icon: ShieldCheck, gradient: 'linear-gradient(135deg,#4F46E5,#7C3AED)', iconColor: '#4F46E5', href: '/audit/dashboard' },
+      { role: 'audit_officer', label: 'Audit / Compliance',  desc: 'Audit trail, compliance reports, NABH prep',        icon: ShieldCheck, gradient: 'linear-gradient(135deg,#4F46E5,#1E3A8A)', iconColor: '#4F46E5', href: '/audit/dashboard' },
     ]
   },
   {
     id: 'patient',
     label: 'Patient',
     roles: [
-      { role: 'patient', label: 'Patient Portal', desc: 'Track queue, view records, billing, appointments', icon: Users, gradient: 'linear-gradient(135deg,#2563EB,#0891B2)', iconColor: '#2563EB', href: '/patient/dashboard' },
+      { role: 'patient', label: 'Patient Portal', desc: 'Track queue, view records, billing, appointments', icon: Users, gradient: 'linear-gradient(135deg,#2563EB,#2563EB)', iconColor: '#2563EB', href: '/patient/dashboard' },
     ]
   },
 ]
 
+// Uniform brand identity (no per-item color) — premium, single deep-blue system.
+const BRAND_COLOR = '#2563EB'
+const BRAND_GRADIENT = 'linear-gradient(135deg,#1E3A8A,#2563EB)'
+
 const floatingCards = [
-  {
-    icon: Activity,
-    title: 'Live Queue',
-    value: '24 patients',
-    sub: 'Avg wait: 12 min',
-    color: '#10B981',
-    delay: 0,
-  },
-  {
-    icon: Sparkles,
-    title: 'AI Suggestions',
-    value: '98.2% accuracy',
-    sub: 'Clinical decision support',
-    color: '#8B5CF6',
-    delay: 0.6,
-  },
-  {
-    icon: TrendingUp,
-    title: 'Bed Occupancy',
-    value: '87%',
-    sub: '214 / 247 beds',
-    color: '#0EA5E9',
-    delay: 1.2,
-  },
-  {
-    icon: CheckCircle,
-    title: 'Discharges Today',
-    value: '18 patients',
-    sub: 'Avg LOS: 3.4 days',
-    color: '#F59E0B',
-    delay: 1.8,
-  },
+  { icon: Activity,    title: 'Live Queue',      value: '24 patients',    sub: 'Avg wait: 12 min',            color: BRAND_COLOR, delay: 0 },
+  { icon: Sparkles,    title: 'AI Suggestions',  value: '98.2% accuracy', sub: 'Clinical decision support',   color: BRAND_COLOR, delay: 0.6 },
+  { icon: TrendingUp,  title: 'Bed Occupancy',   value: '87%',            sub: '214 / 247 beds',              color: BRAND_COLOR, delay: 1.2 },
+  { icon: CheckCircle, title: 'Discharges Today',value: '18 patients',    sub: 'Avg LOS: 3.4 days',           color: BRAND_COLOR, delay: 1.8 },
 ]
 
 const trustBadges = [
@@ -165,9 +141,9 @@ export default function LoginPage() {
 
         {/* Glow orbs */}
         <div className="absolute top-[-5%] left-[-10%] w-[500px] h-[500px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.16) 0%, transparent 70%)' }} />
         <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(8,145,178,0.12) 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(30,58,138,0.18) 0%, transparent 70%)' }} />
 
         {/* Logo + Brand */}
         <div className="relative z-10 flex items-center gap-3">
@@ -192,7 +168,7 @@ export default function LoginPage() {
               Intelligent Care.{' '}
               <span
                 style={{
-                  background: 'linear-gradient(135deg, #60A5FA, #34D399)',
+                  background: 'linear-gradient(135deg, #93B4FF, #2563EB)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -339,7 +315,10 @@ export default function LoginPage() {
                 transition={{ duration: 0.2 }}
                 className="grid grid-cols-1 sm:grid-cols-2 gap-3"
               >
-                {activeGroup.roles.map(({ role, label, desc, icon: Icon, gradient, iconColor, href }) => {
+                {activeGroup.roles.map(({ role, label, desc, icon: Icon, href }) => {
+                  // Uniform brand color for every portal card (design direction).
+                  const gradient = BRAND_GRADIENT
+                  const iconColor = BRAND_COLOR
                   const isSelected = selectedRole === role
                   const isLoading = loadingRole === role
                   return (

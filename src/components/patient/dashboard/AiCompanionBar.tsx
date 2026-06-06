@@ -17,10 +17,10 @@ export function AiCompanionBar() {
   const [text, setText] = useState("")
 
   return (
-    <div className="rounded-3xl p-[1.5px] bg-gradient-to-r from-violet-400 via-fuchsia-400 to-blue-400 shadow-[0_8px_28px_rgba(139,92,246,0.18)]">
+    <div className="rounded-3xl p-[1.5px] bg-gradient-to-r from-blue-400 via-blue-400 to-blue-400 shadow-[0_8px_28px_rgba(37,99,235,0.18)]">
       <div className="rounded-[22px] bg-white p-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0">
+          <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center flex-shrink-0">
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
@@ -29,7 +29,7 @@ export function AiCompanionBar() {
           </div>
         </div>
 
-        <div className="mt-3 flex items-center gap-2 rounded-2xl bg-slate-50 border border-slate-200 px-3 h-12 focus-within:ring-2 focus-within:ring-inset focus-within:ring-violet-400 transition-shadow">
+        <div className="mt-3 flex items-center gap-2 rounded-2xl bg-slate-50 border border-slate-200 px-3 h-12 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-400 transition-shadow">
           <input
             value={text}
             onChange={e => setText(e.target.value)}
@@ -37,15 +37,15 @@ export function AiCompanionBar() {
             aria-label="Ask the AI health companion"
             className="intake-input flex-1 bg-transparent border-none text-[15px] text-slate-900 placeholder:text-slate-400"
           />
-          <button aria-label="Speak" className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"><Mic className="h-4.5 w-4.5" /></button>
-          <button aria-label="Send" className="h-8 w-8 rounded-full bg-violet-600 text-white flex items-center justify-center active:scale-95 transition-transform"><ArrowUp className="h-4.5 w-4.5" /></button>
+          <button aria-label="Speak" className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><Mic className="h-4.5 w-4.5" /></button>
+          <button aria-label="Send" className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center active:scale-95 transition-transform"><ArrowUp className="h-4.5 w-4.5" /></button>
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
           {SUGGESTIONS.map((s, i) => (
             <button key={s.q} onClick={() => setActive(active === i ? null : i)}
               className={cn("text-[13px] font-medium px-3 py-1.5 rounded-full border transition-all active:scale-95",
-                active === i ? "bg-violet-600 border-violet-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-violet-300")}>
+                active === i ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300")}>
               {s.q}
             </button>
           ))}
@@ -54,10 +54,10 @@ export function AiCompanionBar() {
         <AnimatePresence>
           {active !== null && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div className="mt-3 rounded-2xl bg-violet-50/70 border border-violet-100 p-4">
+              <div className="mt-3 rounded-2xl bg-blue-50/70 border border-blue-100 p-4">
                 <p className="text-[14px] text-slate-800 leading-relaxed">{SUGGESTIONS[active].a}</p>
                 <div className="flex items-center gap-1.5 mt-2.5 text-[11px] text-slate-400">
-                  <ShieldCheck className="h-3.5 w-3.5 text-violet-500" />
+                  <ShieldCheck className="h-3.5 w-3.5 text-blue-500" />
                   AI-generated for guidance · always verify with your doctor
                 </div>
               </div>

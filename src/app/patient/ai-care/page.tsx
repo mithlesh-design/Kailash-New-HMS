@@ -43,7 +43,7 @@ function AskAI() {
             <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn("flex", m.role === 'me' ? "justify-end" : "justify-start")}>
               <div className={cn("max-w-[80%] px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed", m.role === 'me' ? "bg-blue-600 text-white rounded-br-md" : "bg-slate-100 text-slate-800 rounded-bl-md")}>
                 {m.text}
-                {m.role === 'ai' && i > 0 && <span className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400"><ShieldCheck className="h-3.5 w-3.5 text-violet-500" /> AI guidance · verify with your doctor</span>}
+                {m.role === 'ai' && i > 0 && <span className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400"><ShieldCheck className="h-3.5 w-3.5 text-blue-500" /> AI guidance · verify with your doctor</span>}
               </div>
             </motion.div>
           ))}
@@ -53,15 +53,15 @@ function AskAI() {
       <div className="px-4 pt-2 pb-4 border-t border-slate-100">
         <div className="flex flex-wrap gap-2 mb-3">
           {SUGGESTIONS.map(s => { const Icon = s.icon; return (
-            <button key={s.label} onClick={() => send(s.label)} className="flex items-center gap-1.5 text-[12.5px] font-medium px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600 transition-colors active:scale-95">
+            <button key={s.label} onClick={() => send(s.label)} className="flex items-center gap-1.5 text-[12.5px] font-medium px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-colors active:scale-95">
               <Icon className="h-3.5 w-3.5" /> {s.label}
             </button>
           ) })}
         </div>
-        <div className="flex items-center gap-2 rounded-2xl bg-slate-50 border border-slate-200 px-3 h-12 focus-within:ring-2 focus-within:ring-inset focus-within:ring-violet-400 transition-shadow">
+        <div className="flex items-center gap-2 rounded-2xl bg-slate-50 border border-slate-200 px-3 h-12 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-400 transition-shadow">
           <input value={text} onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') send(text) }} placeholder="Ask about your health…" aria-label="Ask the AI health companion" className="intake-input flex-1 bg-transparent border-none text-[15px] text-slate-900 placeholder:text-slate-400" />
-          <button aria-label="Speak" className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"><Mic className="h-4.5 w-4.5" /></button>
-          <button aria-label="Send" onClick={() => send(text)} className="h-8 w-8 rounded-full bg-violet-600 text-white flex items-center justify-center active:scale-95 transition-transform"><ArrowUp className="h-4.5 w-4.5" /></button>
+          <button aria-label="Speak" className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><Mic className="h-4.5 w-4.5" /></button>
+          <button aria-label="Send" onClick={() => send(text)} className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center active:scale-95 transition-transform"><ArrowUp className="h-4.5 w-4.5" /></button>
         </div>
       </div>
     </div>
@@ -82,7 +82,7 @@ function Transparency() {
   return (
     <div className="space-y-4">
       <div className="rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 p-4 grid grid-cols-3 gap-3 text-center">
-        <div><Sparkles className="h-5 w-5 text-violet-500 mx-auto mb-1" /><p className="text-[12px] text-slate-500">AI is</p><p className="text-[13px] font-bold text-slate-900">Advisory only</p></div>
+        <div><Sparkles className="h-5 w-5 text-blue-500 mx-auto mb-1" /><p className="text-[12px] text-slate-500">AI is</p><p className="text-[13px] font-bold text-slate-900">Advisory only</p></div>
         <div><CheckCircle className="h-5 w-5 text-green-500 mx-auto mb-1" /><p className="text-[12px] text-slate-500">Decisions by</p><p className="text-[13px] font-bold text-slate-900">Your doctor</p></div>
         <div><ShieldCheck className="h-5 w-5 text-blue-500 mx-auto mb-1" /><p className="text-[12px] text-slate-500">Every action</p><p className="text-[13px] font-bold text-slate-900">Logged</p></div>
       </div>
@@ -114,7 +114,7 @@ export default function AiCarePage() {
   return (
     <div className="max-w-3xl mx-auto pb-10">
       <h1 className="text-[24px] font-bold text-slate-900 tracking-tight flex items-center gap-2 mb-3">
-        <span className="h-8 w-8 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center"><Sparkles className="h-4.5 w-4.5 text-white" /></span>
+        <span className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center"><Sparkles className="h-4.5 w-4.5 text-white" /></span>
         AI Care
       </h1>
       <div className="inline-flex p-1 rounded-xl bg-slate-100 mb-4">

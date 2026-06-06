@@ -24,9 +24,9 @@ export function OverviewTab({ ip, insight }: { ip: Inpatient; insight?: string |
   return (
     <div className="space-y-4">
       {insight && (
-        <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-white p-4">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-violet-600 mb-1">AI insight</p>
-          <p className="text-[13.5px] text-violet-900 leading-relaxed">{insight}</p>
+        <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-4">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 mb-1">AI insight</p>
+          <p className="text-[13.5px] text-blue-900 leading-relaxed">{insight}</p>
         </div>
       )}
       <div className="grid sm:grid-cols-2 gap-4">
@@ -203,7 +203,7 @@ export function ProcedureTab({ ip }: { ip: Inpatient }) {
     <div className="space-y-4">
       <Section icon={Scissors} title="Surgery / Procedure"><SurgeryPanel ip={ip} /></Section>
       {ip.otBooking && (
-        <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-100 p-3 text-[12.5px] text-fuchsia-900">
+        <div className="rounded-xl bg-blue-50 border border-blue-100 p-3 text-[12.5px] text-blue-900">
           OT booked — {ip.otBooking.procedure} · {ip.otBooking.surgeon} · {ip.otBooking.ot} · {new Date(ip.otBooking.scheduledAt).toLocaleString('en-IN')} ({ip.otBooking.status})
         </div>
       )}

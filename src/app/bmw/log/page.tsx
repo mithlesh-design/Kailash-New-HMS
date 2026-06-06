@@ -124,7 +124,7 @@ export default function BMWLogPage() {
                     {l.ward} · {l.weightKg}kg · {l.bagCount} bag(s)
                     {l.status === 'pending' && <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">Pending</span>}
                     {l.status === 'collected' && <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">Collected</span>}
-                    {l.status === 'treated' && <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-violet-100 text-violet-700">Treated</span>}
+                    {l.status === 'treated' && <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">Treated</span>}
                     {l.status === 'disposed' && <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">Disposed</span>}
                   </p>
                   <p className="text-[11px] text-slate-500 mt-0.5">
@@ -142,7 +142,7 @@ export default function BMWLogPage() {
                   </p>
                   {l.status === 'collected' && (
                     <button onClick={() => { markTreated(l.id); toast.success('Marked treated') }}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white cursor-pointer">
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
                       <ShieldCheck className="h-3.5 w-3.5" />Mark treated
                     </button>
                   )}

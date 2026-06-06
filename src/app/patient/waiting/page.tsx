@@ -285,7 +285,7 @@ export default function WaitingRoomPage() {
               value={Math.max(5, 100 - (waitMin / 30) * 100)}
               size={76}
               strokeWidth={6}
-              color="#2DD4BF"
+              color="#60A5FA"
               label={
                 <span className="font-bold text-base text-slate-900">
                   {waitMin}m
@@ -348,10 +348,10 @@ export default function WaitingRoomPage() {
 
       {/* AI Brief Status */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-        <div className="hms-card p-6 border-purple-200 bg-purple-50/30">
+        <div className="hms-card p-6 border-blue-200 bg-blue-50/30">
           <div className="flex items-start gap-5">
-            <div className="h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-purple-100 border border-purple-200">
-              <Sparkles className="h-6 w-6 text-purple-600" />
+            <div className="h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-100 border border-blue-200">
+              <Sparkles className="h-6 w-6 text-blue-600" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-2">
@@ -370,9 +370,9 @@ export default function WaitingRoomPage() {
                 </motion.p>
               </AnimatePresence>
               {/* Progress bar */}
-              <div className="mt-4 h-1.5 rounded-full bg-purple-100/50 overflow-hidden">
+              <div className="mt-4 h-1.5 rounded-full bg-blue-100/50 overflow-hidden">
                 <motion.div
-                  className="h-full bg-purple-500 rounded-full"
+                  className="h-full bg-blue-500 rounded-full"
                   animate={{ width: [`${(aiMsgIdx / AI_MESSAGES.length) * 80}%`, `${((aiMsgIdx + 1) / AI_MESSAGES.length) * 100}%`] }}
                   transition={{ duration: 3.2 }}
                 />

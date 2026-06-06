@@ -14,8 +14,8 @@ import { FlaskConical, Pill, Droplets, Send, ArrowUpRight, Scissors, CheckCircle
 import { toast } from "sonner"
 
 const KIND: Record<OrderKind, { icon: React.ElementType; tint: string }> = {
-  test:     { icon: FlaskConical, tint: "bg-violet-50 text-violet-600 border-violet-100" },
-  med:      { icon: Pill,         tint: "bg-purple-50 text-purple-600 border-purple-100" },
+  test:     { icon: FlaskConical, tint: "bg-blue-50 text-blue-600 border-blue-100" },
+  med:      { icon: Pill,         tint: "bg-blue-50 text-blue-600 border-blue-100" },
   iv:       { icon: Droplets,     tint: "bg-blue-50 text-blue-600 border-blue-100" },
   referral: { icon: Send,         tint: "bg-teal-50 text-teal-600 border-teal-100" },
   icu:      { icon: ArrowUpRight, tint: "bg-red-50 text-red-600 border-red-100" },
@@ -61,7 +61,7 @@ export default function NurseOrdersPage() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <WardSwitcher />
-          <div className="flex items-center gap-2 text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-full px-3 py-1.5">
+          <div className="flex items-center gap-2 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-3 py-1.5">
             <Sparkles className="h-3.5 w-3.5" /> AI-prioritised{highCount > 0 ? ` · ${highCount} high` : ""}
           </div>
         </div>
@@ -99,14 +99,14 @@ export default function NurseOrdersPage() {
                           <div className="flex items-center gap-3 mt-1 text-[11px] flex-wrap">
                             <span className="flex items-center gap-1 text-teal-700 font-semibold"><Stethoscope className="h-3 w-3" /> Ordered by {o.requestedBy}</span>
                             <span className="flex items-center gap-1 text-slate-400"><Clock className="h-3 w-3" /> {timeAgo(o.at)}</span>
-                            <span className="flex items-center gap-1 text-violet-600 font-semibold"><Sparkles className="h-3 w-3" /> {o.aiReason}</span>
+                            <span className="flex items-center gap-1 text-blue-600 font-semibold"><Sparkles className="h-3 w-3" /> {o.aiReason}</span>
                           </div>
                         </div>
                       </div>
                       <button
                         onClick={() => action(o)}
                         className="flex flex-col items-center gap-0.5 text-sm font-bold text-white px-4 py-2 rounded-xl cursor-pointer transition-all flex-shrink-0"
-                        style={{ background: "linear-gradient(135deg,#16A34A,#0D9488)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}
+                        style={{ background: "linear-gradient(135deg,#16A34A,#1E3A8A)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}
                       >
                         <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> Mark done</span>
                         <span className="text-[9px] font-medium text-white/80">notifies {o.requestedBy.replace(/^Dr\.?\s*/, "Dr. ")}</span>

@@ -165,7 +165,7 @@ export default function ERDashboard() {
             { label: 'Awaiting triage', sub: 'Just arrived',         count: m.kpis.awaitingTriageOnly, color: 'border-amber-200 bg-amber-50',      icon: Ambulance,    fg: 'text-amber-700',     href: '/emergency/triage', cta: 'Triage' },
             { label: 'Triaged',         sub: 'Awaiting doctor',      count: m.kpis.triagedOnly,        color: 'border-orange-200 bg-orange-50',    icon: ClipboardList, fg: 'text-orange-700',   href: '/emergency/floor',  cta: 'Claim' },
             { label: 'In treatment',    sub: 'Active care',          count: m.kpis.inTreatmentCount,   color: 'border-blue-200 bg-blue-50',        icon: Stethoscope,   fg: 'text-blue-700',     href: '/emergency/floor',  cta: 'Continue' },
-            { label: 'Awaiting dispo',  sub: 'Decision pending',     count: m.kpis.awaitingDispoCount, color: 'border-violet-200 bg-violet-50',    icon: Hourglass,     fg: 'text-violet-700',   href: '/emergency/floor',  cta: 'Decide' },
+            { label: 'Awaiting dispo',  sub: 'Decision pending',     count: m.kpis.awaitingDispoCount, color: 'border-blue-200 bg-blue-50',    icon: Hourglass,     fg: 'text-blue-700',   href: '/emergency/floor',  cta: 'Decide' },
             { label: 'Disposed',        sub: 'Today',                count: m.kpis.disposedToday,      color: 'border-emerald-200 bg-emerald-50',  icon: LogOut,        fg: 'text-emerald-700',  href: '/emergency/floor',  cta: 'Review' },
             { label: 'MLC pending',     sub: 'Trauma w/o file',      count: m.kpis.mlcOpen,            color: m.kpis.mlcOpen > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: ShieldAlert, fg: m.kpis.mlcOpen > 0 ? 'text-red-700' : 'text-slate-400', href: '/emergency/floor', cta: 'File MLC' },
           ].map((s, i, arr) => (
@@ -195,7 +195,7 @@ export default function ERDashboard() {
           { label: 'NEWS2 high', value: m.kpis.high, icon: ShieldAlert, fg: 'text-red-600', bg: 'bg-red-50' },
           { label: 'Sepsis suspected (qSOFA)', value: m.kpis.sepsisSuspected, icon: ShieldAlert, fg: 'text-orange-600', bg: 'bg-orange-50' },
           { label: 'Trauma active', value: m.kpis.traumaActive, icon: AlertTriangle, fg: 'text-pink-600', bg: 'bg-pink-50' },
-          { label: 'Awaiting bed', value: m.kpis.awaitingBed, icon: PackageCheck, fg: 'text-violet-600', bg: 'bg-violet-50' },
+          { label: 'Awaiting bed', value: m.kpis.awaitingBed, icon: PackageCheck, fg: 'text-blue-600', bg: 'bg-blue-50' },
         ].map(s => (
           <div key={s.label} className={cn('rounded-xl p-3 flex items-center gap-3', s.bg)}>
             <div className="p-2 rounded-lg bg-white shadow-sm"><s.icon className={cn('h-4 w-4', s.fg)} /></div>
@@ -296,7 +296,7 @@ export default function ERDashboard() {
             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Hourglass className="h-4 w-4 text-violet-600" />
+                  <Hourglass className="h-4 w-4 text-blue-600" />
                   <h2 className="text-sm font-bold text-slate-800">Awaiting bed / disposition</h2>
                   <span className="text-xs text-slate-400">{m.awaitingDispo.length}</span>
                 </div>
@@ -307,7 +307,7 @@ export default function ERDashboard() {
                   <div key={p.id} className="px-4 py-2.5 text-sm">
                     <span className="font-bold text-slate-800">{p.name}</span>
                     <span className="text-slate-400 mx-2">·</span>
-                    <span className="text-violet-700">{p.disposition ? p.disposition : 'decision pending'}</span>
+                    <span className="text-blue-700">{p.disposition ? p.disposition : 'decision pending'}</span>
                     {p.dispositionNote && <>
                       <span className="text-slate-400 mx-2">·</span>
                       <span className="text-[11px] text-slate-500 italic">{p.dispositionNote.slice(0, 80)}</span>

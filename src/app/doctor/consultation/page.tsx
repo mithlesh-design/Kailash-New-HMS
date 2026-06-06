@@ -132,7 +132,7 @@ export default function DoctorConsultation() {
           <p className="text-[12px] text-slate-500">{active.id} · {active.age}y · {active.gender} · {active.department}</p>
           {active.symptoms?.length ? <p className="text-[11.5px] text-slate-600 mt-0.5">Chief complaint: <b>{active.symptoms.join(', ')}</b></p> : null}
         </div>
-        <span className="text-[10.5px] font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-full px-2 py-0.5 inline-flex items-center gap-1">
+        <span className="text-[10.5px] font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-full px-2 py-0.5 inline-flex items-center gap-1">
           <Sparkles className="h-3 w-3" /> AI scribe ready
         </span>
       </div>
@@ -141,7 +141,7 @@ export default function DoctorConsultation() {
         {/* SOAP note */}
         <div className="lg:col-span-2 rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-4 space-y-2.5">
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-violet-600" />
+            <FileText className="h-4 w-4 text-blue-600" />
             <h3 className="text-[14px] font-semibold text-slate-900">SOAP note</h3>
             <span className="ml-auto text-[10.5px] text-slate-400">auto-saves as you type</span>
           </div>
@@ -151,10 +151,10 @@ export default function DoctorConsultation() {
               <textarea value={soap[k]} onChange={(e) => persist({ ...soap, [k]: e.target.value })}
                 rows={k === 'plan' ? 3 : 2}
                 placeholder={k === 'subjective' ? 'Patient reports…' : k === 'objective' ? 'On examination…' : k === 'assessment' ? 'Most likely…' : 'Plan: Rx, labs, follow-up, red-flag advice…'}
-                className="w-full px-3 py-2 rounded-lg ring-1 ring-slate-200 bg-white text-[13px] focus:outline-none focus:ring-violet-400 resize-none" />
+                className="w-full px-3 py-2 rounded-lg ring-1 ring-slate-200 bg-white text-[13px] focus:outline-none focus:ring-blue-400 resize-none" />
             </div>
           ))}
-          <button onClick={signNote} className="w-full mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-[13.5px] font-semibold cursor-pointer">
+          <button onClick={signNote} className="w-full mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[13.5px] font-semibold cursor-pointer">
             <Save className="h-4 w-4" /> Sign &amp; save SOAP
           </button>
         </div>
@@ -162,9 +162,9 @@ export default function DoctorConsultation() {
         {/* Quick-orders rail */}
         <div className="rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06)] p-4 space-y-2">
           <h3 className="text-[14px] font-semibold text-slate-900 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-violet-600" /> Quick orders
+            <Sparkles className="h-4 w-4 text-blue-600" /> Quick orders
           </h3>
-          <button onClick={orderRx} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 text-[12.5px] font-semibold cursor-pointer">
+          <button onClick={orderRx} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 text-[12.5px] font-semibold cursor-pointer">
             <Pill className="h-4 w-4" /> Send Rx to pharmacy
           </button>
           <button onClick={orderLab} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 text-[12.5px] font-semibold cursor-pointer">

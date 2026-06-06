@@ -131,8 +131,8 @@ export function ClinicalNotesCard({ patientId, patientName }: { patientId: strin
 
   return (
     <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-sm overflow-hidden">
-      <header className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-violet-50/60 to-blue-50/40">
-        <Sparkles className="h-4 w-4 text-violet-600" />
+      <header className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-blue-50/60 to-blue-50/40">
+        <Sparkles className="h-4 w-4 text-blue-600" />
         <h3 className="text-[14px] font-semibold text-slate-900">Clinical notes · {patientName}</h3>
         <span className="ml-auto text-[10.5px] text-slate-500">{counts.wound} wound · {counts.fall} fall-risk · {counts.careplan} care plan</span>
       </header>
@@ -249,7 +249,7 @@ export function ClinicalNotesCard({ patientId, patientName }: { patientId: strin
         <div>
           <button onClick={() => setOpenSection(openSection === 'careplan' ? null : 'careplan')}
             className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 cursor-pointer">
-            <ClipboardList className="h-4 w-4 text-violet-600" />
+            <ClipboardList className="h-4 w-4 text-blue-600" />
             <span className="text-[13px] font-semibold text-slate-900">Care plan</span>
             <span className="ml-auto text-[10px] text-slate-400">{counts.careplan}</span>
             {openSection === 'careplan' ? <ChevronDown className="h-3.5 w-3.5 text-slate-400" /> : <ChevronRight className="h-3.5 w-3.5 text-slate-400" />}
@@ -257,16 +257,16 @@ export function ClinicalNotesCard({ patientId, patientName }: { patientId: strin
           {openSection === 'careplan' && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="px-4 py-3 bg-slate-50/50 space-y-2">
               <input value={cpProblem} onChange={e => setCpProblem(e.target.value)} placeholder="Problem (e.g. Risk for fluid volume deficit)"
-                className="w-full h-9 px-2.5 rounded-md ring-1 ring-slate-200 bg-white text-[12.5px] focus:outline-none focus:ring-violet-400" />
+                className="w-full h-9 px-2.5 rounded-md ring-1 ring-slate-200 bg-white text-[12.5px] focus:outline-none focus:ring-blue-400" />
               <input value={cpGoal} onChange={e => setCpGoal(e.target.value)} placeholder="Goal (e.g. Maintain urine output ≥ 30 ml/h)"
-                className="w-full h-9 px-2.5 rounded-md ring-1 ring-slate-200 bg-white text-[12.5px] focus:outline-none focus:ring-violet-400" />
+                className="w-full h-9 px-2.5 rounded-md ring-1 ring-slate-200 bg-white text-[12.5px] focus:outline-none focus:ring-blue-400" />
               <textarea value={cpInterventions} onChange={e => setCpInterventions(e.target.value)} rows={2} placeholder="Interventions (one per line)"
-                className="w-full px-2.5 py-1.5 rounded-md ring-1 ring-slate-200 bg-white text-[12.5px] focus:outline-none focus:ring-violet-400 resize-none" />
+                className="w-full px-2.5 py-1.5 rounded-md ring-1 ring-slate-200 bg-white text-[12.5px] focus:outline-none focus:ring-blue-400 resize-none" />
               <div className="flex items-center gap-2">
                 <input value={cpReview} onChange={e => setCpReview(e.target.value)} placeholder="Review (e.g. 24h reassess)"
-                  className="flex-1 h-9 px-2.5 rounded-md ring-1 ring-slate-200 bg-white text-[12.5px] focus:outline-none focus:ring-violet-400" />
+                  className="flex-1 h-9 px-2.5 rounded-md ring-1 ring-slate-200 bg-white text-[12.5px] focus:outline-none focus:ring-blue-400" />
                 <button onClick={addCarePlan}
-                  className="h-9 px-3 rounded-md bg-violet-600 hover:bg-violet-700 text-white text-[12px] font-semibold inline-flex items-center gap-1.5 cursor-pointer">
+                  className="h-9 px-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-semibold inline-flex items-center gap-1.5 cursor-pointer">
                   <Plus className="h-3.5 w-3.5" /> Add to plan
                 </button>
               </div>

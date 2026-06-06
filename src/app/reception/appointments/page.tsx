@@ -123,7 +123,7 @@ export default function ReceptionAppointments() {
               <div key={a.id} className={cn("rounded-2xl bg-white shadow-[0_1px_4px_rgba(15,23,42,0.06),0_4px_16px_rgba(15,23,42,0.04)] p-4", cancelled && "opacity-65")}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">
-                    <span className={cn("h-10 w-10 rounded-2xl flex items-center justify-center flex-shrink-0", online ? "bg-violet-50 text-violet-600" : "bg-teal-50 text-teal-600")}>
+                    <span className={cn("h-10 w-10 rounded-2xl flex items-center justify-center flex-shrink-0", online ? "bg-blue-50 text-blue-600" : "bg-teal-50 text-teal-600")}>
                       {online ? <Video className="h-5 w-5" /> : <Building2 className="h-5 w-5" />}
                     </span>
                     <div className="min-w-0">
@@ -133,7 +133,7 @@ export default function ReceptionAppointments() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", online ? "bg-violet-50 text-violet-700" : "bg-teal-50 text-teal-700")}>{online ? 'Online' : 'In-person'}</span>
+                    <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", online ? "bg-blue-50 text-blue-700" : "bg-teal-50 text-teal-700")}>{online ? 'Online' : 'In-person'}</span>
                     <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full capitalize", STATUS_TINT[a.status])}>{a.status}</span>
                   </div>
                 </div>
@@ -141,7 +141,7 @@ export default function ReceptionAppointments() {
                 {!cancelled && (
                   <div className="flex flex-wrap items-center gap-2 mt-3">
                     {online && isToday && (a.status === 'confirmed' || a.status === 'upcoming') && (
-                      <button onClick={() => toast.success('Launching video room', { description: nameFor(a) })} className="text-[12px] font-bold text-white bg-violet-600 hover:bg-violet-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition"><Video className="h-3.5 w-3.5" /> Join</button>
+                      <button onClick={() => toast.success('Launching video room', { description: nameFor(a) })} className="text-[12px] font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition"><Video className="h-3.5 w-3.5" /> Join</button>
                     )}
                     {a.status === 'upcoming' && (
                       <button onClick={() => { updateAppointment(a.id, { status: 'confirmed' }); toast.success('Appointment confirmed') }} className="text-[12px] font-bold text-green-700 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition"><CheckCircle className="h-3.5 w-3.5" /> Confirm</button>

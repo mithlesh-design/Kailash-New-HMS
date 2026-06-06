@@ -164,12 +164,12 @@ export function AiInsightPanel({ insights, title = 'AI Insights', compact = fals
   const urgentCount = insights.filter(i => i.confidenceTier === 'high').length
 
   return (
-    <div className={`rounded-2xl overflow-hidden ${className}`} style={{ boxShadow: '0 2px 12px rgba(124,58,237,0.08), 0 1px 4px rgba(15,23,42,0.06)' }}>
+    <div className={`rounded-2xl overflow-hidden border border-[#EAECF2] ${className}`} style={{ boxShadow: '0 2px 12px rgba(30,58,138,0.06), 0 1px 4px rgba(16,24,40,0.05)' }}>
       {/* Panel Header */}
       <button
         onClick={() => setCollapsed(c => !c)}
         className="w-full flex items-center justify-between px-5 py-3.5 cursor-pointer transition-colors hover:opacity-90"
-        style={{ background: 'linear-gradient(135deg, #7C3AED, #6D28D9)' }}
+        style={{ background: 'linear-gradient(135deg, #1E3A8A, #2563EB)' }}
       >
         <div className="flex items-center gap-2.5">
           <Sparkles className="h-4 w-4 text-white/90" />

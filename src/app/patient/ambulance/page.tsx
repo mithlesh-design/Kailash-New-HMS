@@ -119,7 +119,7 @@ export default function AmbulancePage() {
           </div>
 
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 mt-3">
-            <span className="h-10 w-10 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0 font-bold text-[15px]">SK</span>
+            <span className="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 font-bold text-[15px]">SK</span>
             <div className="flex-1"><p className="text-[14px] font-semibold text-slate-900">Suresh Kumar</p><p className="text-[12.5px] text-slate-500">Driver · Paramedic on board</p></div>
             <a href="tel:+918012345678" className="h-10 w-10 rounded-2xl bg-green-600 text-white flex items-center justify-center active:scale-[0.97] transition-transform"><Phone className="h-4.5 w-4.5" /></a>
           </div>

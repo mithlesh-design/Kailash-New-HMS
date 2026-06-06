@@ -28,7 +28,7 @@ const STATUS_STYLE: Record<TestStatus, string> = {
   collected:           "bg-amber-100 text-amber-700",
   on_bench:            "bg-amber-100 text-amber-700",
   in_progress:         "bg-blue-100 text-blue-700",
-  entered:             "bg-violet-100 text-violet-700",
+  entered:             "bg-blue-100 text-blue-700",
   verified:            "bg-emerald-100 text-emerald-700",
   released:            "bg-slate-100 text-slate-500",
   rejected:            "bg-red-100 text-red-700",
@@ -123,7 +123,7 @@ export default function LabBenches() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
-          <Microscope className="h-6 w-6 text-violet-600" /> Benches
+          <Microscope className="h-6 w-6 text-blue-600" /> Benches
         </h1>
         <p className="text-sm text-[#64748B] mt-1">Claim → enter results → send for verification → verify → release · live H/L/Critical flagging against reference ranges</p>
       </div>
@@ -230,7 +230,7 @@ function BenchRow(props: {
             <span className="text-[11px] font-bold text-slate-400">{order.patientId}</span>
             {order.wardBed && <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-0.5"><Bed className="h-3 w-3" />{order.wardBed}</span>}
             <span className="text-[11px] font-semibold text-slate-500">·</span>
-            <span className="text-[12px] font-bold text-violet-700">{test.name}</span>
+            <span className="text-[12px] font-bold text-blue-700">{test.name}</span>
             <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", STATUS_STYLE[test.status])}>{STATUS_LABEL[test.status]}</span>
             {test.assignedTo && <span className="text-[11px] font-semibold text-slate-400">· {mine ? "your counter" : `on ${test.assignedTo.name}`}</span>}
           </div>
@@ -268,7 +268,7 @@ function BenchRow(props: {
             <div className="flex items-center gap-1.5 flex-wrap">
               <input value={overrideReason} onChange={e => props.setOverrideReason(e.target.value)}
                 placeholder="Override reason"
-                className="w-44 h-7 px-2 text-[11px] rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-200" />
+                className="w-44 h-7 px-2 text-[11px] rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-200" />
               <button onClick={props.onConfirmOverride} className="text-[11px] font-bold text-white bg-red-600 hover:bg-red-700 px-2.5 py-1 rounded-lg cursor-pointer">Confirm override</button>
               <button onClick={props.onCancelOverride} className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 cursor-pointer">Cancel</button>
             </div>
@@ -312,7 +312,7 @@ function BenchRow(props: {
                               const v = spec.isText ? raw : (raw === "" ? "" : Number(raw))
                               props.onEnter(spec.analyte, v)
                             }}
-                            className="w-full h-9 px-2.5 rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-violet-200 text-sm" />
+                            className="w-full h-9 px-2.5 rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm" />
                         ) : (
                           <span className="text-sm font-bold text-slate-800">{result?.value ?? "—"} <span className="text-[11px] font-normal text-slate-400">{spec.unit}</span></span>
                         )}
@@ -368,7 +368,7 @@ function ActionBtn({ onClick, children, icon: Icon, tone = "brand" }: { onClick:
     <button onClick={onClick}
       className={cn("flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl cursor-pointer transition-all whitespace-nowrap",
         tone === "ghost" && "text-slate-600 bg-slate-100 hover:bg-slate-200")}
-      style={tone === "brand" ? { background: "linear-gradient(135deg,#8B5CF6,#EC4899)", color: "#fff", boxShadow: "0 2px 8px rgba(139,92,246,0.25)" } : undefined}>
+      style={tone === "brand" ? { background: "linear-gradient(135deg,#2563EB,#EC4899)", color: "#fff", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" } : undefined}>
       <Icon className="h-3.5 w-3.5" />{children}
     </button>
   )

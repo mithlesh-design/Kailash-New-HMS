@@ -125,7 +125,7 @@ export default function ReceptionMessages() {
                     const ai = m.from === 'ai'
                     return (
                       <div key={m.id} className={cn("flex", mine ? "justify-end" : "justify-start")}>
-                        <div className={cn("max-w-[75%] rounded-2xl px-3.5 py-2", mine ? "bg-blue-600 text-white" : ai ? "bg-violet-50 text-violet-900 border border-violet-100" : "bg-white text-slate-800 border border-slate-100")}>
+                        <div className={cn("max-w-[75%] rounded-2xl px-3.5 py-2", mine ? "bg-blue-600 text-white" : ai ? "bg-blue-50 text-blue-900 border border-blue-100" : "bg-white text-slate-800 border border-slate-100")}>
                           {!mine && <p className="text-[10px] font-bold mb-0.5 flex items-center gap-1 opacity-70">{ai ? <><Bot className="h-3 w-3" /> AI assistant</> : <><User className="h-3 w-3" /> Patient</>}</p>}
                           <p className="text-[13px] leading-snug">{m.text}</p>
                         </div>

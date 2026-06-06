@@ -78,7 +78,7 @@ export default function ReceptionDashboard() {
   const kpis = [
     { label: 'Patients today', value: `${todayPatients.length}`, icon: Users, tint: 'bg-blue-50 text-blue-600', href: '/reception/patients' },
     { label: 'In queue', value: `${inQueue.length}`, sub: `avg wait ${avgWait}m`, icon: Activity, tint: 'bg-amber-50 text-amber-600', href: '/reception/opd' },
-    { label: 'Now serving', value: nowServing ? `#${nowServing.token}` : '—', sub: nowServing?.name, icon: Volume2, tint: 'bg-violet-50 text-violet-600', href: '/reception/queue' },
+    { label: 'Now serving', value: nowServing ? `#${nowServing.token}` : '—', sub: nowServing?.name, icon: Volume2, tint: 'bg-blue-50 text-blue-600', href: '/reception/queue' },
     { label: 'Free beds', value: `${freeBeds}`, sub: `of ${beds.length}`, icon: BedDouble, tint: 'bg-teal-50 text-teal-600', href: '/reception/beds' },
     { label: 'Pending bills', value: `${pendingBills.length}`, sub: `₹${totalDue.toLocaleString('en-IN')} due`, icon: CreditCard, tint: 'bg-rose-50 text-rose-600', href: '/reception/billing' },
     { label: 'Appointments', value: `${todayAppts.length}`, sub: 'today', icon: Calendar, tint: 'bg-indigo-50 text-indigo-600', href: '/reception/appointments' },
@@ -114,7 +114,7 @@ export default function ReceptionDashboard() {
           {[
             { label: 'Waiting',    sub: 'In waiting room',  count: pipelineCounts.waiting,    color: 'border-amber-200 bg-amber-50',     icon: Users,        fg: 'text-amber-700',    href: '/reception/opd',     cta: 'Send to vitals' },
             { label: 'Vitals',     sub: 'With nurse',       count: pipelineCounts.vitals,     color: 'border-orange-200 bg-orange-50',   icon: Activity,     fg: 'text-orange-700',   href: '/reception/opd',     cta: 'Track' },
-            { label: 'Consulting', sub: 'With doctor',      count: pipelineCounts.consulting, color: 'border-violet-200 bg-violet-50',   icon: Stethoscope,  fg: 'text-violet-700',   href: '/reception/queue',   cta: 'Display board' },
+            { label: 'Consulting', sub: 'With doctor',      count: pipelineCounts.consulting, color: 'border-blue-200 bg-blue-50',   icon: Stethoscope,  fg: 'text-blue-700',   href: '/reception/queue',   cta: 'Display board' },
             { label: 'Pharmacy',   sub: 'Collecting Rx',    count: pipelineCounts.pharmacy,   color: 'border-pink-200 bg-pink-50',       icon: Pill,         fg: 'text-pink-700',     href: '/reception/opd',     cta: 'Track' },
             { label: 'Billing',    sub: 'Settling fees',    count: pipelineCounts.billing,    color: 'border-rose-200 bg-rose-50',       icon: CreditCard,   fg: 'text-rose-700',     href: '/reception/billing', cta: 'Collect' },
             { label: 'Done',       sub: 'Completed today',  count: pipelineCounts.done,       color: 'border-emerald-200 bg-emerald-50', icon: CheckCircle2, fg: 'text-emerald-700',  href: '/reception/patients',cta: 'Review' },
@@ -176,7 +176,7 @@ export default function ReceptionDashboard() {
                   title={`${pendingBills.length} bill${pendingBills.length > 1 ? 's' : ''} pending settlement`} sub={`₹${totalDue.toLocaleString('en-IN')} outstanding across patients`} cta="Billing" />
               )}
               {escalations.length > 0 && (
-                <AttnRow href="/reception/messages" tint="bg-violet-50 text-violet-600" icon={MessageSquare}
+                <AttnRow href="/reception/messages" tint="bg-blue-50 text-blue-600" icon={MessageSquare}
                   title={`${escalations.length} WhatsApp chat${escalations.length > 1 ? 's' : ''} escalated to front desk`} sub={escalations.map(e => e.patientName ?? e.patientPhone).join(', ')} cta="Messages" />
               )}
               {criticalNotifs.map(n => (
@@ -194,7 +194,7 @@ export default function ReceptionDashboard() {
             </div>
 
             {/* Now serving */}
-            <div className="rounded-2xl p-4 mb-3 bg-gradient-to-br from-violet-600 to-indigo-600 text-white">
+            <div className="rounded-2xl p-4 mb-3 bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
               <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white/70 mb-1"><Volume2 className="h-3.5 w-3.5" /> Now serving</div>
               {nowServing ? (
                 <div className="flex items-center justify-between">
@@ -226,7 +226,7 @@ export default function ReceptionDashboard() {
             <div className="grid grid-cols-2 gap-2.5">
               {[
                 { label: 'Register walk-in', icon: UserPlus, href: '/reception/opd', tint: 'from-blue-500 to-indigo-500' },
-                { label: 'New appointment', icon: Calendar, href: '/reception/appointments', tint: 'from-violet-500 to-fuchsia-500' },
+                { label: 'New appointment', icon: Calendar, href: '/reception/appointments', tint: 'from-blue-500 to-blue-500' },
                 { label: 'OPD display', icon: Volume2, href: '/reception/queue', tint: 'from-amber-500 to-orange-500' },
                 { label: 'Bed status', icon: BedDouble, href: '/reception/beds', tint: 'from-teal-500 to-cyan-500' },
               ].map(a => (
