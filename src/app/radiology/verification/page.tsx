@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import {
   ShieldCheck, ChevronDown, ChevronRight, CheckCircle, Stethoscope, Clock, ShieldAlert,
+  Ban, UserCheck,
 } from "lucide-react"
 import {
   useRadiologyStudiesStore,
@@ -10,7 +11,8 @@ import {
 } from "@/store/useRadiologyStudiesStore"
 import { RADIOLOGY_CATALOG, TEMPLATE_SECTIONS, type Priority } from "@/lib/radiologyCatalog"
 import { useAuthStore } from "@/store/useAuthStore"
-import { notifyAndAudit, notifyAndAuditMany } from "@/lib/notifyAndAudit"
+import { notifyAndAuditMany } from "@/lib/notifyAndAudit"
+import { checkReportConsistency, isCriticalText } from "@/lib/radiologyAI"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -25,11 +27,11 @@ const timeAgo = (iso?: string) => {
   if (mins < 60) return `${mins}m ago`
   return `${Math.round(mins / 60)}h ago`
 }
-const CRITICAL_RE = /\b(haemorrhage|hemorrhage|bleed|pneumothorax|tamponade|stroke|infarct|free air|pe\b|pulmonary embolism|bi-?rads (4|5|6)|lung-?rads (4|4a|4b|4x)|pi-?rads (4|5))\b/i
+const isCriticalStudy = (s: RadiologyStudy) => isCriticalText(s.reportSections.impression) || isCriticalText(s.reportSections.findings)
 
 export default function Verification() {
   const studies = useRadiologyStudiesStore(s => s.studies)
-  const verifyAndRelease = useRadiologyStudiesStore(s => s.verifyAndRelease)
+  const consultantVerify = useRadiologyStudiesStore(s => s.consultantVerify)
   const currentUser = useAuthStore(s => s.currentUser)
   const me: RadTech = { id: currentUser?.id ?? "RD-202", name: currentUser?.name ?? "Verifier" }
 
@@ -50,7 +52,7 @@ export default function Verification() {
         <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-2">
           <ShieldCheck className="h-6 w-6 text-blue-600" /> Verification
         </h1>
-        <p className="text-sm text-[#64748B] mt-1">Second-read sign-off · releases the report to the ordering doctor and the patient</p>
+        <p className="text-sm text-[#64748B] mt-1">Resident → consultant sign-off · AI consistency gate · releases to ordering doctor and patient</p>
       </div>
 
       <div className="space-y-2">
@@ -61,14 +63,20 @@ export default function Verification() {
           </div>
         )}
         {pending.map(s => {
-          const isCritical = CRITICAL_RE.test(s.reportSections.impression ?? "") ||
-                             CRITICAL_RE.test(s.reportSections.findings ?? "")
+          const isCritical = isCriticalStudy(s)
           return (
             <VerificationRow key={s.id} s={s}
               expanded={expandedId === s.id}
               onToggle={() => setExpandedId(id => id === s.id ? null : s.id)}
               onVerify={() => {
-                verifyAndRelease(s.id, me)
+                // AI consistency gate — block release on inconsistent/missing impression.
+                const consistency = checkReportConsistency(s)
+                if (!consistency.data.ok) {
+                  toast.error(`Release blocked: ${consistency.data.issues[0]}`)
+                  setExpandedId(s.id)
+                  return
+                }
+                consultantVerify(s.id, me)
                 const action = isCritical ? 'radiology_critical_callback' : 'radiology_report_verified'
                 notifyAndAuditMany(['doctor', 'patient'], {
                   type: isCritical ? 'critical_value' : 'system',
@@ -97,8 +105,9 @@ function VerificationRow(props: {
   const cat = RADIOLOGY_CATALOG[s.code]
   const tmpl = cat ? TEMPLATE_SECTIONS[cat.template] : []
   const minsElapsed = Math.round((Date.now() - new Date(s.orderedAt).getTime()) / 60000)
-  const isCritical = CRITICAL_RE.test(s.reportSections.impression ?? "") ||
-                     CRITICAL_RE.test(s.reportSections.findings ?? "")
+  const isCritical = isCriticalStudy(s)
+  const consistency = checkReportConsistency(s)
+  const blocked = !consistency.data.ok
 
   return (
     <div className={cn("rounded-xl bg-white ring-1 overflow-hidden", isCritical ? "ring-red-200" : "ring-slate-200/70")}>
@@ -111,9 +120,19 @@ function VerificationRow(props: {
             <span className="text-[11px] font-bold text-slate-400">{s.patientId}</span>
             <span className="text-[12px] font-bold text-blue-700">{s.name}</span>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">{s.modality}</span>
+            {s.residentReadBy && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#1E3A8A]/[0.08] text-[#1E3A8A] flex items-center gap-0.5">
+                <UserCheck className="h-3 w-3" />Resident read
+              </span>
+            )}
             {isCritical && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700 flex items-center gap-0.5">
                 <ShieldAlert className="h-3 w-3" />CRITICAL
+              </span>
+            )}
+            {blocked && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 flex items-center gap-0.5">
+                <Ban className="h-3 w-3" />Consistency
               </span>
             )}
           </div>
@@ -125,9 +144,9 @@ function VerificationRow(props: {
         </button>
 
         <button onClick={props.onVerify}
-          className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap"
-          style={{ background: "linear-gradient(135deg,#16A34A,#1E3A8A)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
-          <CheckCircle className="h-3.5 w-3.5" />Verify &amp; release
+          className={cn("flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap", blocked ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300" : "text-white")}
+          style={blocked ? undefined : { background: "linear-gradient(135deg,#16A34A,#1E3A8A)", boxShadow: "0 2px 8px rgba(22,163,74,0.25)" }}>
+          {blocked ? <Ban className="h-3.5 w-3.5" /> : <CheckCircle className="h-3.5 w-3.5" />}{blocked ? "Resolve to release" : "Consultant verify & release"}
         </button>
         <button onClick={props.onToggle} className="p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer text-slate-400">
           {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -136,6 +155,18 @@ function VerificationRow(props: {
 
       {expanded && (
         <div className="border-t border-slate-100 bg-slate-50/60 p-4 space-y-2">
+          {/* AI consistency gate */}
+          <div className={cn("rounded-lg ring-1 p-2.5 flex items-start gap-2", blocked ? "bg-amber-50 ring-amber-200" : "bg-emerald-50 ring-emerald-200")}>
+            {blocked ? <ShieldAlert className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" /> : <CheckCircle className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />}
+            <div>
+              <p className={cn("text-[12px] font-bold", blocked ? "text-amber-800" : "text-emerald-800")}>
+                AI consistency check {blocked ? "— release blocked" : "— passed"}
+              </p>
+              {blocked
+                ? <ul className="text-[11.5px] text-amber-700 list-disc ml-4 mt-0.5">{consistency.data.issues.map((i, k) => <li key={k}>{i}</li>)}</ul>
+                : <p className="text-[11.5px] text-emerald-700">Findings ↔ impression are consistent and required sections complete.</p>}
+            </div>
+          </div>
           {tmpl.map(sec => {
             const value = s.reportSections[sec.key] ?? ""
             if (!value) return null

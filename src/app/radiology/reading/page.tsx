@@ -3,15 +3,18 @@
 import { useMemo, useState } from "react"
 import {
   FileText, Bed, Stethoscope, ChevronDown, ChevronRight, Hand, Send, Sparkles,
-  Image as ImageIcon, Clock, ShieldAlert,
+  Image as ImageIcon, Clock, ShieldAlert, Mic, MicOff, Wand2, GitCompare,
 } from "lucide-react"
 import {
   useRadiologyStudiesStore,
-  type RadiologyStudy, type RadTech,
+  type RadiologyStudy, type RadTech, type AiFinding,
 } from "@/store/useRadiologyStudiesStore"
 import { RADIOLOGY_CATALOG, TEMPLATE_SECTIONS, type Priority } from "@/lib/radiologyCatalog"
 import { useAuthStore } from "@/store/useAuthStore"
 import { notifyAndAudit } from "@/lib/notifyAndAudit"
+import { detectFindings, draftImpression, isCriticalText } from "@/lib/radiologyAI"
+import { getConfidenceTier } from "@/lib/ai-helpers"
+import { AiConfidenceBadge } from "@/components/ui/AiConfidenceBadge"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -32,6 +35,7 @@ export default function ReadingRoom() {
   const studies = useRadiologyStudiesStore(s => s.studies)
   const claimReading = useRadiologyStudiesStore(s => s.claimReading)
   const setAIPrelim = useRadiologyStudiesStore(s => s.setAIPrelim)
+  const setAIFindings = useRadiologyStudiesStore(s => s.setAIFindings)
   const updateReportSection = useRadiologyStudiesStore(s => s.updateReportSection)
   const submitReport = useRadiologyStudiesStore(s => s.submitReport)
   const currentUser = useAuthStore(s => s.currentUser)
@@ -82,6 +86,7 @@ export default function ReadingRoom() {
             onToggle={() => setExpandedId(id => id === s.id ? null : s.id)}
             onClaim={() => { claimReading(s.id, me); setExpandedId(s.id); toast.success(`${s.name} on your queue`) }}
             onAI={() => { setAIPrelim(s.id); toast.success("AI prelim generated") }}
+            onSaveFindings={(f) => setAIFindings(s.id, f)}
             onUpdate={(key, value) => updateReportSection(s.id, key, value)}
             onSubmit={() => {
               const cat = RADIOLOGY_CATALOG[s.code]
@@ -113,6 +118,7 @@ function ReadingRow(props: {
   onToggle: () => void
   onClaim: () => void
   onAI: () => void
+  onSaveFindings: (f: AiFinding[]) => void
   onUpdate: (key: string, value: string) => void
   onSubmit: () => void
 }) {
@@ -122,6 +128,37 @@ function ReadingRow(props: {
   const mine = s.readingBy?.id === me.id
   const minsElapsed = Math.round((Date.now() - new Date(s.orderedAt).getTime()) / 60000)
   const overdue = minsElapsed > s.expectedTATmin
+  // Deterministic AI detection for this study (structured findings + heatmap).
+  const ai = useMemo(() => detectFindings(s), [s.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  const aiFindings = s.aiFindings && s.aiFindings.length ? s.aiFindings : ai.data
+  const [listening, setListening] = useState(false)
+
+  // Voice dictation → appends transcript into the (uncontrolled) impression textarea.
+  const dictateImpression = () => {
+    const SR = (typeof window !== "undefined" && ((window as unknown as Record<string, unknown>).SpeechRecognition || (window as unknown as Record<string, unknown>).webkitSpeechRecognition)) as (new () => { lang: string; interimResults: boolean; onresult: (e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void; onend: () => void; start: () => void; stop: () => void }) | undefined
+    if (!SR) { toast.error("Voice dictation not supported in this browser"); return }
+    const rec = new SR()
+    rec.lang = "en-IN"; rec.interimResults = false
+    rec.onresult = (e) => {
+      const transcript = Array.from(e.results).map(r => r[0].transcript).join(" ")
+      const ta = document.querySelector<HTMLTextAreaElement>(`textarea[data-section="impression"][data-study="${s.id}"]`)
+      const next = ta ? `${ta.value} ${transcript}`.trim() : transcript
+      if (ta) ta.value = next
+      props.onUpdate("impression", next)
+      toast.success("Dictated into impression")
+    }
+    rec.onend = () => setListening(false)
+    setListening(true); rec.start()
+  }
+
+  const acceptAiDraft = () => {
+    const draft = draftImpression(aiFindings)
+    const ta = document.querySelector<HTMLTextAreaElement>(`textarea[data-section="impression"][data-study="${s.id}"]`)
+    if (ta) ta.value = draft
+    props.onUpdate("impression", draft)
+    props.onSaveFindings(aiFindings)
+    toast.success("AI draft inserted — review & edit before submitting")
+  }
 
   return (
     <div className={cn("rounded-xl bg-white ring-1 overflow-hidden", overdue ? "ring-red-200" : "ring-slate-200/70")}>
@@ -211,6 +248,43 @@ function ReadingRow(props: {
             <p className="text-[12px] text-blue-800 mt-1 italic">{s.aiPrelim ?? "AI prelim not yet generated."}</p>
           </div>
 
+          {/* AI structured detection + heatmap overlay (assistive only) */}
+          <div className="rounded-lg ring-1 ring-[#2563EB]/15 bg-[#F5F8FF] p-3">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <p className="text-[11px] font-bold text-[#1E3A8A] flex items-center gap-1"><Wand2 className="h-3 w-3" />AI structured findings</p>
+              <span className="text-[10px] text-slate-400">{s.modality} · {s.bodyPart}</span>
+              {mine && s.status === "reading" && (
+                <button onClick={acceptAiDraft} className="ml-auto text-[10.5px] font-bold text-white bg-[#1E3A8A] hover:bg-[#172E6E] px-2.5 py-1 rounded-lg cursor-pointer inline-flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />Insert draft impression
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-[150px_1fr] gap-3">
+              {/* Heatmap preview */}
+              <div className="relative h-[110px] rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden flex-shrink-0">
+                <ImageIcon className="absolute inset-0 m-auto h-7 w-7 text-white/15" />
+                {aiFindings.filter(f => f.heatmap).map(f => (
+                  <div key={f.id} className="absolute rounded border-2 border-red-400/90"
+                    style={{ left: `${f.heatmap!.x * 100}%`, top: `${f.heatmap!.y * 100}%`, width: `${f.heatmap!.w * 100}%`, height: `${f.heatmap!.h * 100}%`, boxShadow: "0 0 0 9999px rgba(239,68,68,0.08) inset, 0 0 12px rgba(239,68,68,0.5)" }}>
+                    <span className="absolute -top-4 left-0 text-[8px] font-bold text-red-300 whitespace-nowrap">{Math.round(f.confidence * 100)}%</span>
+                  </div>
+                ))}
+                <span className="absolute bottom-1 left-1.5 text-[8px] font-semibold text-white/50">AI heatmap · demo</span>
+              </div>
+              {/* Findings list */}
+              <div className="space-y-1.5">
+                {aiFindings.map(f => (
+                  <div key={f.id} className="flex items-center gap-2">
+                    <span className={cn("h-2 w-2 rounded-full flex-shrink-0", f.category === "critical" ? "bg-red-500" : f.category === "actionable" ? "bg-amber-500" : "bg-emerald-500")} />
+                    <span className="text-[12px] font-semibold text-slate-800 flex-1 truncate">{f.label}{f.birads ? ` · BI-RADS ${f.birads}` : ""}{f.lungrads ? ` · Lung-RADS ${f.lungrads}` : ""}{f.pirads ? ` · PI-RADS ${f.pirads}` : ""}</span>
+                    <AiConfidenceBadge confidence={Math.round(f.confidence * 100)} tier={getConfidenceTier(f.confidence)} />
+                  </div>
+                ))}
+                {s.comparisonPriorId && <p className="text-[10.5px] text-slate-500 flex items-center gap-1 pt-0.5"><GitCompare className="h-3 w-3" />Prior study linked for comparison</p>}
+              </div>
+            </div>
+          </div>
+
           {/* Structured report editor */}
           {tmpl.length > 0 && (
             <div>
@@ -224,6 +298,12 @@ function ReadingRow(props: {
                       <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1 mb-1">
                         {sec.label}
                         {sec.required && <span className="text-[10px] text-red-600">required</span>}
+                        {sec.key === "impression" && editable && (
+                          <button type="button" onClick={dictateImpression}
+                            className={cn("ml-auto inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded cursor-pointer", listening ? "bg-red-100 text-red-700" : "bg-[#1E3A8A]/[0.08] text-[#1E3A8A] hover:bg-[#1E3A8A]/15")}>
+                            {listening ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />}{listening ? "Listening…" : "Dictate"}
+                          </button>
+                        )}
                       </label>
                       {editable ? (
                         <textarea
@@ -256,12 +336,7 @@ function ReadingRow(props: {
   )
 }
 
-const CRITICAL_RE = /\b(haemorrhage|hemorrhage|bleed|pneumothorax|tamponade|stroke|infarct|free air|pe\b|pulmonary embolism|bi-?rads (4|5|6)|lung-?rads (4|4a|4b|4x)|pi-?rads (4|5))\b/i
-
 function checkCriticalImpression(s: RadiologyStudy): boolean {
-  return CRITICAL_RE.test(s.reportSections.impression ?? "")
-    || CRITICAL_RE.test(s.reportSections.findings ?? "")
-    || CRITICAL_RE.test(s.reportSections.lungrads ?? "")
-    || CRITICAL_RE.test(s.reportSections.birads ?? "")
-    || CRITICAL_RE.test(s.reportSections.pirads ?? "")
+  return isCriticalText(s.reportSections.impression) || isCriticalText(s.reportSections.findings)
+    || isCriticalText(s.reportSections.lungrads) || isCriticalText(s.reportSections.birads) || isCriticalText(s.reportSections.pirads)
 }
