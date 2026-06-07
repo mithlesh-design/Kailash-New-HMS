@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { useQualityStore, type IncidentType, type IncidentSeverity } from "@/store/useQualityStore"
 import { motion, AnimatePresence } from "framer-motion"
@@ -144,17 +145,17 @@ export default function IncidentsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Type</label>
-                  <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as IncidentType }))}
+                  <Select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as IncidentType }))}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                     {INCIDENT_TYPES.map(t => <option key={t}>{t}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Severity</label>
-                  <select value={form.severity} onChange={e => setForm(f => ({ ...f, severity: e.target.value as IncidentSeverity }))}
+                  <Select value={form.severity} onChange={e => setForm(f => ({ ...f, severity: e.target.value as IncidentSeverity }))}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                     {SEVERITIES.map(s => <option key={s}>{s}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Ward / Location *</label>

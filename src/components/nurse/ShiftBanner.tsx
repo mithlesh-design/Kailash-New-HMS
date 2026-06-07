@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useShiftStore, SHIFT_WINDOWS, WARDS, ALL_WARDS } from "@/store/useShiftStore"
 import { Sun, Clock, MapPin, Layers } from "lucide-react"
 
@@ -12,10 +13,10 @@ export function WardSwitcher() {
     <div className="flex items-center gap-1.5">
       <Layers className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
       <label htmlFor="ward-switcher" className="sr-only">Active ward</label>
-      <select id="ward-switcher" value={activeWard} onChange={e => setActiveWard(e.target.value)}
+      <Select id="ward-switcher" value={activeWard} onChange={e => setActiveWard(e.target.value)}
         className="h-9 px-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
         {[...WARDS, ALL_WARDS].map(w => <option key={w} value={w}>{w}</option>)}
-      </select>
+      </Select>
     </div>
   )
 }

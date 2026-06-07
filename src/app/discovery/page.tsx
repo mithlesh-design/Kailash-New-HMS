@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, User, Clock, ShieldCheck, ChevronRight, FileText, AlertCircle, CheckCircle, Star } from "lucide-react"
@@ -249,14 +250,14 @@ export default function DiscoveryPage() {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-bold text-slate-700 block mb-2">Your Insurance Provider</label>
-              <select
+              <Select
                 value={selectedInsurer}
                 onChange={e => setSelectedInsurer(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="">Select insurer...</option>
                 {INSURERS.map(i => <option key={i.name}>{i.name}</option>)}
-              </select>
+              </Select>
             </div>
 
             <AnimatePresence>

@@ -23,7 +23,7 @@ const BED_STATUS_STYLE: Record<string, { bg: string; border: string; text: strin
   Maintenance: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', dot: 'bg-red-500' },
 }
 
-function BedCard({ bed }: { bed: BedType }) {
+function BedCard({ bed, side = 'right' }: { bed: BedType; side?: 'left' | 'right' }) {
   const { markBedForCleaning, confirmBedReady } = useAdmissionStore()
   const { addTask } = useHousekeepingStore()
   const style = BED_STATUS_STYLE[bed.status]
@@ -52,7 +52,7 @@ function BedCard({ bed }: { bed: BedType }) {
       initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
       className={cn("group relative rounded-xl border p-3.5 flex flex-col gap-2", style.bg, style.border)}
     >
-      <BedHoverCard bed={bed} side="right" />
+      <BedHoverCard bed={bed} side={side} />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-lg font-bold text-slate-900">{bed.bedNumber}</span>
@@ -205,7 +205,8 @@ export default function BedBoardPage() {
 
       {/* Bed Grid by Ward */}
       {Object.entries(grouped).map(([ward, wardBeds]) => (
-        <div key={ward} className="bg-white border shadow-sm rounded-xl overflow-hidden">
+        <div key={ward} className="bg-white border shadow-sm rounded-xl">
+          {/* No `overflow-hidden` on this card — it would clip the bed hover cards. */}
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Bed className="h-5 w-5 text-slate-500" />
@@ -218,7 +219,9 @@ export default function BedBoardPage() {
             </span>
           </div>
           <div className="p-4 grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3">
-            {wardBeds.map(bed => <BedCard key={bed.id} bed={bed} />)}
+            {/* Flip the wide hover panel to the left for right-most columns (lg:8-col,
+                desktop-first) so it stays within the viewport. */}
+            {wardBeds.map((bed, idx) => <BedCard key={bed.id} bed={bed} side={(idx % 8) >= 5 ? 'left' : 'right'} />)}
           </div>
         </div>
       ))}

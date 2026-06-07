@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { useInsuranceStore } from "@/store/useInsuranceStore"
 import { usePatientStore } from "@/store/usePatientStore"
@@ -98,13 +99,13 @@ function VerificationPanel() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Insurer</label>
-                <select
+                <Select
                   value={insurer}
                   onChange={e => setInsurer(e.target.value)}
                   className="w-full h-10 px-3 rounded-xl bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   {INSURERS.map(i => <option key={i}>{i}</option>)}
-                </select>
+                </Select>
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Patient Name (optional)</label>

@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState, type ReactNode, type ComponentType } from "react"
 import {
   Pill, ChevronDown, ChevronRight, IndianRupee, Bed, ShieldAlert, Package,
@@ -391,10 +392,10 @@ function QueueRow(props: {
             <div className="flex items-center gap-2 text-xs">
               <Clock className="h-3.5 w-3.5 text-slate-400" />
               <span className="text-slate-500 font-semibold">Reason for quantity changes:</span>
-              <select value={props.reason} onChange={e => props.setReason(e.target.value as ModificationReason)}
+              <Select value={props.reason} onChange={e => props.setReason(e.target.value as ModificationReason)}
                 className="text-xs font-semibold rounded-lg border border-slate-200 bg-white px-2 py-1 cursor-pointer">
                 {REASONS.map(r => <option key={r} value={r}>{r}</option>)}
-              </select>
+              </Select>
             </div>
           )}
 

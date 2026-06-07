@@ -23,9 +23,12 @@ export type DischargePatient = {
   attendingDoctor: string
   clearances: Record<ClearancePillar, 'pending' | 'cleared'>
   blockers: DischargeBlocker[]
+  orderIssued: boolean
   summaryDrafted: boolean
   summaryApproved: boolean
   exitClearanceIssued: boolean
+  /** When exit clearance was issued (discharge completed) — drives history. */
+  dischargedAt?: string
   dischargeSummary?: string
   dischargeInstructions?: string
   followUpDate?: string
@@ -39,15 +42,23 @@ export type DischargePatient = {
 
 interface DischargeState {
   dischargeQueue: DischargePatient[]
-  initDischarge: (patient: Omit<DischargePatient, 'id' | 'clearances' | 'blockers' | 'summaryDrafted' | 'summaryApproved' | 'exitClearanceIssued'>) => void
+  initDischarge: (patient: Omit<DischargePatient, 'id' | 'clearances' | 'blockers' | 'orderIssued' | 'summaryDrafted' | 'summaryApproved' | 'exitClearanceIssued'>) => void
   setClearance: (patientId: string, pillar: ClearancePillar, status: 'pending' | 'cleared') => void
+  /** Re-issue / revoke the discharge order (step 1). */
+  setOrderIssued: (patientId: string, issued: boolean) => void
   addBlocker: (patientId: string, blocker: Omit<DischargeBlocker, 'id'>) => void
   resolveBlocker: (patientId: string, blockerId: string) => void
   draftSummary: (patientId: string, summary: string) => void
   approveSummary: (patientId: string) => void
+  /** Re-open the drafted summary (also un-approves, since approval depends on a draft). */
+  undraftSummary: (patientId: string) => void
+  /** Re-open an approved summary back to drafted/in-progress. */
+  unapproveSummary: (patientId: string) => void
   issueExitClearance: (patientId: string) => void
   setFollowUp: (patientId: string, date: string) => void
   setInstructions: (patientId: string, instructions: string) => void
+  /** Remove a patient from the discharge queue (e.g. discharge cancelled — back to IPD). */
+  removeFromQueue: (patientId: string) => void
 }
 
 const MOCK_DISCHARGE_PATIENTS: DischargePatient[] = [
@@ -65,6 +76,7 @@ const MOCK_DISCHARGE_PATIENTS: DischargePatient[] = [
       { id: 'BLK-001', type: 'Billing', description: 'Final pharmacy bill not reconciled', owner: 'Billing Desk' },
       { id: 'BLK-002', type: 'Insurance', description: 'TPA pre-auth query pending since 6h', owner: 'Karan Patel (TPA)' },
     ],
+    orderIssued: true,
     summaryDrafted: true,
     summaryApproved: false,
     exitClearanceIssued: false,
@@ -89,6 +101,7 @@ const MOCK_DISCHARGE_PATIENTS: DischargePatient[] = [
     blockers: [
       { id: 'BLK-K1', type: 'Billing', description: 'Final billing summary being prepared', owner: 'Billing Desk' },
     ],
+    orderIssued: true,
     summaryDrafted: true,
     summaryApproved: true,
     exitClearanceIssued: false,
@@ -118,6 +131,7 @@ const MOCK_DISCHARGE_PATIENTS: DischargePatient[] = [
     blockers: [
       { id: 'BLK-003', type: 'Nursing', description: 'Post-op wound dressing change pending', owner: 'Nurse Anjali Desai' },
     ],
+    orderIssued: true,
     summaryDrafted: false,
     summaryApproved: false,
     exitClearanceIssued: false,
@@ -129,8 +143,30 @@ const MOCK_DISCHARGE_PATIENTS: DischargePatient[] = [
   },
 ]
 
+// Already-discharged patients — populate the "Discharged Patients" history so the
+// section isn't empty on first load. Injected into existing persisted state by
+// the v2 migrate below (matched on patientId).
+const DISCHARGED_HISTORY: DischargePatient[] = [
+  {
+    id: 'DC-H-001', patientId: 'PT-55001', patientName: 'Rohan Verma', wardBed: 'General Ward 108',
+    diagnosis: 'Dengue fever — recovered', admittedOn: new Date(Date.now() - 5 * 24 * 3600000).toISOString(),
+    expectedDischarge: new Date(Date.now() - 1 * 24 * 3600000).toISOString(), attendingDoctor: 'Dr. Priya Menon',
+    clearances: { doctor: 'cleared', nursing: 'cleared', pharmacy: 'cleared', billing: 'cleared', insurance: 'cleared' },
+    blockers: [], orderIssued: true, summaryDrafted: true, summaryApproved: true, exitClearanceIssued: true,
+    dischargedAt: new Date(Date.now() - 1 * 24 * 3600000).toISOString(), payerType: 'Cashless (HDFC ERGO)', condition: 'Stable',
+  },
+  {
+    id: 'DC-H-002', patientId: 'PT-55002', patientName: 'Lakshmi Iyer', wardBed: 'Private Room 305',
+    diagnosis: 'Cholecystectomy — post-op recovered', admittedOn: new Date(Date.now() - 4 * 24 * 3600000).toISOString(),
+    expectedDischarge: new Date(Date.now() - 6 * 3600000).toISOString(), attendingDoctor: 'Dr. Ravi Kumar',
+    clearances: { doctor: 'cleared', nursing: 'cleared', pharmacy: 'cleared', billing: 'cleared', insurance: 'cleared' },
+    blockers: [], orderIssued: true, summaryDrafted: true, summaryApproved: true, exitClearanceIssued: true,
+    dischargedAt: new Date(Date.now() - 6 * 3600000).toISOString(), payerType: 'Self-pay', condition: 'Stable',
+  },
+]
+
 export const useDischargeStore = create<DischargeState>()(persist((set) => ({
-  dischargeQueue: MOCK_DISCHARGE_PATIENTS,
+  dischargeQueue: [...MOCK_DISCHARGE_PATIENTS, ...DISCHARGED_HISTORY],
 
   initDischarge: (patient) =>
     set((s) => ({
@@ -141,6 +177,7 @@ export const useDischargeStore = create<DischargeState>()(persist((set) => ({
           id: `DC-${Date.now()}`,
           clearances: { doctor: 'pending', nursing: 'pending', pharmacy: 'pending', billing: 'pending', insurance: 'pending' },
           blockers: [],
+          orderIssued: true,
           summaryDrafted: false,
           summaryApproved: false,
           exitClearanceIssued: false,
@@ -150,9 +187,20 @@ export const useDischargeStore = create<DischargeState>()(persist((set) => ({
 
   setClearance: (patientId, pillar, status) => {
     set((s) => ({
-      dischargeQueue: s.dischargeQueue.map(p =>
-        p.patientId === patientId ? { ...p, clearances: { ...p.clearances, [pillar]: status } } : p
-      ),
+      dischargeQueue: s.dischargeQueue.map(p => {
+        if (p.patientId !== patientId) return p
+        const next = { ...p, clearances: { ...p.clearances, [pillar]: status } }
+        // The 'doctor' pillar is the master gate for all doctor-owned steps:
+        // toggling it cascades to the order + summary draft/approval, so the
+        // whole doctor block reverts (OFF) or re-clears (ON) in one action.
+        if (pillar === 'doctor') {
+          const on = status === 'cleared'
+          next.orderIssued = on
+          next.summaryDrafted = on
+          next.summaryApproved = on
+        }
+        return next
+      }),
     }))
     useAuditStore.getState().log({
       userId: 'DC-SYS', userName: 'Discharge',
@@ -160,6 +208,13 @@ export const useDischargeStore = create<DischargeState>()(persist((set) => ({
       detail: `${pillar} → ${status}`,
     })
   },
+
+  setOrderIssued: (patientId, issued) =>
+    set((s) => ({
+      dischargeQueue: s.dischargeQueue.map(p =>
+        p.patientId === patientId ? { ...p, orderIssued: issued } : p
+      ),
+    })),
 
   addBlocker: (patientId, blocker) =>
     set((s) => ({
@@ -193,10 +248,24 @@ export const useDischargeStore = create<DischargeState>()(persist((set) => ({
       ),
     })),
 
+  undraftSummary: (patientId) =>
+    set((s) => ({
+      dischargeQueue: s.dischargeQueue.map(p =>
+        p.patientId === patientId ? { ...p, summaryDrafted: false, summaryApproved: false } : p
+      ),
+    })),
+
+  unapproveSummary: (patientId) =>
+    set((s) => ({
+      dischargeQueue: s.dischargeQueue.map(p =>
+        p.patientId === patientId ? { ...p, summaryApproved: false } : p
+      ),
+    })),
+
   issueExitClearance: (patientId) => {
     set((s) => ({
       dischargeQueue: s.dischargeQueue.map(p =>
-        p.patientId === patientId ? { ...p, exitClearanceIssued: true } : p
+        p.patientId === patientId ? { ...p, exitClearanceIssued: true, dischargedAt: new Date().toISOString() } : p
       ),
     }))
     useAuditStore.getState().log({
@@ -219,10 +288,23 @@ export const useDischargeStore = create<DischargeState>()(persist((set) => ({
         p.patientId === patientId ? { ...p, dischargeInstructions: instructions } : p
       ),
     })),
+
+  removeFromQueue: (patientId) =>
+    set((s) => ({ dischargeQueue: s.dischargeQueue.filter(p => p.patientId !== patientId) })),
 }),
   {
-    name: 'kailash-dischargestore', version: 1,
+    name: 'kailash-dischargestore', version: 2,
     storage: createJSONStorage(() => localStorage),
     skipHydration: true,
+    // v2: seed the discharged-patients history into existing persisted queues
+    // (only the entries not already present, matched by patientId).
+    migrate: (persisted) => {
+      const p = persisted as { dischargeQueue?: DischargePatient[] } | undefined
+      if (p?.dischargeQueue) {
+        const existing = new Set(p.dischargeQueue.map(d => d.patientId))
+        p.dischargeQueue = [...p.dischargeQueue, ...DISCHARGED_HISTORY.filter(d => !existing.has(d.patientId))]
+      }
+      return p as DischargeState
+    },
   },
 ))

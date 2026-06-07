@@ -436,6 +436,19 @@ export async function seedAnilLegacyStores(): Promise<void> {
       summaryApproved: false,
       exitClearanceIssued: false,
       payerType: 'Cashless (Star Health)',
+      dischargeSummary: [
+        `DISCHARGE SUMMARY · Anil Kumar Verma (PT-44012)`,
+        `Ward/Bed: Surgical SW-301 · Attending: Dr. Vikram Rao · LOS: 2 days`,
+        ``,
+        `1. Diagnosis: Acute appendicitis, treated with laparoscopic appendectomy.`,
+        `2. Course: Emergency laparoscopic appendectomy performed without intra-operative complications. Post-operative recovery uneventful — afebrile, haemodynamically stable, tolerating oral diet. Wound clean and dry; no signs of infection.`,
+        `3. Investigations: CBC normalising (WBC trending down), CRP improving. USG abdomen confirmed appendicitis pre-op; no residual collection.`,
+        `4. Medications at discharge (TTO): Tab Cefuroxime 500mg BD × 5 days, Tab Paracetamol 650mg TDS PRN for pain, Cap Pantoprazole 40mg OD × 5 days. Reconciled prescription attached.`,
+        `5. Follow-up: Surgical OPD review in 7 days with Dr. Vikram Rao for wound check and suture removal.`,
+        `6. Red-flag advice: Return to ER immediately if fever > 38.5°C, increasing abdominal pain, wound redness/discharge, persistent vomiting or abdominal distension.`,
+        `7. Activity: Resume light activities as tolerated. Avoid heavy lifting and strenuous exercise for 2 weeks.`,
+        `8. Diet: Light, easily digestible diet for 3–4 days; resume normal diet thereafter as tolerated.`,
+      ].join('\n'),
     }
     useDischargeStore.setState({
       dischargeQueue: [anilDis, ...(dsState.dischargeQueue ?? [])],

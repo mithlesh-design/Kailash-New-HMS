@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import {
   Ambulance, AlertTriangle, ChevronDown, ChevronRight, UserPlus, Send,
@@ -249,16 +250,16 @@ export default function TriagePage() {
             <input value={reg.age} onChange={e => setReg(r => ({ ...r, age: e.target.value }))}
               placeholder="Age" type="number"
               className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200" />
-            <select value={reg.gender} onChange={e => setReg(r => ({ ...r, gender: e.target.value as 'M' | 'F' | 'X' }))}
+            <Select value={reg.gender} onChange={e => setReg(r => ({ ...r, gender: e.target.value as 'M' | 'F' | 'X' }))}
               className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200">
               <option value="M">Male</option><option value="F">Female</option><option value="X">Other</option>
-            </select>
-            <select value={reg.arrival} onChange={e => setReg(r => ({ ...r, arrival: e.target.value as Arrival }))}
+            </Select>
+            <Select value={reg.arrival} onChange={e => setReg(r => ({ ...r, arrival: e.target.value as Arrival }))}
               className="h-9 px-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-200">
               <option value="walk_in">Walk-in</option>
               <option value="ambulance">108 Ambulance</option>
               <option value="transfer">Transfer-in</option>
-            </select>
+            </Select>
             <label className="flex items-center gap-1.5 text-[11px] font-semibold px-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
               <input type="checkbox" checked={reg.trauma} onChange={e => setReg(r => ({ ...r, trauma: e.target.checked }))} className="h-3 w-3" />
               <span>Trauma</span>

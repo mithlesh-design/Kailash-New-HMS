@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
@@ -192,10 +193,10 @@ export default function HoursPage() {
 
         <div className="flex items-center gap-1.5">
           <Filter className="h-3.5 w-3.5 text-slate-400" />
-          <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}
+          <Select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}
             className="text-xs font-bold border border-slate-300 rounded-xl px-2 py-1.5 bg-white">
             {departments.map(d => <option key={d}>{d}</option>)}
-          </select>
+          </Select>
         </div>
       </div>
 
@@ -264,13 +265,13 @@ export default function HoursPage() {
             <div className="space-y-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">Staff member</p>
-                <select value={otForm.staffId} onChange={(e) => setOtForm({ ...otForm, staffId: e.target.value })}
+                <Select value={otForm.staffId} onChange={(e) => setOtForm({ ...otForm, staffId: e.target.value })}
                   className="w-full h-9 px-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200">
                   <option value="">— Pick —</option>
                   {staff.filter(s => s.status === 'active').map(s => (
                     <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
                   ))}
-                </select>
+                </Select>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

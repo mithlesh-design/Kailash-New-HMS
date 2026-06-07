@@ -25,6 +25,7 @@ export function RoleGuard({ allowedRole, children }: Props) {
         doctor:        '/doctor/dashboard',
         reception:     '/reception/dashboard',
         admin:         '/admin/dashboard',
+        hr:            '/hr/dashboard',
         nurse:         '/nurse/dashboard',
         emergency:     '/emergency/dashboard',
         lab:           '/lab/dashboard',

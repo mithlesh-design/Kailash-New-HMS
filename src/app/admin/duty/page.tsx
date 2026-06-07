@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
@@ -229,10 +230,10 @@ export default function DutyAssignmentPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}
+          <Select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}
             className="text-xs font-bold border border-slate-300 rounded-xl px-2 py-2 bg-white">
             {roles.map(r => <option key={r}>{r === 'All' ? 'All roles' : r.replace('_', ' ')}</option>)}
-          </select>
+          </Select>
         </div>
       </div>
 

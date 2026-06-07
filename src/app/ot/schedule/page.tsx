@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { useOTStore } from "@/store/useOTStore"
 import { Plus, X, Scissors, Printer } from "lucide-react"
@@ -183,44 +184,44 @@ export default function OTSchedulePage() {
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Procedure *</label>
-                  <select
+                  <Select
                     value={form.procedureName}
                     onChange={e => setForm(f => ({ ...f, procedureName: e.target.value }))}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select procedure...</option>
                     {PROCEDURES_LIST.map(p => <option key={p}>{p}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Surgeon</label>
-                  <select
+                  <Select
                     value={form.surgeon}
                     onChange={e => setForm(f => ({ ...f, surgeon: e.target.value }))}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {SURGEONS.map(s => <option key={s}>{s}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Anaesthetist</label>
-                  <select
+                  <Select
                     value={form.anaesthetist}
                     onChange={e => setForm(f => ({ ...f, anaesthetist: e.target.value }))}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {ANAESTHETISTS.map(a => <option key={a}>{a}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">OT Room</label>
-                  <select
+                  <Select
                     value={form.otRoom}
                     onChange={e => setForm(f => ({ ...f, otRoom: e.target.value }))}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {OT_ROOMS.map(r => <option key={r}>{r}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Scheduled Time</label>

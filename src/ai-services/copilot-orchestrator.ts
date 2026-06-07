@@ -17,6 +17,7 @@ export type CopilotRole =
   | 'billing'
   | 'insurance'
   | 'admin'
+  | 'hr'
   | 'quality'
   | 'discharge'
   | 'reception'

@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -127,13 +128,13 @@ export default function VerifyQueue() {
         </div>
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-slate-400" />
-          <select value={benchFilter} onChange={e => setBenchFilter(e.target.value as 'all' | Bench)}
+          <Select value={benchFilter} onChange={e => setBenchFilter(e.target.value as 'all' | Bench)}
             className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-200">
             <option value="all">All sections</option>
             {(['HEMA', 'BIOCHEM', 'IMMUNO', 'URINE', 'MICRO', 'HISTO'] as Bench[]).map(b => (
               <option key={b} value={b}>{BENCH_LABEL[b]}</option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
 
@@ -281,7 +282,7 @@ export default function VerifyQueue() {
                           className="overflow-hidden mt-3 border-t border-slate-100 pt-3">
                           <p className="text-[11px] font-bold text-red-700 mb-2">Reject reason</p>
                           <div className="flex gap-2 items-end">
-                            <select value={rejectReason} onChange={e => setRejectReason(e.target.value)}
+                            <Select value={rejectReason} onChange={e => setRejectReason(e.target.value)}
                               className="h-9 rounded-lg border border-red-200 bg-red-50 px-2 text-xs font-semibold text-slate-700 focus:outline-none">
                               <option value="hemolyzed">Hemolyzed</option>
                               <option value="clotted">Clotted</option>
@@ -289,7 +290,7 @@ export default function VerifyQueue() {
                               <option value="contaminated">Contaminated</option>
                               <option value="wrong_tube">Wrong tube</option>
                               <option value="unlabeled">Unlabeled</option>
-                            </select>
+                            </Select>
                             <button onClick={() => onReject(test)}
                               className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold cursor-pointer">
                               Confirm reject

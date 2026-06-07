@@ -40,6 +40,7 @@ const DEMO_USERS: Record<Role, User> = {
   insurance:    { id: 'INS-011',  name: 'Karan Patel',           role: 'insurance',    department: 'TPA Desk' },
   // Management
   admin:        { id: 'ADM-01',   name: 'Rajesh Kulkarni',       role: 'admin' },
+  hr:           { id: 'HR-2001',  name: 'Anita Rao',             role: 'hr',           department: 'Human Resources' },
   quality:      { id: 'QA-1101',  name: 'Dr. Lalitha Iyer',      role: 'quality',      department: 'Quality & Compliance' },
   housekeeping: { id: 'HK-1001',  name: 'Ramesh Kumar',          role: 'housekeeping', department: 'Housekeeping' },
   inventory:    { id: 'INV-550',  name: 'Vikram Singh',          role: 'inventory',    department: 'Procurement' },

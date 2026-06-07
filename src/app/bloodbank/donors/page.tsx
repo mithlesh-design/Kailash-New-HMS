@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Heart, Plus, Search, CheckCircle, XCircle, Clock, AlertTriangle, Sparkles, ChevronRight, Droplets, User, Phone, Calendar, Activity } from "lucide-react"
@@ -296,10 +297,10 @@ export default function DonorsPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-bold text-slate-600 block mb-1.5">Blood Group *</label>
-                    <select value={form.bloodGroup} onChange={e => setForm(f => ({ ...f, bloodGroup: e.target.value as BloodGroup }))}
+                    <Select value={form.bloodGroup} onChange={e => setForm(f => ({ ...f, bloodGroup: e.target.value as BloodGroup }))}
                       className="w-full px-4 py-2.5 rounded-xl text-sm text-slate-800 bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30 cursor-pointer">
                       {(['O+','O-','A+','A-','B+','B-','AB+','AB-'] as BloodGroup[]).map(g => <option key={g}>{g}</option>)}
-                    </select>
+                    </Select>
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-600 block mb-1.5">Age *</label>

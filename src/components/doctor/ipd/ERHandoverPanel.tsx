@@ -34,8 +34,13 @@ const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString('en-IN', { hou
  */
 export function ERHandoverPanel({ patientId }: { patientId: string }) {
   const erRecord = useERStore(s => s.patients.find(p => p.patientId === patientId))
-  const labOrders = useLabOrdersStore(s => s.orders.filter(o => o.patientId === patientId && o.source === 'ER'))
-  const radStudies = useRadiologyStudiesStore(s => s.studies.filter(s2 => s2.patientId === patientId && s2.source === 'ER'))
+  // Select the raw arrays (stable refs) and filter in useMemo — filtering inside
+  // the selector returns a new array each render, which trips zustand's snapshot
+  // check and causes an infinite render loop.
+  const allOrders = useLabOrdersStore(s => s.orders)
+  const allStudies = useRadiologyStudiesStore(s => s.studies)
+  const labOrders = useMemo(() => allOrders.filter(o => o.patientId === patientId && o.source === 'ER'), [allOrders, patientId])
+  const radStudies = useMemo(() => allStudies.filter(s2 => s2.patientId === patientId && s2.source === 'ER'), [allStudies, patientId])
 
   const vitals = useMemo(() => erRecord ? latestVitals(erRecord) : undefined, [erRecord])
   const news = useMemo(() => vitals ? news2(vitals) : null, [vitals])

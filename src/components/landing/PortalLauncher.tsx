@@ -35,6 +35,7 @@ const allRoleGroups: { id: string; label: string; roles: RoleCard[] }[] = [
   ] },
   { id: "management", label: "Management", roles: [
     { role: "admin",        label: "Admin",        desc: "Analytics, staff, operations overview", icon: Shield,       href: "/admin/dashboard" },
+    { role: "hr",           label: "HR / HRMS",    desc: "Employees, leave, attendance, hiring, appraisals", icon: Users, href: "/hr/dashboard" },
     { role: "quality",      label: "Quality",      desc: "NABH compliance, audits, incidents",    icon: Heart,        href: "/quality/dashboard" },
     { role: "housekeeping", label: "Housekeeping", desc: "Ward cleanliness, bed turnover tasks",  icon: Package,      href: "/housekeeping/dashboard" },
     { role: "inventory",    label: "Inventory",    desc: "Assets, stock levels, procurement",     icon: FlaskConical, href: "/inventory/dashboard" },

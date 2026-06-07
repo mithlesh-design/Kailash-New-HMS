@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
@@ -351,7 +352,7 @@ export default function VendorsPage() {
                 placeholder="Search vendor / invoice # / description"
                 className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300" />
             </div>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as VendorInvoice['status'] | 'all')}
+            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as VendorInvoice['status'] | 'all')}
               className="text-xs font-bold border border-slate-300 rounded-xl px-2 py-2 bg-white">
               <option value="all">All status</option>
               <option value="open">Open</option>
@@ -359,12 +360,12 @@ export default function VendorsPage() {
               <option value="overdue">Overdue</option>
               <option value="disputed">Disputed</option>
               <option value="paid">Paid</option>
-            </select>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as VendorCategory | 'all')}
+            </Select>
+            <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as VendorCategory | 'all')}
               className="text-xs font-bold border border-slate-300 rounded-xl px-2 py-2 bg-white">
               <option value="all">All categories</option>
               {Object.entries(CATEGORY_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
+            </Select>
           </div>
 
           {/* Table */}
@@ -467,11 +468,11 @@ export default function VendorsPage() {
                 placeholder="Search vendor / contact / email"
                 className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300" />
             </div>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as VendorCategory | 'all')}
+            <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as VendorCategory | 'all')}
               className="text-xs font-bold border border-slate-300 rounded-xl px-2 py-2 bg-white">
               <option value="all">All categories</option>
               {Object.entries(CATEGORY_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
+            </Select>
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">

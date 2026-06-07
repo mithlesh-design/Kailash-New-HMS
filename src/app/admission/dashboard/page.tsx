@@ -126,6 +126,16 @@ export default function AdmissionDashboard() {
       )
     : []
 
+  // Pipeline cards for in-page stages scroll to the relevant section rather
+  // than navigating to the current route (which was a no-op). Falls back
+  // through the list so a conditionally-rendered section degrades gracefully.
+  const scrollToFirst = (ids: string[]) => {
+    for (const id of ids) {
+      const el = document.getElementById(id)
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return }
+    }
+  }
+
   const handleAssign = (bedId: string) => {
     if (!selectedRequest) return
     const req = admissionRequests.find(r => r.id === selectedRequest)
@@ -173,30 +183,35 @@ export default function AdmissionDashboard() {
           </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 items-stretch">
-          {[
-            { label: 'Pending',   sub: 'Awaiting bed',     count: pending.length,        color: 'border-orange-200 bg-orange-50',   icon: Hourglass,    fg: 'text-orange-700',   href: '/admission/dashboard', cta: 'Assign' },
-            { label: 'Assigned',  sub: 'Awaiting arrival', count: assignedReqs,          color: 'border-amber-200 bg-amber-50',     icon: UserCheck,    fg: 'text-amber-700',    href: '/admission/dashboard', cta: 'Mark arrived' },
-            { label: 'Admitted',  sub: 'Today',            count: admittedTodayCount,    color: 'border-blue-200 bg-blue-50',       icon: CheckCircle2, fg: 'text-blue-700',     href: '/admission/dashboard', cta: 'Review' },
+          {([
+            { label: 'Pending',   sub: 'Awaiting bed',     count: pending.length,        color: 'border-orange-200 bg-orange-50',   icon: Hourglass,    fg: 'text-orange-700',   scrollTo: ['admission-requests'],                  cta: 'Assign' },
+            { label: 'Assigned',  sub: 'Awaiting arrival', count: assignedReqs,          color: 'border-amber-200 bg-amber-50',     icon: UserCheck,    fg: 'text-amber-700',    scrollTo: ['assigned-awaiting', 'admission-requests'], cta: 'Mark arrived' },
+            { label: 'Admitted',  sub: 'Today',            count: admittedTodayCount,    color: 'border-blue-200 bg-blue-50',       icon: CheckCircle2, fg: 'text-blue-700',     scrollTo: ['bed-board'],                           cta: 'Review' },
             { label: 'Occupied',  sub: 'On wards',         count: occupiedBeds.length,   color: 'border-blue-200 bg-blue-50',   icon: Bed,          fg: 'text-blue-700',   href: '/admission/beds',      cta: 'Bed board' },
             { label: 'Cleaning',  sub: 'Turning over',     count: cleaningBeds.length,   color: 'border-yellow-200 bg-yellow-50',   icon: Wrench,       fg: 'text-yellow-700',   href: '/admission/beds',      cta: 'Track' },
             { label: 'Available', sub: 'Ready now',        count: availableBeds.length,  color: 'border-emerald-200 bg-emerald-50', icon: Activity,     fg: 'text-emerald-700',  href: '/admission/beds',      cta: 'Allocate' },
-          ].map((s, i, arr) => (
-            <Link key={s.label} href={s.href}
-              className={cn("relative rounded-xl border p-3 hover:shadow-md transition flex flex-col gap-1 cursor-pointer group", s.color)}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <s.icon className={cn("h-4 w-4 flex-shrink-0", s.fg)} />
-                  <p className={cn("text-xs font-bold truncate", s.fg)}>{s.label}</p>
+          ] as const).map((s, i, arr) => {
+            const inner = (
+              <>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <s.icon className={cn("h-4 w-4 flex-shrink-0", s.fg)} />
+                    <p className={cn("text-xs font-bold truncate", s.fg)}>{s.label}</p>
+                  </div>
+                  {i < arr.length - 1 && <ChevronRight className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
                 </div>
-                {i < arr.length - 1 && <ChevronRight className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
-              </div>
-              <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
-              <p className={cn("text-[10px] font-bold mt-1 inline-flex items-center gap-0.5 group-hover:underline", s.fg)}>
-                {s.cta} <ArrowRight className="h-2.5 w-2.5" />
-              </p>
-            </Link>
-          ))}
+                <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
+                <p className={cn("text-[10px] font-bold mt-1 inline-flex items-center gap-0.5 group-hover:underline", s.fg)}>
+                  {s.cta} <ArrowRight className="h-2.5 w-2.5" />
+                </p>
+              </>
+            )
+            const cardCls = cn("relative rounded-xl border p-3 hover:shadow-md transition flex flex-col gap-1 cursor-pointer group text-left w-full", s.color)
+            return 'href' in s
+              ? <Link key={s.label} href={s.href} className={cardCls}>{inner}</Link>
+              : <button key={s.label} type="button" onClick={() => scrollToFirst([...s.scrollTo])} className={cardCls}>{inner}</button>
+          })}
         </div>
       </div>
 
@@ -222,7 +237,7 @@ export default function AdmissionDashboard() {
 
       <div className="grid grid-cols-2 gap-6">
         {/* Pending Requests */}
-        <div className="bg-white border shadow-sm rounded-xl overflow-hidden">
+        <div id="admission-requests" className="bg-white border shadow-sm rounded-xl overflow-hidden scroll-mt-6">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
             <h2 className="text-lg font-bold text-slate-900">Admission Requests</h2>
             {pending.length > 0 && <NeonBadge variant="warning" dot pulse>{pending.length} pending</NeonBadge>}
@@ -305,7 +320,7 @@ export default function AdmissionDashboard() {
           </div>
 
           {assigned.length > 0 && (
-            <div className="p-4 border-t border-slate-100 bg-green-50">
+            <div id="assigned-awaiting" className="p-4 border-t border-slate-100 bg-green-50 scroll-mt-6">
               <p className="text-xs font-bold text-green-700 mb-2 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" />Assigned — Awaiting Arrival ({assigned.length})</p>
               {assigned.map(req => (
                 <div key={req.id} className="flex items-center justify-between py-1.5 border-b border-green-100 last:border-0">
@@ -333,7 +348,7 @@ export default function AdmissionDashboard() {
         </div>
 
         {/* Bed Selection */}
-        <div className="bg-white border shadow-sm rounded-xl overflow-hidden">
+        <div id="bed-board" className="bg-white border shadow-sm rounded-xl overflow-hidden scroll-mt-6">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
             <h2 className="text-lg font-bold text-slate-900">
               {selectedReq ? `Assign Bed — ${selectedReq.patientName}` : "Bed Board"}

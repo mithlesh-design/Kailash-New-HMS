@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState, useRef, useEffect, useCallback } from "react"
 import { type PatientBed, type RoundsNote } from "@/store/useWardStore"
 import { useWard } from "@/lib/useWard"
@@ -90,11 +91,11 @@ function AddTestForm({ onAdd, onCancel }: { onAdd: (t: { name: string; urgency: 
         <input placeholder="Test name (e.g. CBC, ECG, X-Ray)" value={f.name}
           onChange={e => setF(p => ({ ...p, name: e.target.value }))}
           className="flex-1 h-9 px-3 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-sm" />
-        <select value={f.urgency} onChange={e => setF(p => ({ ...p, urgency: e.target.value as any }))}
+        <Select value={f.urgency} onChange={e => setF(p => ({ ...p, urgency: e.target.value as any }))}
           className="h-9 px-3 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-sm">
           <option>Routine</option>
           <option>Urgent</option>
-        </select>
+        </Select>
       </div>
       <div className="flex gap-2">
         <button onClick={onCancel} className="flex-1 h-8 rounded-lg text-xs font-semibold text-slate-600 bg-white shadow-sm hover:bg-slate-50 cursor-pointer">Cancel</button>

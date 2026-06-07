@@ -175,6 +175,15 @@ const navByRole: Record<Role, NavItem[]> = {
     { href: '/quality/nabh',          label: 'NABH Cockpit',     icon: ShieldCheck },
     { href: '/admin/ai-performance',  label: 'AI Performance',   icon: Sparkles },
   ],
+  hr: [
+    { href: '/hr/dashboard',     label: 'HR Dashboard',          icon: LayoutDashboard },
+    { href: '/hr/employees',     label: 'Employees',             icon: Users },
+    { href: '/hr/leave',         label: 'Leave Management',      icon: Calendar },
+    { href: '/hr/attendance',    label: 'Attendance & Time',     icon: Activity },
+    { href: '/hr/recruitment',   label: 'Recruitment',           icon: Workflow },
+    { href: '/hr/onboarding',    label: 'Onboarding',            icon: ClipboardCheck },
+    { href: '/hr/appraisals',    label: 'Performance',           icon: BarChart3 },
+  ],
   nurse: [
     { href: '/nurse/dashboard',       label: 'Ward Dashboard',  icon: LayoutDashboard },
     { href: '/nurse/vitals-requests', label: 'Vitals Requests', icon: HeartPulse },
@@ -292,6 +301,7 @@ const ROLE_LABELS: Record<Role, string> = {
   housekeeping: 'Housekeeping',   quality: 'Quality & Safety',   blood_bank: 'Blood Bank',
   cssd: 'CSSD',                   dietary: 'Dietary Services',   bmw: 'Bio-Medical Waste',
   mortuary: 'Mortuary',           ambulance: 'Ambulance Svc.',   audit_officer: 'Audit & Compliance',
+  hr: 'HR Portal',
 }
 
 const BRAND = {
@@ -340,6 +350,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const roleNotifs = notifications.filter(n => activeRole === 'admin' || !n.targetRole || n.targetRole === activeRole)
   const unreadCount = roleNotifs.filter(n => !n.read).length
+
+  // Where clicking a notification takes the user. Prefers an explicit deep-link,
+  // then a keyword/type match for the active role, then the role's home page so
+  // a click always lands somewhere actionable.
+  const notifHref = (n: typeof notifications[number]): string | null => {
+    if (n.link) return n.link
+    const t = `${n.type} ${n.title} ${n.body}`.toLowerCase()
+    if (activeRole === 'doctor') {
+      if (/discharge|round|ipd|inpatient|admit/.test(t)) return '/doctor/ipd'
+      if (/radiolog|x-ray|ct |mri|scan|lab|result|critical|report/.test(t)) return '/doctor/inbox'
+      if (/appointment|consult|opd/.test(t)) return '/doctor/dashboard'
+    }
+    if (activeRole === 'discharge' && /discharge|clearance|exit/.test(t)) return '/discharge/dashboard'
+    if (activeRole === 'bed_manager' && /bed|admission|discharge/.test(t)) return '/admission/dashboard'
+    if (activeRole === 'radiology' && /radiolog|x-ray|scan|study|report/.test(t)) return '/radiology/inbox'
+    if (activeRole === 'lab' && /lab|result|sample|critical/.test(t)) return '/lab/inbox'
+    if (activeRole === 'pharmacy' && /pharmac|medicine|rx|prescription|dispense/.test(t)) return '/pharmacy/queue'
+    return nav[0]?.href ?? null
+  }
+
+  const handleNotifClick = (n: typeof notifications[number]) => {
+    markNotifRead(n.id)
+    setNotifOpen(false)
+    const href = notifHref(n)
+    if (href) router.push(href)
+  }
 
   const q = query.trim().toLowerCase()
   const searchResults = q.length >= 1 ? (() => {
@@ -497,9 +533,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* ── Main Area ────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        {/* Top Header */}
+        {/* Top Header — z-30 keeps its dropdowns (notifications, search) above the
+            page content in <main> (z-10) and the sidebar (z-20); equal z-index
+            previously let <main> paint over the open notification panel. */}
         <header
-          className="h-[68px] flex-shrink-0 flex items-center justify-between px-6 bg-white relative z-10"
+          className="h-[68px] flex-shrink-0 flex items-center justify-between px-6 bg-white relative z-30"
           style={{ borderBottom: '1px solid var(--color-border)' }}
         >
           <div className="flex items-center gap-4">
@@ -620,7 +658,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         {roleNotifs.slice(0, 12).map(n => (
                           <div key={n.id}
                             className={cn("w-full text-left px-4 py-2.5 border-b border-slate-50 last:border-0 hover:bg-slate-50 flex items-start gap-2.5 group cursor-pointer", !n.read && "bg-blue-50/40")}
-                            onClick={() => markNotifRead(n.id)}>
+                            onClick={() => handleNotifClick(n)}>
                             {!n.read ? <span className={cn("h-2 w-2 rounded-full mt-1.5 flex-shrink-0", n.priority === 'critical' ? "bg-red-500" : n.priority === 'high' ? "bg-orange-500" : "bg-blue-500")} /> : <span className="w-2 flex-shrink-0" />}
                             <span className="min-w-0 flex-1">
                               <span className="block text-[12.5px] font-semibold text-slate-800 truncate">{n.title}</span>

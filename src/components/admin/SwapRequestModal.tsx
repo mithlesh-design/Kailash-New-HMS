@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -143,13 +144,13 @@ export function SwapRequestModal({ open, onClose, defaults }: SwapRequestModalPr
                       <div className="space-y-2">
                         <div>
                           <p className="text-[10px] font-bold text-slate-500 mb-0.5">Staff (you)</p>
-                          <select value={requesterId} onChange={(e) => setRequesterId(e.target.value)}
+                          <Select value={requesterId} onChange={(e) => setRequesterId(e.target.value)}
                             className="w-full h-9 px-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200">
                             <option value="">— Pick —</option>
                             {staff.filter(s => s.status === 'active').map(s => (
                               <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
                             ))}
-                          </select>
+                          </Select>
                         </div>
                         {myShifts.length > 0 ? (
                           <div>
@@ -178,13 +179,13 @@ export function SwapRequestModal({ open, onClose, defaults }: SwapRequestModalPr
                       <div className="space-y-2">
                         <div>
                           <p className="text-[10px] font-bold text-slate-500 mb-0.5">Colleague (same role)</p>
-                          <select value={targetId} onChange={(e) => setTargetId(e.target.value)}
+                          <Select value={targetId} onChange={(e) => setTargetId(e.target.value)}
                             className="w-full h-9 px-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200">
                             <option value="">— Pick —</option>
                             {eligibleTargets.map(s => (
                               <option key={s.id} value={s.id}>{s.name} ({s.department})</option>
                             ))}
-                          </select>
+                          </Select>
                         </div>
                         {targetShifts.length > 0 ? (
                           <div>

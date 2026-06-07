@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import {
   ClipboardList, Bed, Stethoscope, IndianRupee, FlaskConical, FileCheck2,
@@ -331,10 +332,10 @@ function SpecimenRow(props: {
         )}
         {rejecting && (
           <div className="flex items-center gap-2 flex-wrap">
-            <select value={rejectReason} onChange={e => props.setRejectReason(e.target.value as RejectReason)}
+            <Select value={rejectReason} onChange={e => props.setRejectReason(e.target.value as RejectReason)}
               className="text-xs font-semibold rounded-lg border border-slate-200 bg-white px-2 py-1 cursor-pointer">
               {REJECT_REASONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-            </select>
+            </Select>
             <button onClick={props.onRejectConfirm}
               className="text-[11px] font-bold text-white bg-red-600 hover:bg-red-700 px-2.5 py-1 rounded-lg cursor-pointer">Confirm reject</button>
             <button onClick={props.onCancelReject} className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 px-1 cursor-pointer">Cancel</button>

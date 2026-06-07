@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState, useEffect } from "react"
 import { useOTStore, type OTProcedure } from "@/store/useOTStore"
 import { Clock, CheckCircle, AlertTriangle, ChevronRight, Activity, Pill, Droplets, FlaskConical, ScanLine, Droplet, ShieldAlert, FileText, Plus, Send, ChevronDown, ChevronUp, Calendar, Stethoscope, ClipboardCheck, Heart, Wind, LogOut, ArrowRight, Sparkles } from "lucide-react"
@@ -140,7 +141,7 @@ function IPDBriefPanel({ proc }: { proc: OTProcedure }) {
           )
         })}
         <div className="flex gap-2 mt-2">
-          <select
+          <Select
             value={reqType}
             onChange={e => setReqType(e.target.value as typeof reqType)}
             className="flex-shrink-0 rounded-lg px-2 py-1.5 text-xs text-slate-700 border border-slate-200 bg-slate-50 focus:outline-none"
@@ -149,7 +150,7 @@ function IPDBriefPanel({ proc }: { proc: OTProcedure }) {
             <option value="blood">Blood Bank</option>
             <option value="radiology">Radiology</option>
             <option value="equipment">Equipment</option>
-          </select>
+          </Select>
           <input
             type="text"
             value={reqDesc}

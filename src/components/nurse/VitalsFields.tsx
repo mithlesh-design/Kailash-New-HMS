@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { Activity, AlertTriangle } from "lucide-react"
 import { O2_OPTIONS, AVPU_OPTIONS, type VitalsDraftApi } from "./useVitalsDraft"
 import type { O2Delivery, Consciousness, News2, Anomaly } from "@/lib/vitals"
@@ -37,10 +38,10 @@ export function VitalsFields({ api, hideAnthropometrics = false }: { api: Vitals
           <Field id="vital-spo2" label="SpO₂" unit="%" value={f.spo2} onChange={set("spo2")} placeholder="98" />
           <div>
             <label htmlFor="vital-o2" className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">O₂ delivery</label>
-            <select id="vital-o2" value={o2} onChange={e => setO2(e.target.value as O2Delivery)}
+            <Select id="vital-o2" value={o2} onChange={e => setO2(e.target.value as O2Delivery)}
               className="w-full h-10 px-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500 bg-slate-50">
               {O2_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
+            </Select>
           </div>
           {o2 !== "Room air" && <Field id="vital-o2flow" label="O₂ flow" unit="L/min" value={f.o2flow} onChange={set("o2flow")} placeholder="4" />}
         </div>
@@ -60,10 +61,10 @@ export function VitalsFields({ api, hideAnthropometrics = false }: { api: Vitals
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div>
             <label htmlFor="vital-avpu" className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Consciousness (AVPU)</label>
-            <select id="vital-avpu" value={avpu} onChange={e => setAvpu(e.target.value as Consciousness)}
+            <Select id="vital-avpu" value={avpu} onChange={e => setAvpu(e.target.value as Consciousness)}
               className="w-full h-10 px-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500 bg-slate-50">
               {AVPU_OPTIONS.map(o => <option key={o.v} value={o.v}>{o.label}</option>)}
-            </select>
+            </Select>
           </div>
           <Field id="vital-gcs" label="GCS" unit="3–15" value={f.gcs} onChange={set("gcs")} placeholder="15" />
         </div>

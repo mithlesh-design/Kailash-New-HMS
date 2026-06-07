@@ -23,6 +23,7 @@ import { useBloodBankStore } from "@/store/useBloodBankStore"
 import { useCSSDStore } from "@/store/useCSSDStore"
 import { useConsultationStore } from "@/store/useConsultationStore"
 import { useDietaryStore } from "@/store/useDietaryStore"
+import { useHrmsStore } from "@/store/useHrmsStore"
 import { useDischargeStore } from "@/store/useDischargeStore"
 import { useDoctorStatsStore } from "@/store/useDoctorStatsStore"
 import { useDrugMasterStore } from "@/store/useDrugMasterStore"
@@ -65,6 +66,7 @@ export function StoreHydrator() {
     usePatientProfileStore.persist.rehydrate()
     useShiftStore.persist.rehydrate()
     useHRStore.persist.rehydrate()
+    useHrmsStore.persist.rehydrate()
     useVendorStore.persist.rehydrate()
     useStatutoryStore.persist.rehydrate()
 

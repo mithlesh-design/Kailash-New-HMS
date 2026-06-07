@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useBMWStore, type WasteCategory } from "@/store/useBMWStore"
@@ -64,15 +65,15 @@ function CollectModal({ onClose }: { onClose: () => void }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Ward *</label>
-              <select value={ward} onChange={e => setWard(e.target.value)} className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+              <Select value={ward} onChange={e => setWard(e.target.value)} className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                 {WARDS.map(w => <option key={w} value={w}>{w}</option>)}
-              </select>
+              </Select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Category *</label>
-              <select value={category} onChange={e => setCategory(e.target.value as WasteCategory)} className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+              <Select value={category} onChange={e => setCategory(e.target.value as WasteCategory)} className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              </Select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

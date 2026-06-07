@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
@@ -238,10 +239,10 @@ export default function PayrollPage() {
         </div>
         <div className="flex items-center gap-1.5">
           <Filter className="h-3.5 w-3.5 text-slate-400" />
-          <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}
+          <Select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}
             className="text-xs font-bold border border-slate-300 rounded-xl px-2 py-1.5 bg-white">
             {departments.map(d => <option key={d}>{d}</option>)}
-          </select>
+          </Select>
         </div>
       </div>
 

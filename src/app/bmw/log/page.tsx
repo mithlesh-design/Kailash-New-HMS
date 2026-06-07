@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
@@ -73,14 +74,14 @@ export default function BMWLogPage() {
           <Plus className="h-4 w-4 text-emerald-600" />Log a new collection
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          <select value={ward} onChange={(e) => setWard(e.target.value)}
+          <Select value={ward} onChange={(e) => setWard(e.target.value)}
             className="text-xs font-bold border border-slate-300 rounded-lg px-2 py-2">
             {WARDS.map(w => <option key={w}>{w}</option>)}
-          </select>
-          <select value={category} onChange={(e) => setCategory(e.target.value as WasteCategory)}
+          </Select>
+          <Select value={category} onChange={(e) => setCategory(e.target.value as WasteCategory)}
             className="text-xs font-bold border border-slate-300 rounded-lg px-2 py-2">
             {CATS.map(c => <option key={c}>{c}</option>)}
-          </select>
+          </Select>
           <input type="number" step="0.1" min="0" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Weight (kg)"
             className="text-xs font-bold border border-slate-300 rounded-lg px-2 py-2" />
           <input type="number" min="1" value={bags} onChange={(e) => setBags(e.target.value)} placeholder="Bags"

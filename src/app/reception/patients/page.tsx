@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -135,9 +136,9 @@ export default function ReceptionPatients() {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
-        <select value={dept} onChange={e => setDept(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[12.5px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100">
+        <Select value={dept} onChange={e => setDept(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[12.5px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100">
           {DEPARTMENTS.map(d => <option key={d} value={d}>{d === 'All' ? 'All departments' : d}</option>)}
-        </select>
+        </Select>
         <div className="flex gap-1">
           {['All', 'Critical', 'High', 'Medium', 'Low'].map(t => (
             <button key={t} onClick={() => setTriage(t)}

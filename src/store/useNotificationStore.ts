@@ -32,6 +32,8 @@ export interface Notification {
   read: boolean
   createdAt: string
   readAt?: string
+  /** Optional explicit deep-link; clicking the notification navigates here. */
+  link?: string
 }
 
 export type ChannelConfigMap = Partial<Record<NotificationType, NotificationChannel[]>>
@@ -67,6 +69,8 @@ const DEFAULT_CHANNEL_CONFIG: ChannelConfigMap = {
   appointment:        ['in_app', 'sms'],
 }
 
+let _notifSeq = 0
+
 export const useNotificationStore = create<NotificationState>()(
   persist(
     (set) => ({
@@ -76,7 +80,9 @@ export const useNotificationStore = create<NotificationState>()(
 
   add: (n) =>
     set((state) => {
-      const entry: Notification = { ...n, id: `N-${Date.now()}`, read: false, createdAt: new Date().toISOString() }
+      // Monotonic suffix so notifications added in the same millisecond (batched
+      // notifyAndAudit calls) get unique ids — duplicate ids broke React keys.
+      const entry: Notification = { ...n, id: `N-${Date.now()}-${++_notifSeq}`, read: false, createdAt: new Date().toISOString() }
       return { notifications: [entry, ...state.notifications], unreadCount: state.unreadCount + 1 }
     }),
 
@@ -113,6 +119,22 @@ export const useNotificationStore = create<NotificationState>()(
       ),
     })),
     }),
-    { name: 'kailash-notifications', version: 1, storage: createJSONStorage(() => localStorage), skipHydration: true },
+    {
+      name: 'kailash-notifications',
+      version: 2,
+      storage: createJSONStorage(() => localStorage),
+      skipHydration: true,
+      // v2: drop any notifications with duplicate ids left by the old
+      // millisecond-only id scheme, and recompute unreadCount.
+      migrate: (persisted) => {
+        const p = persisted as { notifications?: Notification[]; unreadCount?: number } | undefined
+        if (p?.notifications) {
+          const seen = new Set<string>()
+          p.notifications = p.notifications.filter(n => (seen.has(n.id) ? false : (seen.add(n.id), true)))
+          p.unreadCount = p.notifications.filter(n => !n.read).length
+        }
+        return p as NotificationState
+      },
+    },
   ),
 )

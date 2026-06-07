@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -186,13 +187,13 @@ export function SickCallModal({ open, onClose, defaults }: SickCallModalProps) {
                   <>
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">Staff member</p>
-                      <select value={staffId} onChange={(e) => setStaffId(e.target.value)}
+                      <Select value={staffId} onChange={(e) => setStaffId(e.target.value)}
                         className="w-full h-9 px-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200">
                         <option value="">— Pick —</option>
                         {staff.filter(s => s.status === 'active').map(s => (
                           <option key={s.id} value={s.id}>{s.name} ({s.role} · {s.department})</option>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                     <div className="grid grid-cols-3 gap-3">
                       <div>
@@ -202,10 +203,10 @@ export function SickCallModal({ open, onClose, defaults }: SickCallModalProps) {
                       </div>
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">Shift</p>
-                        <select value={shift} onChange={(e) => setShift(e.target.value as ShiftType)}
+                        <Select value={shift} onChange={(e) => setShift(e.target.value as ShiftType)}
                           className="w-full h-9 px-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200">
                           {(['Morning', 'Evening', 'Night'] as ShiftType[]).map(s => <option key={s}>{s}</option>)}
-                        </select>
+                        </Select>
                       </div>
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-1">Expected return</p>

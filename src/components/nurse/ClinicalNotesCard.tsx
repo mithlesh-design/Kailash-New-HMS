@@ -8,6 +8,7 @@
  * risk = high).
  */
 
+import { Select } from "@/components/ui/Select"
 import { useEffect, useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import { Bandage, Footprints, ClipboardList, ChevronDown, ChevronRight, Plus, X, Sparkles } from "lucide-react"
@@ -152,10 +153,10 @@ export function ClinicalNotesCard({ patientId, patientName }: { patientId: strin
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <input value={wLocation} onChange={e => setWLocation(e.target.value)} placeholder="Location (e.g. Sacrum)"
                   className="h-9 px-2.5 rounded-md ring-1 ring-slate-200 bg-white text-[12.5px] focus:outline-none focus:ring-rose-400" />
-                <select value={wStage} onChange={e => setWStage(e.target.value as WoundStage)}
+                <Select value={wStage} onChange={e => setWStage(e.target.value as WoundStage)}
                   className="h-9 px-2 rounded-md ring-1 ring-slate-200 bg-white text-[12.5px] focus:outline-none focus:ring-rose-400">
                   {STAGES.map(s => <option key={s} value={s}>Stage {s}</option>)}
-                </select>
+                </Select>
                 <button onClick={addWound} className="h-9 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-semibold inline-flex items-center justify-center gap-1.5 cursor-pointer">
                   <Plus className="h-3.5 w-3.5" /> Add wound
                 </button>

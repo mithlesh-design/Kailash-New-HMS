@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
 
@@ -72,9 +73,9 @@ export default function ReceptionSetup() {
             </div>
             <div>
               <label className="block text-[12.5px] font-semibold text-slate-700 mb-1.5">Default department</label>
-              <select value={dept} onChange={e => setDept(e.target.value)} className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-100">
+              <Select value={dept} onChange={e => setDept(e.target.value)} className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-100">
                 {DEPTS.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
+              </Select>
             </div>
           </div>
         </div>

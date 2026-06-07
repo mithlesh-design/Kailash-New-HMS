@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import {
   ClipboardCheck, Bed, Stethoscope, ChevronDown, ChevronRight, ShieldCheck,
@@ -349,11 +350,11 @@ function AnesthesiaPanel(props: {
         </div>
         <div>
           <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Technique</label>
-          <select value={props.technique ?? ''} onChange={e => props.setTechnique(e.target.value as 'GA' | 'Spinal' | 'Epidural' | 'CSE' | 'Regional' | 'MAC' | 'Local')}
+          <Select value={props.technique ?? ''} onChange={e => props.setTechnique(e.target.value as 'GA' | 'Spinal' | 'Epidural' | 'CSE' | 'Regional' | 'MAC' | 'Local')}
             className="w-full h-7 px-2 text-[12px] rounded-md border border-slate-200 cursor-pointer">
             <option value="">Select…</option>
             {['GA','Spinal','Epidural','CSE','Regional','MAC','Local'].map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          </Select>
         </div>
       </div>
     </div>

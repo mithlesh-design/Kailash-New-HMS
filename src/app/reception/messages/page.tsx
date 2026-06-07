@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -185,9 +186,9 @@ export default function ReceptionMessages() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">To</label>
-                  <select value={draft.to} onChange={e => setDraft(d => ({ ...d, to: e.target.value }))} className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-100">
+                  <Select value={draft.to} onChange={e => setDraft(d => ({ ...d, to: e.target.value }))} className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-100">
                     {RECIPIENTS.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Subject</label>

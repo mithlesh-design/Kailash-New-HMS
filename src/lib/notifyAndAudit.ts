@@ -40,6 +40,7 @@ export interface NotifyAndAuditInput {
   body: string
   patientName?: string
   patientPhone?: string
+  link?: string                           // deep-link opened when the notification is clicked
   channels?: NotificationChannel[]        // override (else uses channelConfig[type])
   audit: {
     action: AuditAction
@@ -65,6 +66,7 @@ export function notifyAndAudit(input: NotifyAndAuditInput): void {
     targetRole: input.to,
     patientName: input.patientName,
     patientPhone: input.patientPhone,
+    link: input.link,
     channels: input.channels ?? channelConfig,
   })
 

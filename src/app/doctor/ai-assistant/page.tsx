@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState, useEffect, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -131,11 +132,11 @@ export default function AiAssistantPage() {
             <span className="text-[11px] font-semibold text-slate-400 hidden sm:inline">Context:</span>
             <div className="relative">
               <User className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
-              <select value={focusId ?? ''} onChange={e => setFocusId(e.target.value || null)}
+              <Select value={focusId ?? ''} onChange={e => setFocusId(e.target.value || null)}
                 className="h-9 pl-8 pr-7 rounded-xl bg-slate-50 border border-slate-200 text-[12.5px] font-medium text-slate-700 outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100 appearance-none cursor-pointer max-w-[200px]">
                 <option value="">No patient pinned</option>
                 {pinnable.map(p => <option key={p.id} value={p.id}>{p.name} — {p.tag}</option>)}
-              </select>
+              </Select>
             </div>
           </div>
         </div>

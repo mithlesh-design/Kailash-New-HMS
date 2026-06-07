@@ -26,7 +26,8 @@ interface Step {
   getStatus: (p: DischargePatient) => StepStatus
   /** Mark cleared. Returns true if the action was applied. */
   clear: (p: DischargePatient, ctx: ClearCtx) => boolean
-  reopen: (p: DischargePatient, ctx: ClearCtx) => void
+  /** Revert a cleared step. Omit when the step is terminal / can't be reopened. */
+  reopen?: (p: DischargePatient, ctx: ClearCtx) => void
   /** This step's dependencies — IDs of steps that must clear first to enable. */
   dependsOn?: string[]
   helpText: string
@@ -34,8 +35,11 @@ interface Step {
 
 interface ClearCtx {
   setClearance: ReturnType<typeof useDischargeStore.getState>['setClearance']
+  setOrderIssued: ReturnType<typeof useDischargeStore.getState>['setOrderIssued']
   draftSummary: ReturnType<typeof useDischargeStore.getState>['draftSummary']
   approveSummary: ReturnType<typeof useDischargeStore.getState>['approveSummary']
+  undraftSummary: ReturnType<typeof useDischargeStore.getState>['undraftSummary']
+  unapproveSummary: ReturnType<typeof useDischargeStore.getState>['unapproveSummary']
   issueExitClearance: ReturnType<typeof useDischargeStore.getState>['issueExitClearance']
   defaultSummary: (p: DischargePatient) => string
   actorName: string
@@ -47,9 +51,10 @@ const STEPS: Step[] = [
     owner: 'Attending doctor', ownerRole: 'doctor', icon: Stethoscope,
     helpText: 'Doctor decides patient is medically fit; order goes into the discharge queue.',
     // Always cleared once the patient is in the queue.
-    getStatus: () => 'cleared',
-    clear: () => true,
-    reopen: () => { /* no-op — can't undo the order from the board */ },
+    // Backed by `orderIssued` (default cleared) so the Doctor pillar can revert it.
+    getStatus: (p) => p.orderIssued === false ? 'in_progress' : 'cleared',
+    clear: (p, ctx) => { ctx.setOrderIssued(p.patientId, true); return true },
+    reopen: (p, ctx) => ctx.setOrderIssued(p.patientId, false),
   },
   {
     id: 'summary_draft', number: 2, label: 'Discharge summary drafted',
@@ -61,7 +66,7 @@ const STEPS: Step[] = [
       ctx.draftSummary(p.patientId, ctx.defaultSummary(p))
       return true
     },
-    reopen: () => { /* draft can be re-edited; status auto-derives */ },
+    reopen: (p, ctx) => ctx.undraftSummary(p.patientId),
   },
   {
     id: 'summary_approve', number: 3, label: 'Summary approved',
@@ -75,7 +80,7 @@ const STEPS: Step[] = [
       ctx.approveSummary(p.patientId)
       return true
     },
-    reopen: () => { /* no-op — re-draft to re-open */ },
+    reopen: (p, ctx) => ctx.unapproveSummary(p.patientId),
   },
   {
     id: 'pharmacy', number: 4, label: 'Pharmacy clearance (TTO meds)',
@@ -141,7 +146,7 @@ const STEPS: Step[] = [
       ctx.issueExitClearance(p.patientId)
       return true
     },
-    reopen: () => { /* exit is terminal; can't reopen from the board */ },
+    // Terminal — exit pass / bed release can't be reopened from the board (no reopen).
   },
 ]
 
@@ -160,10 +165,10 @@ interface Props {
 }
 
 export function DischargeClearanceBoard({ patient, actorName = 'Discharge Coordinator', variant = 'full' }: Props) {
-  const { setClearance, draftSummary, approveSummary, issueExitClearance } = useDischargeStore()
+  const { setClearance, setOrderIssued, draftSummary, approveSummary, undraftSummary, unapproveSummary, issueExitClearance } = useDischargeStore()
 
   const ctx: ClearCtx = {
-    setClearance, draftSummary, approveSummary, issueExitClearance,
+    setClearance, setOrderIssued, draftSummary, approveSummary, undraftSummary, unapproveSummary, issueExitClearance,
     actorName, defaultSummary: defaultSummaryFor,
   }
 
@@ -201,7 +206,15 @@ export function DischargeClearanceBoard({ patient, actorName = 'Discharge Coordi
   }
 
   const onReopen = (step: Step) => {
+    if (!step.reopen) return
     step.reopen(patient, ctx)
+    notifyAndAudit({
+      to: step.ownerRole, type: 'system', priority: 'low',
+      title: `Discharge step reopened · ${patient.patientName}`,
+      body: `Step ${step.number}/9 "${step.label}" reopened by ${actorName}.`,
+      patientName: patient.patientName,
+      audit: { action: 'discharge_clearance', resource: 'discharge', resourceId: patient.id, detail: `Step ${step.number} (${step.label}) reopened`, userName: actorName },
+    })
     toast(`Step ${step.number}: ${step.label} · reopened`)
   }
 
@@ -265,7 +278,7 @@ export function DischargeClearanceBoard({ patient, actorName = 'Discharge Coordi
                       <CheckCircle2 className="h-3 w-3" />Mark cleared
                     </button>
                   )}
-                  {status === 'cleared' && step.reopen.toString() !== '() => { }' && step.id !== 'order' && step.id !== 'exit' && (
+                  {status === 'cleared' && step.reopen && (
                     <button onClick={() => onReopen(step)}
                       className="flex items-center gap-1 text-[10.5px] font-semibold px-2 py-0.5 rounded border border-slate-200 text-slate-500 hover:bg-slate-50 cursor-pointer">
                       <RotateCcw className="h-2.5 w-2.5" />Re-open

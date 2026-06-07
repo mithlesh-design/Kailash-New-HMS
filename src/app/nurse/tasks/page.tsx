@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { CheckCircle2, Circle, AlertCircle, Plus, Sparkles, Mic, Wand2, FileText, Trash2 } from "lucide-react"
 import { NeonBadge } from "@/components/ui/neon-badge"
@@ -124,11 +125,11 @@ export default function NurseTasksPage() {
           <span className="ml-auto text-[11px] text-slate-400">posts to the patient&apos;s shared timeline</span>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <select value={notePatient} onChange={e => setNotePatient(e.target.value)}
+          <Select value={notePatient} onChange={e => setNotePatient(e.target.value)}
             className="h-10 px-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500 bg-slate-50 sm:w-56">
             <option value="">Select patient…</option>
             {active.map(i => <option key={i.patientId} value={i.patientId}>{i.name} · {i.ward} {i.bed}</option>)}
-          </select>
+          </Select>
           <textarea value={noteText} onChange={e => setNoteText(e.target.value)} rows={3}
             placeholder="Type, or click Dictate to capture by voice, then Structure with AI…"
             className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500 bg-slate-50 whitespace-pre-wrap" />

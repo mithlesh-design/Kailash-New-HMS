@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   CheckCircle2, AlertCircle, Clock, FileText, Sparkles, X,
@@ -12,6 +13,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { DischargeClearanceBoard } from "@/components/discharge/DischargeClearanceBoard"
+import { DischargeSummaryResubmitModal, type ResubmitData } from "@/components/discharge/DischargeSummaryResubmitModal"
+import { useInpatientStore } from "@/store/useInpatientStore"
 import { LogOut, ChevronRight as ChevronRightIcon } from "lucide-react"
 
 const PILLAR_CONFIG: Record<ClearancePillar, { label: string; icon: React.ElementType; color: string }> = {
@@ -71,7 +74,7 @@ function ClearancePillarBadge({ pillar, status, onClick }: { pillar: ClearancePi
   )
 }
 
-function PatientCard({ patient }: { patient: DischargePatient }) {
+function PatientCard({ patient, highlighted = false, dimmed = false }: { patient: DischargePatient; highlighted?: boolean; dimmed?: boolean }) {
   const { setClearance, addBlocker, resolveBlocker, draftSummary, approveSummary, issueExitClearance, setFollowUp } = useDischargeStore()
   const [expanded, setExpanded] = useState(false)
   const [newBlocker, setNewBlocker] = useState({ type: 'Other', description: '', owner: '' })
@@ -113,7 +116,12 @@ function PatientCard({ patient }: { patient: DischargePatient }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className={cn("bg-white border shadow-sm rounded-xl overflow-hidden", patient.exitClearanceIssued && "opacity-60")}
+      className={cn(
+        "bg-white border shadow-sm rounded-xl overflow-hidden transition-all",
+        patient.exitClearanceIssued && "opacity-60",
+        highlighted && "ring-2 ring-blue-400 ring-offset-2 shadow-md",
+        dimmed && "opacity-50",
+      )}
     >
       {/* Header */}
       <div
@@ -195,6 +203,18 @@ function PatientCard({ patient }: { patient: DischargePatient }) {
                             })
                           }
                           toast.success(`${PILLAR_CONFIG[pillar].label} clearance given`)
+                        } else if (pillar === 'doctor') {
+                          // Doctor clearance withdrawn for a queued patient → ask the
+                          // doctor to review & resubmit the discharge summary.
+                          notifyAndAudit({
+                            to: 'doctor', type: 'discharge_initiated', priority: 'high',
+                            title: `Review & resubmit discharge summary — ${patient.patientName}`,
+                            body: `Doctor clearance was withdrawn. Review the discharge summary and resubmit; the patient will return to IPD / Inpatients.`,
+                            patientName: patient.patientName,
+                            link: `/discharge/dashboard?resubmit=${patient.patientId}`,
+                            audit: { action: 'discharge_clearance', resource: 'discharge', resourceId: patient.patientId, detail: 'Doctor clearance withdrawn — resubmission requested', userName: 'Discharge desk' },
+                          })
+                          toast('Doctor clearance withdrawn · doctor asked to resubmit')
                         }
                       }}
                     />
@@ -290,7 +310,7 @@ function PatientCard({ patient }: { patient: DischargePatient }) {
                     <AnimatePresence>
                       {showSummary && (
                         <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} className="overflow-hidden">
-                          <p className="text-sm text-slate-700 bg-slate-50 border rounded-xl p-3 mb-3 leading-relaxed">{patient.dischargeSummary}</p>
+                          <p className="text-sm text-slate-700 bg-slate-50 border rounded-xl p-3 mb-3 leading-relaxed whitespace-pre-line">{patient.dischargeSummary?.trim() ? patient.dischargeSummary : AI_SUMMARY_TEMPLATE(patient)}</p>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -362,10 +382,46 @@ function Input({ value, onChange, placeholder, className }: { value: string; onC
 }
 
 export default function DischargeDashboard() {
-  const { dischargeQueue } = useDischargeStore()
+  const { dischargeQueue, draftSummary, approveSummary, setFollowUp, setInstructions, removeFromQueue } = useDischargeStore()
+  const revertDischarge = useInpatientStore(s => s.revertDischarge)
+  const addProgressNote = useInpatientStore(s => s.addProgressNote)
+  const inpatients = useInpatientStore(s => s.inpatients)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Discharge-summary resubmission (opened from the doctor's "review & resubmit"
+  // notification, ?resubmit=<patientId>). On resubmit the patient returns to IPD.
+  const resubmitId = searchParams.get('resubmit')
+  const resubmitPatient = resubmitId ? dischargeQueue.find(p => p.patientId === resubmitId) : undefined
+  const closeResubmit = () => router.replace('/discharge/dashboard')
+  const handleResubmit = (p: DischargePatient, data: ResubmitData) => {
+    // Persist the reviewed summary, then pull the patient back to active care.
+    draftSummary(p.patientId, data.summary)
+    approveSummary(p.patientId)
+    if (data.followUpDate) setFollowUp(p.patientId, data.followUpDate)
+    if (data.instructions) setInstructions(p.patientId, data.instructions)
+    const ip = inpatients.find(i => i.patientId === p.patientId)
+    if (ip) {
+      addProgressNote(p.patientId, `Discharge summary reviewed & revised by doctor; patient returned to ward. ${data.summary}`, ip.condition)
+      revertDischarge(p.patientId)
+    }
+    removeFromQueue(p.patientId)
+    notifyAndAudit({
+      to: 'doctor', type: 'discharge_initiated', priority: 'medium',
+      title: `Patient returned to IPD / Inpatients — ${p.patientName}`,
+      body: `Discharge summary resubmitted. ${p.patientName} is back in IPD / Inpatients for continued care.`,
+      patientName: p.patientName,
+      link: '/doctor/ipd',
+      audit: { action: 'discharge_clearance', resource: 'discharge', resourceId: p.patientId, detail: 'Discharge summary resubmitted — patient returned to IPD', userName: 'Attending doctor' },
+    })
+    toast.success(`${p.patientName} returned to IPD / Inpatients`)
+    closeResubmit()
+  }
 
   const today = dischargeQueue.filter(p => !p.exitClearanceIssued)
   const cleared = dischargeQueue.filter(p => p.exitClearanceIssued)
+  // Discharged-patients history — newest first (by discharge time).
+  const dischargedHistory = [...cleared].sort((a, b) => (b.dischargedAt ?? '').localeCompare(a.dischargedAt ?? ''))
   const blockerCount = today.reduce((acc, p) => acc + p.blockers.filter(b => !b.resolvedAt).length, 0)
   const clearancesDone = today.reduce((acc, p) =>
     acc + Object.values(p.clearances).filter(v => v === 'cleared').length, 0
@@ -391,40 +447,97 @@ export default function DischargeDashboard() {
   const clearing  = today.filter(p => stepsCleared(p) > 2 && stepsCleared(p) < 8).length
   const ready     = today.filter(p => stepsCleared(p) === 8 && !p.exitClearanceIssued).length
 
+  // Clicking a pipeline stage filters the queue below to patients in that stage.
+  // Clicking a pipeline stage card highlights (scrolls to) patients in that stage —
+  // it never hides anyone, so in-workflow patients always stay visible.
+  const [highlightStage, setHighlightStage] = useState<string | null>(null)
+  const matchesStage = (p: DischargePatient) => {
+    const steps = stepsCleared(p)
+    switch (highlightStage) {
+      case 'Initiated':   return !p.exitClearanceIssued && steps <= 2
+      case 'Clearing':    return !p.exitClearanceIssued && steps > 2 && steps < 8
+      case 'Ready':       return !p.exitClearanceIssued && steps === 8
+      case 'Exit issued': return p.exitClearanceIssued
+      case 'Blockers':    return p.blockers.some(b => !b.resolvedAt)
+      default:            return true
+    }
+  }
+  // The queue always lists every in-workflow patient — stage cards highlight, never hide.
+  const queueList = today
+  const highlightCount = highlightStage ? today.filter(matchesStage).length : 0
+
   return (
     <div className="space-y-6">
       {/* M13.7 — Discharge pipeline strip.
           Four stages mirror how an inpatient becomes a "discharged today":
           Order issued → Clearing pillars → Ready (8/9 cleared, awaiting exit) →
           Exit issued. Blockers tile flags anything stuck. */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4">
-        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 pt-4 pb-3 flex-wrap">
           <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <LogOut className="h-4 w-4 text-emerald-600" />Discharge pipeline (9-step clearance)
+            <span className="grid place-items-center h-7 w-7 rounded-lg bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+              <LogOut className="h-4 w-4" />
+            </span>
+            Discharge pipeline
+            <span className="text-[11px] font-semibold text-slate-400">· 9-step clearance</span>
           </h2>
-          <p className="text-[11px] text-slate-500">{today.length} in flight · {cleared.length} exits today</p>
+          <div className="flex items-center gap-2 text-[11px] font-semibold">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-600">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-60 motion-safe:animate-ping" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500" />
+              </span>
+              {today.length} in flight
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700">
+              {cleared.length} exits today
+            </span>
+          </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 items-stretch">
+        <div className="px-4 pb-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4 items-stretch">
           {[
-            { label: 'Initiated',  sub: 'Order + draft',    count: initiated,      color: 'border-blue-200 bg-blue-50',     icon: FileText,     fg: 'text-blue-700',     cta: 'Draft summary' },
-            { label: 'Clearing',   sub: 'Pillars in flight',count: clearing,       color: 'border-amber-200 bg-amber-50',   icon: Clock,        fg: 'text-amber-700',    cta: 'Track' },
-            { label: 'Ready',      sub: '8/9 cleared',      count: ready,          color: 'border-blue-200 bg-blue-50', icon: CheckCircle2, fg: 'text-blue-700',   cta: 'Issue exit' },
-            { label: 'Exit issued',sub: 'Today',            count: cleared.length, color: 'border-emerald-200 bg-emerald-50', icon: LogOut,    fg: 'text-emerald-700',  cta: 'Archive' },
-            { label: 'Blockers',   sub: 'Stuck steps',      count: blockerCount,   color: blockerCount > 0 ? 'border-red-300 bg-red-50 ring-2 ring-red-100' : 'border-slate-200 bg-white', icon: AlertCircle, fg: blockerCount > 0 ? 'text-red-700' : 'text-slate-400', cta: 'Resolve' },
-          ].map((s, i, arr) => (
-            <div key={s.label}
-              className={cn("relative rounded-xl border p-3 flex flex-col gap-1", s.color)}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <s.icon className={cn("h-4 w-4 flex-shrink-0", s.fg)} />
-                  <p className={cn("text-xs font-bold truncate", s.fg)}>{s.label}</p>
-                </div>
-                {i < arr.length - 1 && <ChevronRightIcon className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 hidden lg:block" />}
+            { label: 'Initiated',   sub: 'Order + draft',     count: initiated,      icon: FileText,     fg: 'text-slate-900', card: 'border-slate-200 bg-white', chip: 'bg-blue-50 text-blue-600',     ring: 'ring-blue-300' },
+            { label: 'Clearing',    sub: 'Pillars in flight', count: clearing,       icon: Clock,        fg: 'text-slate-900', card: 'border-slate-200 bg-white', chip: 'bg-amber-50 text-amber-600',   ring: 'ring-amber-300' },
+            { label: 'Ready',       sub: '8/9 cleared',       count: ready,          icon: CheckCircle2, fg: 'text-slate-900', card: 'border-slate-200 bg-white', chip: 'bg-indigo-50 text-indigo-600', ring: 'ring-indigo-300' },
+            { label: 'Exit issued', sub: 'Today',             count: cleared.length, icon: LogOut,       fg: 'text-slate-900', card: 'border-slate-200 bg-white', chip: 'bg-emerald-50 text-emerald-600', ring: 'ring-emerald-300' },
+            { label: 'Blockers',    sub: 'Stuck steps',       count: blockerCount,   icon: AlertCircle,  alert: true, ring: 'ring-red-300',
+              fg: blockerCount > 0 ? 'text-red-600' : 'text-slate-300',
+              card: blockerCount > 0 ? 'border-red-200 bg-red-50/50' : 'border-slate-200 bg-white',
+              chip: blockerCount > 0 ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-400' },
+          ].map((s, i, arr) => {
+            const active = highlightStage === s.label
+            return (
+            <button key={s.label} type="button"
+              onClick={() => {
+                setHighlightStage(active ? null : s.label)
+                if (!active) document.getElementById('discharge-queue')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }}
+              aria-pressed={active}
+              title={active ? `Show all · clear "${s.label}" filter` : `Filter queue to ${s.label}`}
+              className={cn(
+                "relative rounded-xl border p-4 text-left w-full cursor-pointer transition-all duration-200 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-blue-500",
+                s.card,
+                active && cn("ring-2 ring-offset-1 shadow-sm", s.ring),
+              )}>
+              <div className="flex items-center justify-between gap-2">
+                <span className={cn("grid place-items-center h-9 w-9 rounded-lg flex-shrink-0", s.chip)}>
+                  <s.icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className={cn("text-3xl font-bold leading-none tabular-nums", s.fg)}>{s.count}</span>
               </div>
-              <p className={cn("text-2xl font-bold leading-none", s.fg)}>{s.count}</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">{s.sub}</p>
-            </div>
-          ))}
+              <p className="mt-3 text-[13px] font-semibold text-slate-800 flex items-center gap-1.5">
+                {s.label}
+                {s.alert && s.count > 0 && <span className="h-1.5 w-1.5 rounded-full bg-red-500 motion-safe:animate-pulse" aria-hidden="true" />}
+              </p>
+              <p className="text-[11px] text-slate-500">{active ? 'Highlighting · tap to clear' : s.sub}</p>
+              {/* Flow chevron — sits inside the gutter (width matches lg gap), never overlaps a card. */}
+              {i < arr.length - 1 && (
+                <span className="hidden lg:flex items-center justify-center absolute left-full top-1/2 -translate-y-1/2 w-4 h-4 z-10" aria-hidden="true">
+                  <ChevronRightIcon className="h-4 w-4 text-slate-300" />
+                </span>
+              )}
+            </button>
+          )})}
         </div>
       </div>
 
@@ -455,37 +568,78 @@ export default function DischargeDashboard() {
       )}
 
       {/* Discharge queue */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-900">Today's Discharge Queue</h2>
-        {today.length === 0 && (
+      <div id="discharge-queue" className="space-y-4 scroll-mt-6">
+        <div className="flex items-center gap-3 flex-wrap">
+          <h2 className="text-lg font-bold text-slate-900">Today's Discharge Queue</h2>
+          {highlightStage && (
+            <button onClick={() => setHighlightStage(null)}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 transition-colors cursor-pointer">
+              Highlighting: {highlightStage} · {highlightCount}
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+        {queueList.length === 0 && (
           <div className="bg-white border rounded-xl p-12 text-center">
             <CheckCircle2 className="h-10 w-10 text-green-400 mx-auto mb-3" />
             <p className="text-lg font-bold text-slate-700">No pending discharges</p>
-            <p className="text-sm text-slate-500 mt-1">All today's discharges have been processed.</p>
+            <p className="text-sm text-slate-500 mt-1">All today&apos;s discharges have been processed.</p>
           </div>
         )}
-        {today.map(patient => <PatientCard key={patient.id} patient={patient} />)}
+        {queueList.map(patient => (
+          <PatientCard
+            key={patient.id}
+            patient={patient}
+            highlighted={!!highlightStage && matchesStage(patient)}
+            dimmed={!!highlightStage && !matchesStage(patient)}
+          />
+        ))}
       </div>
 
-      {/* Cleared today */}
-      {cleared.length > 0 && (
-        <div>
-          <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-500" /> Discharged Today ({cleared.length})
-          </h2>
+      {/* Discharged patients history */}
+      <div>
+        <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+          <CheckCircle2 className="h-5 w-5 text-green-500" /> Discharged Patients History ({dischargedHistory.length})
+        </h2>
+        {dischargedHistory.length === 0 ? (
+          <div className="bg-white border rounded-xl p-8 text-center">
+            <p className="text-sm font-semibold text-slate-500">No patients discharged yet</p>
+            <p className="text-xs text-slate-400 mt-1">Patients appear here once exit clearance is issued.</p>
+          </div>
+        ) : (
           <div className="space-y-2">
-            {cleared.map(p => (
-              <div key={p.id} className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-xl">
-                <div>
-                  <p className="font-bold text-slate-900">{p.patientName}</p>
-                  <p className="text-sm text-slate-600">{p.diagnosis} • {p.wardBed}</p>
+            {dischargedHistory.map(p => (
+              <div key={p.id} className="flex items-center justify-between gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+                <div className="min-w-0">
+                  <p className="font-bold text-slate-900 truncate">{p.patientName}</p>
+                  <p className="text-sm text-slate-600 truncate">{p.diagnosis} • {p.wardBed}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{p.attendingDoctor} · {p.payerType}</p>
                 </div>
-                <NeonBadge variant="success" dot>Exit Issued</NeonBadge>
+                <div className="text-right flex-shrink-0">
+                  <NeonBadge variant="success" dot>Exit Issued</NeonBadge>
+                  {p.dischargedAt && (
+                    <p className="text-[11px] text-slate-500 mt-1.5 flex items-center justify-end gap-1">
+                      <Clock className="h-3 w-3" />
+                      {new Date(p.dischargedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  )}
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      <AnimatePresence>
+        {resubmitPatient && (
+          <DischargeSummaryResubmitModal
+            patient={resubmitPatient}
+            initialSummary={resubmitPatient.dischargeSummary?.trim() ? resubmitPatient.dischargeSummary : AI_SUMMARY_TEMPLATE(resubmitPatient)}
+            onClose={closeResubmit}
+            onResubmit={(data) => handleResubmit(resubmitPatient, data)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

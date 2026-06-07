@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
@@ -140,10 +141,10 @@ export default function CSSDCyclesPage() {
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <p className="text-sm font-bold text-slate-800">Pick instruments &amp; start cycle</p>
             <div className="flex items-center gap-2">
-              <select value={method} onChange={(e) => setMethod(e.target.value as SterilizationMethod)}
+              <Select value={method} onChange={(e) => setMethod(e.target.value as SterilizationMethod)}
                 className="text-xs font-bold border border-slate-300 rounded-lg px-2 py-1.5">
                 {(['Autoclave', 'ETO', 'Plasma', 'Chemical'] as const).map(m => <option key={m}>{m}</option>)}
-              </select>
+              </Select>
               <button onClick={onStart}
                 disabled={picked.size === 0}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">

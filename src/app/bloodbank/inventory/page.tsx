@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useBloodBankStore, type BloodGroup, type BloodComponent } from "@/store/useBloodBankStore"
@@ -57,17 +58,17 @@ function AddUnitModal({ onClose }: { onClose: () => void }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Blood group *</label>
-              <select value={group} onChange={e => setGroup(e.target.value as BloodGroup)}
+              <Select value={group} onChange={e => setGroup(e.target.value as BloodGroup)}
                 className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                 {GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
-              </select>
+              </Select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Component *</label>
-              <select value={component} onChange={e => setComponent(e.target.value as BloodComponent)}
+              <Select value={component} onChange={e => setComponent(e.target.value as BloodComponent)}
                 className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                 {COMPONENTS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              </Select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

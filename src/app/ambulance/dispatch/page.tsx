@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { useAmbulanceStore, type TripStatus } from "@/store/useAmbulanceStore"
 import { Truck, Send, MapPin, CheckCircle2, Fuel, X, Phone } from "lucide-react"
@@ -176,10 +177,10 @@ export default function AmbulanceDispatch() {
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">Select vehicle *</label>
-            <select value={form.vehicleId} onChange={(e) => setForm((f) => ({ ...f, vehicleId: e.target.value }))} className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <Select value={form.vehicleId} onChange={(e) => setForm((f) => ({ ...f, vehicleId: e.target.value }))} className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">— Choose available vehicle —</option>
               {available.map((v) => <option key={v.id} value={v.id}>{v.vehicleNumber} ({v.type}) · {v.driverName}</option>)}
-            </select>
+            </Select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

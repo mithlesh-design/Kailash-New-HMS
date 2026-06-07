@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
@@ -239,12 +240,12 @@ export default function StatutoryPage() {
             placeholder="Search type / period / ack #"
             className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300" />
         </div>
-        <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as StatutoryType | 'all')}
+        <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as StatutoryType | 'all')}
           className="text-xs font-bold border border-slate-300 rounded-xl px-2 py-2 bg-white">
           <option value="all">All types</option>
           {Object.entries(STATUTORY_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-        </select>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as StatutoryStatus | 'all')}
+        </Select>
+        <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as StatutoryStatus | 'all')}
           className="text-xs font-bold border border-slate-300 rounded-xl px-2 py-2 bg-white">
           <option value="all">All status</option>
           <option value="overdue">Overdue</option>
@@ -252,7 +253,7 @@ export default function StatutoryPage() {
           <option value="upcoming">Upcoming</option>
           <option value="filed">Filed</option>
           <option value="exempted">Exempted</option>
-        </select>
+        </Select>
       </div>
 
       {/* Table */}

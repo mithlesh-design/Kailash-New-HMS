@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -296,26 +297,26 @@ export function AddStaffWizard({ open, onClose, onCreated }: AddStaffWizardProps
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <Field label="Role" icon={Briefcase} required>
-                        <select value={identity.role} onChange={(e) => {
+                        <Select value={identity.role} onChange={(e) => {
                           const role = e.target.value as Role
                           const newDept = (ROLE_DEPTS[role] ?? [identity.department])[0]!
                           const newDesignation = (DESIGNATIONS[role] ?? [])[0] ?? identity.designation
                           setIdentity({ ...identity, role, department: newDept, designation: newDesignation })
                         }} className={INPUT}>
                           {ALL_ROLES.filter(r => r !== 'patient').map(r => <option key={r} value={r}>{r.replace('_', ' ')}</option>)}
-                        </select>
+                        </Select>
                       </Field>
                       <Field label="Department" icon={Briefcase}>
-                        <select value={identity.department} onChange={(e) => setIdentity({ ...identity, department: e.target.value })} className={INPUT}>
+                        <Select value={identity.department} onChange={(e) => setIdentity({ ...identity, department: e.target.value })} className={INPUT}>
                           {depts.map(d => <option key={d}>{d}</option>)}
-                        </select>
+                        </Select>
                       </Field>
                     </div>
                     <Field label="Designation" icon={Briefcase}>
                       {designations.length > 0 ? (
-                        <select value={identity.designation} onChange={(e) => setIdentity({ ...identity, designation: e.target.value })} className={INPUT}>
+                        <Select value={identity.designation} onChange={(e) => setIdentity({ ...identity, designation: e.target.value })} className={INPUT}>
                           {designations.map(d => <option key={d}>{d}</option>)}
-                        </select>
+                        </Select>
                       ) : (
                         <input value={identity.designation} onChange={(e) => setIdentity({ ...identity, designation: e.target.value })}
                           placeholder="e.g., Senior Consultant" className={INPUT} />
@@ -323,18 +324,18 @@ export function AddStaffWizard({ open, onClose, onCreated }: AddStaffWizardProps
                     </Field>
                     <div className="grid grid-cols-3 gap-3">
                       <Field label="Branch" icon={Briefcase}>
-                        <select value={identity.branchId} onChange={(e) => setIdentity({ ...identity, branchId: e.target.value as BranchId })} className={INPUT}>
+                        <Select value={identity.branchId} onChange={(e) => setIdentity({ ...identity, branchId: e.target.value as BranchId })} className={INPUT}>
                           {Object.entries(BRANCH_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                        </select>
+                        </Select>
                       </Field>
                       <Field label="Joining date" icon={Calendar}>
                         <input type="date" value={identity.joiningDate}
                           onChange={(e) => setIdentity({ ...identity, joiningDate: e.target.value })} className={INPUT} />
                       </Field>
                       <Field label="Contract" icon={Briefcase}>
-                        <select value={identity.contractType} onChange={(e) => setIdentity({ ...identity, contractType: e.target.value as ContractType })} className={INPUT}>
+                        <Select value={identity.contractType} onChange={(e) => setIdentity({ ...identity, contractType: e.target.value as ContractType })} className={INPUT}>
                           {['permanent', 'visiting', 'locum', 'intern', 'contract'].map(c => <option key={c}>{c}</option>)}
-                        </select>
+                        </Select>
                       </Field>
                     </div>
                   </>

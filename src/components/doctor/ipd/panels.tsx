@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { X, CheckCircle2, Scissors, ArrowRight, ShieldCheck, Clock, Printer } from "lucide-react"
@@ -56,9 +57,9 @@ export function RoundModal({ ip, onClose }: { ip: Inpatient; onClose: () => void
               <input value={temp} onChange={e => setTemp(e.target.value)} placeholder="Temp" className={field} />
               <input value={spo2} onChange={e => setSpo2(e.target.value)} placeholder="SpO₂" className={field} />
               <input value={rr} onChange={e => setRr(e.target.value)} placeholder="Resp. rate" className={field} />
-              <select value={avpu} onChange={e => setAvpu(e.target.value)} className={field} title="Consciousness (AVPU)">
+              <Select value={avpu} onChange={e => setAvpu(e.target.value)} className={field} title="Consciousness (AVPU)">
                 <option value="A">Alert</option><option value="V">Voice</option><option value="P">Pain</option><option value="U">Unresponsive</option>
-              </select>
+              </Select>
             </div>
           </div>
           <div><label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Progress note</label>
@@ -66,7 +67,7 @@ export function RoundModal({ ip, onClose }: { ip: Inpatient; onClose: () => void
           <div><label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Plan</label>
             <input value={plan} onChange={e => setPlan(e.target.value)} placeholder="e.g. Continue antibiotics; repeat CBC tomorrow" className={field} /></div>
           <div><label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Condition after round</label>
-            <select value={condition} onChange={e => setCond(e.target.value as Condition)} className={field}>{CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+            <Select value={condition} onChange={e => setCond(e.target.value as Condition)} className={field}>{CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}</Select></div>
         </div>
         <div className="flex gap-3 mt-5">
           <button onClick={onClose} className="flex-1 h-11 rounded-xl border border-slate-200 text-slate-700 font-bold text-[13.5px] hover:bg-slate-50">Cancel</button>
@@ -130,7 +131,7 @@ export function SurgeryPanel({ ip }: { ip: Inpatient }) {
         <div className="space-y-2">
           <p className="text-[12px] font-semibold text-green-700 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Consent received — schedule OT</p>
           <div className="grid grid-cols-2 gap-2">
-            <select value={ot} onChange={e => setOt(e.target.value)} className={field}><option>OT-1</option><option>OT-2</option><option>Cath Lab</option></select>
+            <Select value={ot} onChange={e => setOt(e.target.value)} className={field}><option>OT-1</option><option>OT-2</option><option>Cath Lab</option></Select>
             <input type="datetime-local" value={when} onChange={e => setWhen(e.target.value)} className={field} />
           </div>
           <button onClick={() => { scheduleSurgery(ip.patientId, { ot, scheduledAt: new Date(when).toISOString() }); toast.success('Surgery scheduled') }} className="h-9 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[12.5px] font-bold">Schedule surgery</button>

@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { useMortuaryStore } from "@/store/useMortuaryStore"
 import { Badge } from "@/components/ui/badge"
@@ -43,9 +44,9 @@ function ReleaseModal({ recordId, onClose }: { recordId: string; onClose: () => 
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">Relation</label>
-            <select value={relation} onChange={e => setRelation(e.target.value)} className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+            <Select value={relation} onChange={e => setRelation(e.target.value)} className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
               {['Spouse', 'Parent', 'Child', 'Sibling', 'Other relative', 'Funeral home'].map(r => <option key={r}>{r}</option>)}
-            </select>
+            </Select>
           </div>
           <p className="text-[11px] text-slate-500">Body release requires legal clearance and (if applicable) a signed death certificate.</p>
         </div>

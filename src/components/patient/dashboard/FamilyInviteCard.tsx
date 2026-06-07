@@ -11,6 +11,7 @@
  *   <FamilyInviteCard />
  */
 
+import { Select } from "@/components/ui/Select"
 import { useEffect, useMemo, useState } from "react"
 import { Send, MessageCircle, UserPlus, X, Check, Phone, Sparkles, Clock } from "lucide-react"
 import { useAuthStore } from "@/store/useAuthStore"
@@ -162,10 +163,10 @@ export function FamilyInviteCard({ className }: { className?: string }) {
           <div className="grid grid-cols-2 gap-2">
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name"
               className="h-9 rounded-lg px-2.5 text-[13px] ring-1 ring-slate-200 bg-white outline-none focus:ring-emerald-400 col-span-1" />
-            <select value={relation} onChange={(e) => setRelation(e.target.value as typeof RELATIONS[number])}
+            <Select value={relation} onChange={(e) => setRelation(e.target.value as typeof RELATIONS[number])}
               className="h-9 rounded-lg px-2 text-[13px] ring-1 ring-slate-200 bg-white outline-none focus:ring-emerald-400 col-span-1">
               {RELATIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-            </select>
+            </Select>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[12px] text-slate-500 inline-flex items-center gap-1"><Phone className="h-3 w-3" />+91</span>

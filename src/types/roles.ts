@@ -17,6 +17,7 @@ export const ALL_ROLES = [
   'insurance',
   // Management
   'admin',
+  'hr',
   'quality',
   'housekeeping',
   'inventory',

@@ -1,4 +1,5 @@
 "use client"
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, Clock, CheckCircle2, AlertCircle, User } from "lucide-react"
@@ -155,7 +156,7 @@ export default function HousekeepingDashboard() {
                     </div>
                     <div className="flex gap-2">
                       {task.status === 'Pending' && !task.assignedTo && (
-                        <select
+                        <Select
                           onChange={e => {
                             if (!e.target.value) return
                             assignTask(task.id, e.target.value)
@@ -172,7 +173,7 @@ export default function HousekeepingDashboard() {
                         >
                           <option value="" disabled>Assign staff</option>
                           {staff.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
-                        </select>
+                        </Select>
                       )}
                       {task.status === 'Pending' && task.assignedTo && (
                         <Button size="sm" variant="secondary" onClick={() => { startTask(task.id); toast.info(`Cleaning started for Bed ${task.bedNumber}`) }}>

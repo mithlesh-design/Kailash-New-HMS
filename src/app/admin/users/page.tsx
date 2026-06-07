@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
@@ -359,10 +360,10 @@ function FilterChip({ label, icon: Icon, value, onChange, options }: {
     <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-white border border-slate-200">
       <Icon className="h-3.5 w-3.5 text-slate-400" />
       <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{label}</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)}
+      <Select value={value} onChange={(e) => onChange(e.target.value)}
         className="text-xs font-bold text-slate-700 bg-transparent outline-none cursor-pointer">
         {options.map(o => <option key={o} value={o} className="font-normal">{o.toString().replace('_', ' ')}</option>)}
-      </select>
+      </Select>
     </div>
   )
 }

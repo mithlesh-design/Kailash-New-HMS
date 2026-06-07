@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import {
   ClipboardList, Bed, Stethoscope, IndianRupee, ScanLine, AlertTriangle, ChevronDown, ChevronRight,
@@ -222,13 +223,13 @@ function StudyRow(props: {
         <div className="flex-shrink-0 flex items-center gap-2">
           {s.status === "ordered" && (
             <>
-              <select value={offset} onChange={e => props.setOffset(Number(e.target.value))}
+              <Select value={offset} onChange={e => props.setOffset(Number(e.target.value))}
                 className="text-[11px] font-semibold rounded-lg border border-slate-200 bg-white px-2 py-1.5 cursor-pointer">
                 <option value={15}>+15m</option>
                 <option value={30}>+30m</option>
                 <option value={60}>+1h</option>
                 <option value={120}>+2h</option>
-              </select>
+              </Select>
               <button onClick={props.onSchedule}
                 className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-2 rounded-xl cursor-pointer whitespace-nowrap"
                 style={{ background: "linear-gradient(135deg,#1E3A8A,#2563EB)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>

@@ -114,8 +114,20 @@ const EMERGENCY_PERMS = new Set<Action>([
 
 const PATIENT_PERMS = new Set<Action>([])
 
+// HR Manager — full control over the HR/HRMS domain.
+const HR_PERMS = new Set<Action>([
+  'hr.staff.read', 'hr.staff.write', 'hr.staff.terminate',
+  'hr.credential.read', 'hr.credential.write',
+  'hr.shift.read', 'hr.shift.write', 'hr.shift.bulk',
+  'hr.duty.read', 'hr.duty.write',
+  'hr.leave.read', 'hr.leave.request', 'hr.leave.decide',
+  'hr.swap.request', 'hr.swap.decide',
+  'hr.overtime.log',
+])
+
 export const PERMISSIONS_MATRIX: Record<Role, ReadonlySet<Action>> = {
   admin:         ADMIN_ALL,
+  hr:            HR_PERMS,
   audit_officer: AUDIT_OFFICER_PERMS,
   quality:       QUALITY_PERMS,
   doctor:        DOCTOR_PERMS,

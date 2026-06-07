@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useEffect, useState } from "react"
 import { useInpatientStore, type Inpatient, type IoKind } from "@/store/useInpatientStore"
 import { useShiftStore, ALL_WARDS } from "@/store/useShiftStore"
@@ -114,9 +115,9 @@ function IoCard({ ip, mounted }: { ip: Inpatient; mounted: boolean }) {
               </button>
             ))}
           </div>
-          <select value={type} onChange={e => setType(e.target.value)} className="h-9 px-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50">
+          <Select value={type} onChange={e => setType(e.target.value)} className="h-9 px-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-800 bg-slate-50">
             {(kind === "intake" ? INTAKE_TYPES : OUTPUT_TYPES).map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          </Select>
           <input value={vol} onChange={e => setVol(e.target.value)} type="number" placeholder="mL" className="h-9 w-20 px-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-900 bg-slate-50" />
           <button onClick={submit} className="h-9 px-3 rounded-lg bg-green-600 text-white text-xs font-bold cursor-pointer hover:bg-green-700">Add</button>
           <button onClick={() => setOpen(false)} className="h-9 px-3 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 cursor-pointer">Cancel</button>

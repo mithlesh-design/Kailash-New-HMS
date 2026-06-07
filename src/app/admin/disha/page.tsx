@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
@@ -250,11 +251,11 @@ export default function DishaPage() {
             placeholder="Search actor / patient ID / detail"
             className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-300" />
         </div>
-        <select value={actionFilter} onChange={(e) => setActionFilter(e.target.value as DishaAction | 'all')}
+        <Select value={actionFilter} onChange={(e) => setActionFilter(e.target.value as DishaAction | 'all')}
           className="text-xs font-bold border border-slate-300 rounded-xl px-2 py-2 bg-white">
           <option value="all">All actions</option>
           {DISHA_ACTIONS.map(a => <option key={a} value={a}>{ACTION_LABEL[a]}</option>)}
-        </select>
+        </Select>
       </div>
 
       {/* Access log */}

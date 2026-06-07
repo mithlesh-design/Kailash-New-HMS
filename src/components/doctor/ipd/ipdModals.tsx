@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { X } from "lucide-react"
@@ -62,9 +63,9 @@ function AddMedForm({ patient, onClose }: { patient: Inpatient; onClose: () => v
       <div><label className={label}>Medicine</label><input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Pantoprazole" className={field} /></div>
       <div className="grid grid-cols-2 gap-2">
         <div><label className={label}>Dose</label><input value={dose} onChange={e => setDose(e.target.value)} placeholder="e.g. 40mg" className={field} /></div>
-        <div><label className={label}>Frequency</label><select value={freq} onChange={e => setFreq(e.target.value)} className={field}><option>OD</option><option>BD</option><option>TDS</option><option>QID</option><option>Q6H</option><option>SOS</option></select></div>
+        <div><label className={label}>Frequency</label><Select value={freq} onChange={e => setFreq(e.target.value)} className={field}><option>OD</option><option>BD</option><option>TDS</option><option>QID</option><option>Q6H</option><option>SOS</option></Select></div>
       </div>
-      <div><label className={label}>Route</label><select value={route} onChange={e => setRoute(e.target.value)} className={field}><option>Oral</option><option>IV</option><option>IM</option><option>SC</option><option>Topical</option></select></div>
+      <div><label className={label}>Route</label><Select value={route} onChange={e => setRoute(e.target.value)} className={field}><option>Oral</option><option>IV</option><option>IM</option><option>SC</option><option>Topical</option></Select></div>
       <Actions onClose={onClose} onSubmit={submit} submitLabel="Add medication" />
     </div>
   )
@@ -83,7 +84,7 @@ function StopMedForm({ patient, onClose }: { patient: Inpatient; onClose: () => 
   if (!active.length) return <p className="text-[13px] text-slate-500">No active medications to stop.</p>
   return (
     <div className="space-y-3">
-      <div><label className={label}>Medication</label><select value={name} onChange={e => setName(e.target.value)} className={field}>{active.map(m => <option key={m.name} value={m.name}>{m.name} {m.dose}</option>)}</select></div>
+      <div><label className={label}>Medication</label><Select value={name} onChange={e => setName(e.target.value)} className={field}>{active.map(m => <option key={m.name} value={m.name}>{m.name} {m.dose}</option>)}</Select></div>
       <div><label className={label}>Reason for stopping</label><input value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Course complete / adverse effect" className={field} /></div>
       <Actions onClose={onClose} onSubmit={submit} submitLabel="Stop medication" />
     </div>
@@ -101,7 +102,7 @@ function OrderTestForm({ patient, onClose }: { patient: Inpatient; onClose: () =
   return (
     <div className="space-y-3">
       <div><label className={label}>Investigation</label><input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Serum Electrolytes" className={field} /></div>
-      <div><label className={label}>Priority</label><select value={priority} onChange={e => setPriority(e.target.value as 'Routine' | 'Urgent')} className={field}><option>Routine</option><option>Urgent</option></select></div>
+      <div><label className={label}>Priority</label><Select value={priority} onChange={e => setPriority(e.target.value as 'Routine' | 'Urgent')} className={field}><option>Routine</option><option>Urgent</option></Select></div>
       <Actions onClose={onClose} onSubmit={submit} submitLabel="Order test" />
     </div>
   )
@@ -119,7 +120,7 @@ function ReferForm({ patient, onClose }: { patient: Inpatient; onClose: () => vo
   }
   return (
     <div className="space-y-3">
-      <div><label className={label}>Specialty</label><select value={specialty} onChange={e => setSpecialty(e.target.value)} className={field}>{['Cardiology', 'Neurology', 'Nephrology', 'Gastroenterology', 'Pulmonology', 'Endocrinology', 'Orthopaedics', 'General Surgery'].map(s => <option key={s}>{s}</option>)}</select></div>
+      <div><label className={label}>Specialty</label><Select value={specialty} onChange={e => setSpecialty(e.target.value)} className={field}>{['Cardiology', 'Neurology', 'Nephrology', 'Gastroenterology', 'Pulmonology', 'Endocrinology', 'Orthopaedics', 'General Surgery'].map(s => <option key={s}>{s}</option>)}</Select></div>
       <div><label className={label}>Consultant (optional)</label><input value={toDoctor} onChange={e => setToDoctor(e.target.value)} placeholder="e.g. Dr. Rohan Mehta" className={field} /></div>
       <div><label className={label}>Reason</label><input value={reason} onChange={e => setReason(e.target.value)} placeholder="Clinical question for the specialist" className={field} /></div>
       <label className="flex items-center gap-2 text-[13px] font-semibold text-rose-600"><input type="checkbox" checked={urgent} onChange={e => setUrgent(e.target.checked)} /> Mark urgent</label>
@@ -141,7 +142,7 @@ function IcuForm({ patient, onClose }: { patient: Inpatient; onClose: () => void
   return (
     <div className="space-y-3">
       <div><label className={label}>Reason for ICU transfer</label><input value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Worsening hypoxia, needs ventilatory support" className={field} /></div>
-      <div><label className={label}>Urgency</label><select value={urgency} onChange={e => setUrgency(e.target.value as typeof urgency)} className={field}><option>Routine</option><option>Urgent</option><option>Emergency</option></select></div>
+      <div><label className={label}>Urgency</label><Select value={urgency} onChange={e => setUrgency(e.target.value as typeof urgency)} className={field}><option>Routine</option><option>Urgent</option><option>Emergency</option></Select></div>
       <Actions onClose={onClose} onSubmit={submit} submitLabel="Request ICU transfer" />
     </div>
   )
@@ -163,7 +164,7 @@ function OtForm({ patient, onClose }: { patient: Inpatient; onClose: () => void 
       <div><label className={label}>Procedure</label><input value={procedure} onChange={e => setProcedure(e.target.value)} placeholder="e.g. Laparoscopic Cholecystectomy" className={field} /></div>
       <div className="grid grid-cols-2 gap-2">
         <div><label className={label}>Surgeon</label><input value={surgeon} onChange={e => setSurgeon(e.target.value)} placeholder="e.g. Dr. Anisha Sharma" className={field} /></div>
-        <div><label className={label}>Theatre</label><select value={ot} onChange={e => setOt(e.target.value)} className={field}><option>OT-1</option><option>OT-2</option><option>Cath Lab</option></select></div>
+        <div><label className={label}>Theatre</label><Select value={ot} onChange={e => setOt(e.target.value)} className={field}><option>OT-1</option><option>OT-2</option><option>Cath Lab</option></Select></div>
       </div>
       <div><label className={label}>Scheduled for</label><input type="datetime-local" value={when} onChange={e => setWhen(e.target.value)} className={field} /></div>
       <Actions onClose={onClose} onSubmit={submit} submitLabel="Book OT" />
@@ -177,7 +178,7 @@ function DietForm({ patient, onClose }: { patient: Inpatient; onClose: () => voi
   const submit = () => { setDiet(patient.patientId, diet); toast.success('Diet updated'); onClose() }
   return (
     <div className="space-y-3">
-      <div><label className={label}>Diet order</label><select value={diet} onChange={e => setDietVal(e.target.value)} className={field}>{['Normal diet', 'Diabetic diet', 'Cardiac diet · low salt', 'Soft diet', 'Renal diet', 'NPO — IV fluids', 'Liquid diet'].map(d => <option key={d}>{d}</option>)}</select></div>
+      <div><label className={label}>Diet order</label><Select value={diet} onChange={e => setDietVal(e.target.value)} className={field}>{['Normal diet', 'Diabetic diet', 'Cardiac diet · low salt', 'Soft diet', 'Renal diet', 'NPO — IV fluids', 'Liquid diet'].map(d => <option key={d}>{d}</option>)}</Select></div>
       <Actions onClose={onClose} onSubmit={submit} submitLabel="Update diet" />
     </div>
   )

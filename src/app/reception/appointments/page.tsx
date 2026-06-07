@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -194,10 +195,10 @@ export default function ReceptionAppointments() {
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Doctor</label>
-                  <select value={draft.doctorIdx} onChange={e => setDraft(d => ({ ...d, doctorIdx: parseInt(e.target.value) }))}
+                  <Select value={draft.doctorIdx} onChange={e => setDraft(d => ({ ...d, doctorIdx: parseInt(e.target.value) }))}
                     className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-100">
                     {DOCTORS.map((d, i) => <option key={d.name} value={i}>{d.name} · {d.specialty}</option>)}
-                  </select>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -208,10 +209,10 @@ export default function ReceptionAppointments() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Time</label>
-                    <select value={draft.time} onChange={e => setDraft(d => ({ ...d, time: e.target.value }))}
+                    <Select value={draft.time} onChange={e => setDraft(d => ({ ...d, time: e.target.value }))}
                       className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-100">
                       {SLOTS.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    </Select>
                   </div>
                 </div>
               </div>

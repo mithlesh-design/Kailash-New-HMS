@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { news2FromRecord, type Consciousness, type O2Delivery } from '@/lib/vitals'
+import { useDischargeStore } from './useDischargeStore'
 
 // The shared inpatient (IPD) journey — written by the doctor portal, mirrored
 // in the patient portal. Every action appends to a single `events` log, which
@@ -294,6 +295,31 @@ function seed(): Inpatient[] {
       mar: [givenRec('Metformin', '08:00', 'N. Ravi'), givenRec('Glimepiride', '08:00', 'N. Ravi')],
       events: seedEvents(DOC, hrsAgo(72), 'Type 2 Diabetes — stabilised', 'Glycaemic control achieved. Fit for discharge. Plan TTO + follow-up.', 3),
     },
+    {
+      // Bed 105 occupant — post-op appendectomy (consistent with her billing: laparoscopic
+      // appendectomy + antibiotics). Matched to the bed by name + ward/bed in BedHoverCard.
+      patientId: 'IP-3005', name: 'Priya Sharma', age: 34, gender: 'Female', bed: '105', ward: 'General Ward',
+      admittingDoctor: DOC, diagnosis: 'Post-op — laparoscopic appendectomy (POD-2)', admittedAt: hrsAgo(60), expectedDischarge: 'In 1–2 days',
+      stage: 'recovering', condition: 'Improving',
+      rounds: seedRounds(DOC, 'Improving', 5, 'POD-2: afebrile, wound clean & dry, tolerating orals. Mobilising well — plan discharge once bowels open.'),
+      meds: [mkMed('Cefuroxime', '500mg', 'BD', 'Oral', hrsAgo(36)), mkMed('Paracetamol', '1g', 'QDS PRN', 'Oral', hrsAgo(60)), mkMed('Pantoprazole', '40mg', 'OD', 'Oral', hrsAgo(60))],
+      tests: [{ ...mkTest('CBC (post-op)', 'Ready'), result: 'WBC 8.9 ×10⁹/L — normalising', resultAt: hrsAgo(4) }, { ...mkTest('LFT', 'Ready'), result: 'Within normal limits', resultAt: hrsAgo(4) }, mkTest('Wound swab', 'Ordered')],
+      diet: 'Light diet — as tolerated', progressNotes: [
+        { id: uid('p'), at: hrsAgo(5), doctor: DOC, text: 'POD-2 review: pain well controlled, wound healthy, no signs of infection. Continue oral antibiotics, encourage mobilisation.', condition: 'Improving' },
+        { id: uid('p'), at: hrsAgo(30), doctor: DOC, text: 'POD-1: stable post-op, started on orals, IV antibiotics switched to oral. Pain score 3/10.', condition: 'Stable' },
+      ],
+      allergies: ['Sulfa drugs (rash)'], comorbidities: ['None significant'], codeStatus: 'Full code',
+      vitals: [
+        mkVit(6, 'N. Anjali', { hr: 86, systolicBP: 118, diastolicBP: 74, rr: 17, spo2: 98, o2Delivery: 'Room air', temp: 99.2, pain: 3, consciousness: 'A', weight: 58, height: 162, urineOutput: 50 }),
+        mkVit(2, 'N. Anjali', { hr: 78, systolicBP: 116, diastolicBP: 72, rr: 16, spo2: 99, o2Delivery: 'Room air', temp: 98.6, pain: 2, consciousness: 'A', urineOutput: 55 }),
+      ],
+      mar: [givenRec('Cefuroxime', '08:00'), givenRec('Pantoprazole', '08:00')],
+      events: [
+        ...seedEvents(DOC, hrsAgo(60), 'Acute appendicitis — for laparoscopic appendectomy', 'POD-2: afebrile, wound clean & dry, tolerating orals. Mobilising well.', 5),
+        ev('surgery_status', hrsAgo(58), 'Dr. Anita Rao', 'Surgery done — Laparoscopic Appendectomy', { detail: 'Uncomplicated; specimen sent for histopathology.', severity: 'success', patientText: 'Your appendix was removed successfully.' }),
+        ev('med_change', hrsAgo(36), DOC, 'IV antibiotics switched to oral', { detail: 'Cefuroxime IV → oral', severity: 'info' }),
+      ],
+    },
   ]
 }
 
@@ -333,6 +359,8 @@ interface InpatientState {
   setPostOpNote: (patientId: string, note: string) => void
   // discharge
   initiateDischarge: (patientId: string) => void
+  /** Cancel an in-progress discharge — return the patient to active ward care. */
+  revertDischarge: (patientId: string) => void
   clearPillar: (patientId: string, key: DischargePillarKey) => void
   setDischargeSummary: (patientId: string, d: { summary: string; followUpDate: string; meds: Discharge['meds']; redFlags: string[] }) => void
   completeDischarge: (patientId: string) => void
@@ -346,7 +374,7 @@ const append = (ip: Inpatient, e: Omit<IpdEvent, 'id' | 'at'> & { at?: string })
 
 export const useInpatientStore = create<InpatientState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       inpatients: seed(),
 
       logEvent: (id, e) => set(s => patch(s, id, ip => ({ ...ip, events: append(ip, e) }))),
@@ -547,11 +575,43 @@ export const useInpatientStore = create<InpatientState>()(
         events: append(ip, { type: 'surgery_status', actor: ip.admittingDoctor, title: 'Post-op note', detail: note }),
       }) : ip)),
 
-      initiateDischarge: (id) => set(s => patch(s, id, ip => ({
-        ...ip, stage: 'discharge_initiated',
-        discharge: { pillars: { clinical: true, nursing: false, pharmacy: false, billing: false, insurance: false }, meds: [], redFlags: [], initiatedAt: new Date().toISOString() },
-        events: append(ip, { type: 'discharge_step', actor: ip.admittingDoctor, title: 'Discharge initiated', severity: 'info', patientText: 'Your discharge process has started.' }),
-      }))),
+      initiateDischarge: (id) => {
+        set(s => patch(s, id, ip => ({
+          ...ip, stage: 'discharge_initiated',
+          discharge: { pillars: { clinical: true, nursing: false, pharmacy: false, billing: false, insurance: false }, meds: [], redFlags: [], initiatedAt: new Date().toISOString() },
+          events: append(ip, { type: 'discharge_step', actor: ip.admittingDoctor, title: 'Discharge initiated', severity: 'info', patientText: 'Your discharge process has started.' }),
+        })))
+        // Bridge into the Discharge Portal queue so the patient shows in the
+        // Initiated stage (the IPD store and the discharge store are separate).
+        const ip = get().inpatients.find(i => i.patientId === id)
+        if (ip) {
+          const ds = useDischargeStore.getState()
+          if (!ds.dischargeQueue.some(d => d.patientId === ip.patientId)) {
+            ds.initDischarge({
+              patientId: ip.patientId,
+              patientName: ip.name,
+              wardBed: `${ip.ward} ${ip.bed}`.trim(),
+              diagnosis: ip.diagnosis,
+              admittedOn: ip.admittedAt,
+              expectedDischarge: new Date().toISOString(),
+              attendingDoctor: ip.admittingDoctor,
+              payerType: 'General',
+              condition: ip.condition === 'Critical' ? 'Critical' : ip.condition === 'Serious' ? 'Monitoring' : 'Stable',
+              ttoMeds: ip.meds.filter(m => m.status === 'active').map(m => ({ name: m.name, dose: m.dose, freq: m.freq, duration: '7 days' })),
+            })
+          }
+        }
+      },
+
+      // Cancel an in-progress discharge — clear the discharge state and return
+      // the patient to active ward care so they show in IPD / Inpatients again.
+      revertDischarge: (id) => set(s => patch(s, id, ip => {
+        const { discharge: _discharge, ...rest } = ip
+        return {
+          ...rest, stage: 'under_treatment',
+          events: append(ip, { type: 'discharge_step', actor: ip.admittingDoctor, title: 'Discharge cancelled — returned to ward', severity: 'warning', patientText: 'Your discharge was paused; your care team is continuing treatment.' }),
+        }
+      })),
 
       clearPillar: (id, key) => set(s => patch(s, id, ip => ip.discharge ? ({
         ...ip, discharge: { ...ip.discharge, pillars: { ...ip.discharge.pillars, [key]: true } },

@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { useInventoryStore, type Asset } from "@/store/useInventoryStore"
 import { Package, AlertTriangle, Search, Settings, CheckCircle, X, Wrench } from "lucide-react"
@@ -110,9 +111,9 @@ function ReceiveDeliveryModal({ onClose }: { onClose: () => void }) {
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Requisition *</label>
-              <select value={pick} onChange={e => setPick(e.target.value)} className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <Select value={pick} onChange={e => setPick(e.target.value)} className="w-full h-10 px-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 {open.map((r) => <option key={r.id} value={r.id}>{r.id} — {r.assetName} × {r.qty}</option>)}
-              </select>
+              </Select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Qty received *</label>

@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import {
@@ -266,10 +267,10 @@ export default function RosterPage() {
 
         <div className="flex items-center gap-1.5">
           <Filter className="h-3.5 w-3.5 text-slate-400" />
-          <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}
+          <Select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)}
             className="text-xs font-bold border border-slate-300 rounded-xl px-2 py-1.5 bg-white">
             {departments.map(d => <option key={d}>{d}</option>)}
-          </select>
+          </Select>
         </div>
       </div>
 
@@ -329,12 +330,12 @@ export default function RosterPage() {
                   return (
                     <td key={date} className={cn('px-1 py-1.5 text-center', isToday && 'bg-blue-50/40')}>
                       {isEditing ? (
-                        <select value={shift} autoFocus
+                        <Select value={shift} autoFocus
                           onBlur={() => setEditCell(null)}
                           onChange={e => handleCellChange(member.id, date, e.target.value as ShiftType)}
                           className="text-[11px] rounded-lg border border-indigo-400 px-1 py-1 focus:outline-none bg-white">
                           {SHIFTS.map(s => <option key={s}>{s}</option>)}
-                        </select>
+                        </Select>
                       ) : (
                         <button onClick={() => canWrite && setEditCell({ staffId: member.id, date })}
                           disabled={!canWrite}

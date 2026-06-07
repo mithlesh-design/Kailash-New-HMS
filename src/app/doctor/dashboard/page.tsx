@@ -1,4 +1,5 @@
 "use client"
+import { Select } from "@/components/ui/Select"
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -6,7 +7,7 @@ import {
   Activity, CheckCircle2, Stethoscope, Mic, MicOff, Pill, Plus, X, Search,
   AlertCircle, Sparkles, Clock, Send, FileText, FlaskConical, ScanLine,
   UserPlus, ArrowRight, GitBranch, Bed, ChevronDown, ChevronUp, Bot,
-  Video, PhoneOff, AlertTriangle,
+  Video, PhoneOff,
 } from "lucide-react"
 import { usePatientStore } from "@/store/usePatientStore"
 import { useAuthStore } from "@/store/useAuthStore"
@@ -30,13 +31,11 @@ import { OrderSetPicker } from "@/components/doctor/OrderSetPicker"
 import { materializeOrderSet, type OrderSetDef } from "@/lib/clinicalOrderSets"
 import type { Patient } from "@/store/usePatientStore"
 import { toast } from "sonner"
-import { checkRx, type RxWarning } from "@/lib/drugSafety"
 import { isSpeechSupported, startDictation, toSOAP, type Recognition } from "@/lib/voiceScribe"
 import { openPrint, olFrom, para } from "@/lib/printDoc"
 import { useDoctorProfileStore } from "@/store/useDoctorProfileStore"
 import { useHRStore } from "@/store/useHRStore"
 import { useDialogs } from "@/components/ui/ConfirmDialog"
-import { DrugSafetyReasoningCard } from "@/components/clinical/DrugSafetyReasoningCard"
 
 const DRUGS = ["Paracetamol 500mg","Amoxicillin 500mg","Azithromycin 500mg","Cetirizine 10mg","Pantoprazole 40mg","Dolo 650mg","Metformin 500mg","Amlodipine 5mg","Atorvastatin 20mg","Omeprazole 20mg","Ibuprofen 400mg","Montelukast 10mg","Metronidazole 400mg","Ondansetron 4mg","Diclofenac 50mg"]
 // Lab tests come straight from the central catalog so every doctor-selected
@@ -196,11 +195,8 @@ export default function DoctorDashboard() {
   const [admSpecialInstructions, setAdmSpecialInstructions] = useState("")
   const [admUrgency, setAdmUrgency] = useState<'Routine' | 'Urgent' | 'Emergency'>("Urgent")
   const [historyOpen, setHistoryOpen] = useState(false)
-  const [rxOverride, setRxOverride] = useState(false)
 
   const patientVisits = currentPatient ? visits.filter(v => v.patientId === currentPatient.id).sort((a, b) => b.date.localeCompare(a.date)) : []
-  // Prescribe-time safety: interactions + allergy cross-check against this patient.
-  const rxWarnings: RxWarning[] = currentPatient ? checkRx(prescriptions.map(p => p.medicine), { history: currentPatient.history }) : []
 
   // Ambient voice scribe.
   const [speechOk, setSpeechOk] = useState(false)
@@ -238,7 +234,6 @@ export default function DoctorDashboard() {
   const wardFree = beds.filter(b => b.ward === admType && b.status === 'Available').length
   const wardTotal = beds.filter(b => b.ward === admType).length
 
-  useEffect(() => { setRxOverride(false) }, [currentPatient?.id])
   useEffect(() => {
     if (!notes) return
     setNoteSaved(false)
@@ -373,12 +368,6 @@ export default function DoctorDashboard() {
 
   const sendRx = () => {
     if (!currentPatient || prescriptions.length === 0) return
-    const major = rxWarnings.find(w => w.severity === 'major')
-    if (major && !rxOverride) {
-      toast.error(`Safety check — ${major.title}`, { description: `${major.note} Click Send again to override.` })
-      setRxOverride(true)
-      return
-    }
     addToPharmacy({
       id: `RX-${Date.now()}`,
       patientId: currentPatient.id,
@@ -471,7 +460,7 @@ export default function DoctorDashboard() {
   }
 
   const selectStyle = "w-full rounded-xl px-3 py-2 text-sm text-[#0F172A] focus:outline-none transition-all"
-  const selectInlineStyle = { background: '#F8FAFC', border: '1px solid rgba(15,23,42,0.06)', boxShadow: 'inset 0 1px 2px rgba(15,23,42,0.04)' }
+  const selectInlineStyle = { backgroundColor: '#F8FAFC', border: '1px solid rgba(15,23,42,0.06)', boxShadow: 'inset 0 1px 2px rgba(15,23,42,0.04)' }
 
   // M2 — Doctor "On leave" gate. Banner is shown on the dashboard, and any
   // "Start consultation" action confirms before proceeding.
@@ -827,14 +816,14 @@ export default function DoctorDashboard() {
             <OrderPanel title="Order Lab Tests" icon={FlaskConical} styleKey="lab">
               <div className="space-y-3 mt-3">
                 <div className="flex gap-2">
-                  <select value={labTest} onChange={e => setLabTest(e.target.value)} className={selectStyle} style={selectInlineStyle}>
+                  <Select value={labTest} onChange={e => setLabTest(e.target.value)} className={selectStyle} style={selectInlineStyle}>
                     <option value="">Select test...</option>
                     {LAB_TESTS.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <select value={labPriority} onChange={e => setLabPriority(e.target.value as 'Routine' | 'Urgent')} className={cn(selectStyle, "w-24")} style={selectInlineStyle}>
+                  </Select>
+                  <Select value={labPriority} onChange={e => setLabPriority(e.target.value as 'Routine' | 'Urgent')} className={cn(selectStyle, "w-24")} style={selectInlineStyle}>
                     <option>Routine</option>
                     <option>Urgent</option>
-                  </select>
+                  </Select>
                   <Button size="sm" variant="secondary" onClick={() => { if (!labTest) return; addLabOrder({ testName: labTest, priority: labPriority }); setLabTest("") }}>
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -870,18 +859,18 @@ export default function DoctorDashboard() {
             <OrderPanel title="Order Radiology Scan" icon={ScanLine} styleKey="radiology">
               <div className="space-y-3 mt-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <select value={radScanType} onChange={e => setRadScanType(e.target.value as 'X-Ray' | 'MRI' | 'CT Scan' | 'Ultrasound')} className={selectStyle} style={selectInlineStyle}>
+                  <Select value={radScanType} onChange={e => setRadScanType(e.target.value as 'X-Ray' | 'MRI' | 'CT Scan' | 'Ultrasound')} className={selectStyle} style={selectInlineStyle}>
                     <option>X-Ray</option><option>MRI</option><option>CT Scan</option><option>Ultrasound</option>
-                  </select>
-                  <select value={radBodyPart} onChange={e => setRadBodyPart(e.target.value)} className={selectStyle} style={selectInlineStyle}>
+                  </Select>
+                  <Select value={radBodyPart} onChange={e => setRadBodyPart(e.target.value)} className={selectStyle} style={selectInlineStyle}>
                     <option value="">Body part...</option>
                     {BODY_PARTS.map(b => <option key={b} value={b}>{b}</option>)}
-                  </select>
+                  </Select>
                 </div>
                 <div className="flex gap-2">
-                  <select value={radPriority} onChange={e => setRadPriority(e.target.value as 'Routine' | 'Urgent')} className={cn(selectStyle, "w-28")} style={selectInlineStyle}>
+                  <Select value={radPriority} onChange={e => setRadPriority(e.target.value as 'Routine' | 'Urgent')} className={cn(selectStyle, "w-28")} style={selectInlineStyle}>
                     <option>Routine</option><option>Urgent</option>
-                  </select>
+                  </Select>
                   <Button size="sm" variant="secondary" className="flex-1" onClick={() => {
                     if (!radBodyPart) return
                     addRadiologyOrder({ scanType: radScanType, bodyPart: radBodyPart, priority: radPriority })
@@ -921,10 +910,10 @@ export default function DoctorDashboard() {
             <OrderPanel title="Refer to Specialist" icon={GitBranch} styleKey="referral">
               <div className="space-y-3 mt-3">
                 <div className="flex gap-2">
-                  <select value={refSpecialty} onChange={e => setRefSpecialty(e.target.value)} className={cn(selectStyle, "flex-1")} style={selectInlineStyle}>
+                  <Select value={refSpecialty} onChange={e => setRefSpecialty(e.target.value)} className={cn(selectStyle, "flex-1")} style={selectInlineStyle}>
                     <option value="">Select specialty...</option>
                     {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  </Select>
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <input type="checkbox" checked={refUrgent} onChange={e => setRefUrgent(e.target.checked)} className="rounded" />
                     <span className="text-xs font-semibold text-red-600">Urgent</span>
@@ -1026,15 +1015,15 @@ export default function DoctorDashboard() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#94A3B8' }}>Ward Type</label>
-                            <select value={admType} onChange={e => setAdmType(e.target.value as typeof admType)} className={selectStyle} style={selectInlineStyle}>
+                            <Select value={admType} onChange={e => setAdmType(e.target.value as typeof admType)} className={selectStyle} style={selectInlineStyle}>
                               <option>General Ward</option><option>ICU</option><option>Private Room</option><option>Semi-Private</option><option>Day Care</option>
-                            </select>
+                            </Select>
                           </div>
                           <div>
                             <label className="block text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: '#94A3B8' }}>Urgency</label>
-                            <select value={admUrgency} onChange={e => setAdmUrgency(e.target.value as typeof admUrgency)} className={selectStyle} style={selectInlineStyle}>
+                            <Select value={admUrgency} onChange={e => setAdmUrgency(e.target.value as typeof admUrgency)} className={selectStyle} style={selectInlineStyle}>
                               <option>Routine</option><option>Urgent</option><option>Emergency</option>
-                            </select>
+                            </Select>
                           </div>
                         </div>
 
@@ -1194,36 +1183,6 @@ export default function DoctorDashboard() {
                         </button>
                       ))}
                     </div>
-                  </div>
-                )}
-
-                {/* M4-W1 — S1: Transparent drug-safety reasoning + HITL
-                    alternatives. Renders only when the prescription has
-                    at least one med (and the patient has loaded). The
-                    existing one-line warnings below it are kept as a
-                    summary trail. */}
-                {prescriptions.length > 0 && currentPatient ? (
-                  <div className="mb-3">
-                    <DrugSafetyReasoningCard
-                      meds={prescriptions.map((p) => ({ name: p.medicine, dose: p.dosage }))}
-                      allergies={(currentPatient.history ?? []).filter((h) =>
-                        /allergy|allergic|penicillin/i.test(h))}
-                      comorbidities={currentPatient.history ?? []}
-                      onSubstitute={(alt) => {
-                        toast.success(`Suggested: ${alt.to}. Pick from the medicine search to add.`)
-                      }}
-                    />
-                  </div>
-                ) : null}
-
-                {rxWarnings.length > 0 && (
-                  <div className="mb-3 space-y-1.5">
-                    {rxWarnings.map((w, i) => (
-                      <div key={i} className={cn("rounded-lg px-2.5 py-2 flex items-start gap-2 text-[11px] border", w.severity === 'major' ? "bg-red-50 border-red-200 text-red-700" : w.severity === 'moderate' ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-slate-50 border-slate-200 text-slate-600")}>
-                        <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
-                        <span><b>{w.title}</b> — {w.note}</span>
-                      </div>
-                    ))}
                   </div>
                 )}
 

@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -125,13 +126,13 @@ export default function RadiologySchedulePage() {
             Assign slots · prep instructions · contrast consent · the patient becomes "scheduled" and shows on arrival desk
           </p>
         </div>
-        <select value={modalityFilter} onChange={e => setModalityFilter(e.target.value as 'all' | Modality)}
+        <Select value={modalityFilter} onChange={e => setModalityFilter(e.target.value as 'all' | Modality)}
           className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200">
           <option value="all">All modalities</option>
           {(['XR', 'CT', 'MRI', 'US', 'MAMMO'] as Modality[]).map(m => (
             <option key={m} value={m}>{m}</option>
           ))}
-        </select>
+        </Select>
       </div>
 
       {/* Modality KPIs */}

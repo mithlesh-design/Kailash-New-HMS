@@ -367,6 +367,25 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* ── Select / dropdown ───────────────────────────────────────
+   Single source of truth for native <select> styling. The native
+   OS arrow is suppressed (appearance:none) and replaced with a
+   crisp chevron drawn as a right-anchored background image, so it
+   can never crowd the right edge regardless of the element width.
+   The Select component (src/components/ui/Select.tsx) pairs this
+   with an enforced right padding (pr-9) that reserves room for it. */
+.ui-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23667085'%20stroke-width='2.25'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpolyline%20points='6%209%2012%2015%2018%209'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1rem 1rem;
+  print-color-adjust: exact;
+}
+.ui-select::-ms-expand { display: none; }
+
 /* ── Intake kiosk inputs ─────────────────────────────────────
    These inputs are full-bleed inside cards, so the global
    offset focus-visible outline would overflow the card. We

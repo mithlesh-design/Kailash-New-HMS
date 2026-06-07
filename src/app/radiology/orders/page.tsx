@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import {
@@ -79,14 +80,14 @@ export default function OrderDesk() {
           <div className="grid grid-cols-2 gap-3">
             <Field label="Patient name"><input value={form.patientName} onChange={e => set("patientName", e.target.value)} className={inputCls} placeholder="Full name" /></Field>
             <Field label="Patient ID"><input value={form.patientId} onChange={e => set("patientId", e.target.value)} className={inputCls} placeholder="PT-xxxxx" /></Field>
-            <Field label="Source"><select value={form.source} onChange={e => set("source", e.target.value)} className={inputCls}>{SOURCES.map(s => <option key={s}>{s}</option>)}</select></Field>
+            <Field label="Source"><Select value={form.source} onChange={e => set("source", e.target.value)} className={inputCls}>{SOURCES.map(s => <option key={s}>{s}</option>)}</Select></Field>
             <Field label="Referring doctor"><input value={form.doctorName} onChange={e => set("doctorName", e.target.value)} className={inputCls} placeholder="Dr. …" /></Field>
             <Field label="Exam">
-              <select value={form.code} onChange={e => set("code", e.target.value)} className={inputCls}>
+              <Select value={form.code} onChange={e => set("code", e.target.value)} className={inputCls}>
                 {RADIOLOGY_CODES.map(c => <option key={c} value={c}>{RADIOLOGY_CATALOG[c].name}</option>)}
-              </select>
+              </Select>
             </Field>
-            <Field label="Payment"><select value={form.paymentMode} onChange={e => set("paymentMode", e.target.value)} className={inputCls}>{PAYMENTS.map(p => <option key={p}>{p}</option>)}</select></Field>
+            <Field label="Payment"><Select value={form.paymentMode} onChange={e => set("paymentMode", e.target.value)} className={inputCls}>{PAYMENTS.map(p => <option key={p}>{p}</option>)}</Select></Field>
             <div className="col-span-2"><Field label="Clinical indication"><textarea value={form.clinicalQuestion} onChange={e => set("clinicalQuestion", e.target.value)} rows={2} className={cn(inputCls, "resize-none")} placeholder="e.g. RUQ pain, R/O cholelithiasis" /></Field></div>
             <Field label="Priority">
               <div className="flex flex-wrap gap-1">

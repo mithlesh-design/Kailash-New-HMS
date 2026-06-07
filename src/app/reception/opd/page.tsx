@@ -1,4 +1,5 @@
 "use client"
+import { Select } from "@/components/ui/Select"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -468,27 +469,27 @@ export default function OpdQueuePage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="wi-dept" className="block text-sm font-semibold text-slate-700 mb-1.5">Department</label>
-                    <select id="wi-dept" value={form.department}
+                    <Select id="wi-dept" value={form.department}
                       onChange={e => setForm(f => ({ ...f, department: e.target.value, doctor: firstDoctorOf(e.target.value), consultationFee: String(feeFor(e.target.value)) }))}
                       className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
                       {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
+                    </Select>
                   </div>
                   <div>
                     <label htmlFor="wi-doctor" className="block text-sm font-semibold text-slate-700 mb-1.5">OPD doctor / room</label>
-                    <select id="wi-doctor" value={form.doctor} onChange={e => setForm(f => ({ ...f, doctor: e.target.value }))}
+                    <Select id="wi-doctor" value={form.doctor} onChange={e => setForm(f => ({ ...f, doctor: e.target.value }))}
                       className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
                       {doctorsForDept(form.department).length === 0
                         ? <option value="Dr. Priya Nair">Dr. Priya Nair</option>
                         : doctorsForDept(form.department).map(r => <option key={r.doctor} value={r.doctor}>{r.doctor} · {r.room}</option>)}
-                    </select>
+                    </Select>
                   </div>
                   <div>
                     <label htmlFor="wi-triage" className="block text-sm font-semibold text-slate-700 mb-1.5">Priority</label>
-                    <select id="wi-triage" value={form.triage} onChange={e => setForm(f => ({ ...f, triage: e.target.value as TriageLevel }))}
+                    <Select id="wi-triage" value={form.triage} onChange={e => setForm(f => ({ ...f, triage: e.target.value as TriageLevel }))}
                       className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
                       {TRIAGE_LEVELS.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                    </Select>
                   </div>
                 </div>
 

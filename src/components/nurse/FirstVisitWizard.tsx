@@ -1,5 +1,6 @@
 "use client"
 
+import { Select } from "@/components/ui/Select"
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import { X, ChevronLeft, ChevronRight, CheckCircle2, ShieldAlert, Sparkles, UserPlus, AlertTriangle } from "lucide-react"
@@ -25,11 +26,11 @@ function SelectField({ label, value, onChange, options, placeholder }: { label: 
   return (
     <div>
       <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)}
+      <Select value={value} onChange={e => onChange(e.target.value)}
         className="w-full h-10 px-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500 bg-slate-50">
         <option value="">{placeholder ?? "Select…"}</option>
         {options.map(o => <option key={o} value={o}>{o}</option>)}
-      </select>
+      </Select>
     </div>
   )
 }
@@ -92,7 +93,10 @@ export function FirstVisitWizard({ title, subtitle, meta, initial, onClose, onCo
     onClose()
   }
 
-  const Body = () => {
+  // Rendered inline via {renderBody()} — NOT as <Body/>. A component defined in
+  // render and used as an element gets a new type each render, remounting the
+  // form on every keystroke (inputs lose focus after one character).
+  const renderBody = () => {
     switch (step) {
       case 0: return (
         <div className="space-y-3">
@@ -230,7 +234,7 @@ export function FirstVisitWizard({ title, subtitle, meta, initial, onClose, onCo
         </div>
 
         {/* Body */}
-        <div className="px-6 py-4 overflow-y-auto"><Body /></div>
+        <div className="px-6 py-4 overflow-y-auto">{renderBody()}</div>
 
         {/* Footer */}
         <div className="flex items-center gap-3 px-6 py-4 border-t border-slate-100">
